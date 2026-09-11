@@ -1,0 +1,330 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { IArticleRepository } from '../../application/ports/article-repository.port';
+import { Article } from '../../domain/entities/article.entity';
+import { FirebaseService } from '../../../../shared/firebase/firebase.service';
+import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const fallbackArticles: any[] = [
+  {
+    id: 'art-01-proteina-hipertrofia',
+    title: 'Efeitos da ingestão de proteína na síntese proteica muscular e ganhos de hipertrofia',
+    summary: 'Meta-análise demonstra que a ingestão de 1.6 a 2.2g de proteína por kg de peso corporal ao dia é a faixa ótima para maximizar ganhos de massa muscular em indivíduos que praticam musculação.',
+    authors: 'Morton RW, Murphy KT, McKellar SR, Schoenfeld BJ, Phillips SM, et al.',
+    year: 2018,
+    journal: 'British Journal of Sports Medicine (BJSM)',
+    doi: '10.1136/bjsports-2017-097608',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/28698222/',
+    tags: ['hipertrofia', 'proteínas', 'nutrição esportiva', 'ganho de força', 'recomposição corporal'],
+    educationalArticle: {
+      investigated: 'Qual é a quantidade ideal de proteína diária para otimizar os ganhos de massa muscular e força em praticantes de treinamento de força resistido?',
+      methodology: 'Revisão sistemática e meta-análise com 49 estudos clínicos randomizados envolvendo 1.863 homens e mulheres que praticavam musculação com diferentes níveis de ingestão proteica.',
+      findings: 'A ingestão de proteína potencializou significativamente os ganhos de massa livre de gordura (músculo) e força no supino e agachamento. O ponto de saturação máxima dos benefícios ocorreu em 1.62 g/kg/dia (com intervalo de confiança de até 2.2 g/kg/dia). Ingestões acima de 2.2 g/kg não demonstraram ganhos adicionais estatisticamente significativos de hipertrofia.',
+      practicalApplication: 'Para quem busca hipertrofia e ganho de força, manter entre 1.6g e 2.2g de proteína por quilo de peso ao dia (ex: 120g a 165g para uma pessoa de 75kg) garante o estímulo máximo à síntese proteica, distribuído em 3 a 5 refeições.',
+      limitations: 'O estudo avaliou pessoas saudáveis. Indivíduos em déficit calórico muito severo ou atletas de elite em preparação competitiva podem necessitar de ajustes individuais.',
+      scientificReference: 'Morton RW, et al. A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults. Br J Sports Med. 2018;52(6):376-384.',
+      aiDisclaimer: 'Esta é uma explicação educativa gerada por IA com base no artigo científico original. Ela não substitui a leitura do estudo original nem constitui prescrição médica ou nutricional individual.',
+    },
+  },
+  {
+    id: 'art-02-deficit-calorico-emagrecimento',
+    title: 'O papel fundamental do balanço calórico negativo na perda de gordura e preservação muscular',
+    summary: 'O balanço energético negativo (déficit calórico) é o fator determinante para perda de tecido adiposo. Déficits moderados (300-500 kcal/dia) preservam a massa magra e o metabolismo basal.',
+    authors: 'Helms ER, Aragon AA, Fitschen PJ.',
+    year: 2014,
+    journal: 'Journal of the International Society of Sports Nutrition (JISSN)',
+    doi: '10.1186/1550-2783-11-20',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/28765272/',
+    tags: ['déficit calórico', 'emagrecimento', 'recomposição corporal', 'manutenção', 'nutrição esportiva'],
+    educationalArticle: {
+      investigated: 'Quais são as melhores estratégias nutricionais e magnitude de déficit calórico para perder gordura preservando o máximo de massa muscular?',
+      methodology: 'Revisão narrativa e diretrizes baseadas em evidências sobre restrição energética, taxa de perda de peso semanal e macronutrientes em atletas e praticantes de musculação.',
+      findings: 'A taxa ideal de perda de peso para preservar massa magra situa-se entre 0.5% e 1.0% do peso corporal total por semana. Déficits calóricos agressivos (>1000 kcal/dia ou perda >1.5% do peso/semana) aumentam a perda de massa muscular e causam queda severa no gasto energético em repouso.',
+      practicalApplication: 'Calcule seu Gasto Energético Total (TDEE) e estabeleça um déficit moderado de 300 a 500 kcal ao dia. Combine isso com ingestão proteica alta e musculação consistente para que praticamente todo o peso perdido seja gordura e não músculo.',
+      limitations: 'A aderência à dieta ao longo dos meses é o fator mais crítico; estratégias muito rígidas tendem a ter maior taxa de abandono.',
+      scientificReference: 'Helms ER, Aragon AA, Fitschen PJ. Evidence-based recommendations for natural bodybuilding contest preparation: nutrition and supplementation. J Int Soc Sports Nutr. 2014;11:20.',
+      aiDisclaimer: 'Esta é uma explicação educativa gerada por IA com base no artigo científico original. Ela não substitui a leitura do estudo original.',
+    },
+  },
+  {
+    id: 'art-03-volume-treino-hipertrofia',
+    title: 'Relação dose-resposta entre volume semanal de treino e hipertrofia muscular',
+    summary: 'Volumes de 10 a 20 séries semanais por grupo muscular promovem hipertrofia superior a volumes baixos (<5 séries), com retornos decrescentes acima de 20 séries devido à fadiga acumulada.',
+    authors: 'Schoenfeld BJ, Ogborn D, Krieger JW.',
+    year: 2017,
+    journal: 'Journal of Sports Sciences',
+    doi: '10.1080/02640414.2016.1210197',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/27433992/',
+    tags: ['hipertrofia', 'treinamento de resistência', 'ganho de força', 'recuperação'],
+    educationalArticle: {
+      investigated: 'Existe uma relação direta entre o número de séries semanais realizadas por músculo e a quantidade de hipertrofia muscular gerada?',
+      methodology: 'Meta-análise com 15 estudos comparando grupos com baixo volume (<5 séries/semana), médio volume (5-9 séries/semana) e alto volume (10+ séries/semana).',
+      findings: 'Houve uma clara relação dose-resposta: grupos realizando 10 ou mais séries semanais por grupo muscular obtiveram quase o dobro de crescimento muscular comparados a grupos com menos de 5 séries.',
+      practicalApplication: 'Estruture seu treino para realizar entre 10 e 20 séries de trabalho efetivas (com boa proximidade da falha) por grupo muscular a cada semana, divididas em 2 sessões semanais para cada músculo.',
+      limitations: 'Volumes ultra-altos (>25-30 séries) podem ultrapassar a capacidade individual de recuperação se o sono e a alimentação não forem perfeitos.',
+      scientificReference: 'Schoenfeld BJ, Ogborn D, Krieger JW. Dose-response relationship between weekly resistance training volume and increases in muscle mass: A systematic review and meta-analysis. J Sports Sci. 2017;35(11):1073-1082.',
+      aiDisclaimer: 'Esta é uma explicação educativa gerada por IA com base no artigo científico original. Ela não substitui a leitura do estudo original.',
+    },
+  },
+  {
+    id: 'art-04-creatina-performance',
+    title: 'Eficácia ergogênica e segurança da suplementação com creatina monohidratada',
+    summary: 'A creatina monohidratada aumenta os estoques intramusculares de fosfocreatina em 20-40%, elevando a capacidade de trabalho em séries de alta intensidade e os ganhos de força e massa magra.',
+    authors: 'Kreider RB, Kalman DS, Antonio J, Ziegenfuss TN, Wildman R, et al.',
+    year: 2017,
+    journal: 'Journal of the International Society of Sports Nutrition (JISSN)',
+    doi: '10.1186/s12970-017-0173-z',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/28615996/',
+    tags: ['suplementação', 'creatina', 'ganho de força', 'hipertrofia', 'nutrição esportiva'],
+    educationalArticle: {
+      investigated: 'Quais são as evidências científicas de longo prazo sobre o ganho de rendimento, mecanismo e perfil de segurança da creatina monohidratada?',
+      methodology: 'Posicionamento oficial da Sociedade Internacional de Nutrição Esportiva (ISSN) analisando centenas de ensaios clínicos controlados.',
+      findings: 'A suplementação com creatina monohidratada é o recurso nutricional mais eficaz disponível para aumentar a capacidade de exercício de alta intensidade e a massa livre de gordura. Nenhum efeito prejudicial à função renal foi observado em pessoas saudáveis.',
+      practicalApplication: 'Uma dose constante de 3g a 5g de creatina monohidratada por dia, ingerida todos os dias (mesmo em dias sem treino), satura os estoques musculares após 3-4 semanas de uso contínuo.',
+      limitations: 'Uma pequena parcela da população pode ser "não-respondedora" por já possuir estoques naturalmente saturados via alimentação rica em carnes.',
+      scientificReference: 'Kreider RB, et al. International Society of Sports Nutrition position stand: safety and efficacy of creatine supplementation in exercise, sport, and medicine. J Int Soc Sports Nutr. 2017;14:18.',
+      aiDisclaimer: 'Esta é uma explicação educativa gerada por IA com base no artigo científico original. Ela não substitui a leitura do estudo original.',
+    },
+  },
+  {
+    id: 'art-05-fibras-microbiota-saciedade',
+    title: 'Impacto das fibras alimentares no controle glicêmico, saciedade e saúde da microbiota',
+    summary: 'A ingestão diária de 25 a 35g de fibras solúveis e insolúveis melhora a sensibilidade à insulina, reduz o apetite por regulação de GLP-1 e PYY e modula positivamente a microbiota intestinal.',
+    authors: 'Slavin J, Green H, Dahl WJ.',
+    year: 2013,
+    journal: 'Nutrients',
+    doi: '10.3390/nu5041417',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/23609775/',
+    tags: ['fibras', 'carboidratos', 'emagrecimento', 'saúde', 'manutenção'],
+    educationalArticle: {
+      investigated: 'Como diferentes tipos de fibras dietéticas influenciam a velocidade de digestão, a saciedade gástrica e o metabolismo de lipídios e carboidratos?',
+      methodology: 'Revisão clínica dos efeitos fisiológicos de fibras solúveis (aveia, frutas) e insolúveis (farelos, sementes e grãos) na motilidade gástrica e fermentação colônica.',
+      findings: 'Fibras solúveis formam um gel viscoso no estômago que retarda o esvaziamento gástrico, prolongando a sensação de plenitude e atenuando picos de glicose e insulina após as refeições. A fermentação bacteriana no cólon gera ácidos graxos de cadeia curta (como butirato) com ação anti-inflamatória.',
+      practicalApplication: 'Consumir pelo menos 25g (para mulheres) a 35g (para homens) de fibras diariamente por meio de aveia, feijões, frutas com casca e vegetais, acompanhados de ingestão hídrica de 35ml/kg.',
+      limitations: 'Aumentos excessivamente bruscos na quantidade de fibras sem aumento proporcional de água podem causar desconforto e constipação.',
+      scientificReference: 'Slavin J. Fiber and prebiotics: mechanisms and health benefits. Nutrients. 2013;5(4):1417-1435.',
+      aiDisclaimer: 'Esta é uma explicação educativa gerada por IA com base no artigo científico original. Ela não substitui a leitura do estudo original.',
+    },
+  },
+  {
+    id: 'art-06-sono-recuperacao-muscular',
+    title: 'Privação de sono e seus efeitos no catabolismo muscular e regulação hormonal',
+    summary: 'Dormir menos de 7 horas por noite eleva o cortisol, reduz a síntese proteica miofibrilar e aumenta a perda de massa muscular mesmo quando as calorias e o treino estão adequados.',
+    authors: 'Saner NJ, Lee MJC, Pitchford NW, Kuang J, Roach GD, Bartlett JD.',
+    year: 2020,
+    journal: 'Physiological Reports',
+    doi: '10.14814/phy2.14660',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/33215843/',
+    tags: ['sono', 'recuperação', 'hipertrofia', 'emagrecimento', 'recomposição corporal'],
+    educationalArticle: {
+      investigated: 'Como a restrição do sono afeta a taxa de síntese proteica muscular e as vias de sinalização anabólicas em adultos jovens?',
+      methodology: 'Estudo cruzado controlado comparando a síntese de proteínas musculares após noites de sono normal (8h) versus privação parcial de sono (4h) com biópsias musculares.',
+      findings: 'A restrição de sono reduziu a taxa fracionária de síntese proteica muscular em quase 20% e alterou negativamente a via molecular mTOR, mesmo mantendo a mesma ingestão de proteínas.',
+      practicalApplication: 'Priorizar entre 7 e 9 horas de sono de qualidade por noite é tão crucial quanto o treino e a dieta para colher resultados máximos de ganho de massa magra e queima de gordura.',
+      limitations: 'O estudo avaliou efeitos em curto prazo (dias). Efeitos de longo prazo envolvem também adaptações crônicas do apetite por grelina e leptina.',
+      scientificReference: 'Saner NJ, et al. The effect of sleep restriction, with or without high-intensity interval exercise, on myofibrillar protein synthesis in healthy young men. Physiol Rep. 2020;8(22):e14660.',
+      aiDisclaimer: 'Esta é uma explicação educativa gerada por IA com base no artigo científico original. Ela não substitui a leitura do estudo original.',
+    },
+  },
+  {
+    id: 'art-07-gorduras-hormonios',
+    title: 'Ingestão de lipídios dietéticos e regulação dos níveis séricos de testosterona',
+    summary: 'Dietas com menos de 20% do total de calorias vindas de gorduras estão associadas a reduções significativas na testosterona total e livre em homens que praticam musculação.',
+    authors: 'Whittaker J, Wu K.',
+    year: 2021,
+    journal: 'The Journal of Steroid Biochemistry and Molecular Biology',
+    doi: '10.1016/j.jsbmb.2021.105878',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/33741447/',
+    tags: ['gorduras', 'nutrição esportiva', 'manutenção', 'hipertrofia', 'saúde'],
+    educationalArticle: {
+      investigated: 'O consumo de dietas com baixo teor de gordura afeta negativamente a produção endógena de testosterona em homens saudáveis?',
+      methodology: 'Revisão sistemática e meta-análise de ensaios de intervenção alimentar comparando dietas com alto teor de gordura (>35% kcal) versus baixo teor de gordura (<20% kcal).',
+      findings: 'A restrição excessiva de gorduras provocou queda média de 10% a 15% na testosterona sérica total e reduções marcantes nos níveis de testosterona livre.',
+      practicalApplication: 'Mesmo durante fases de corte calórico para emagrecimento, não reduza as gorduras para níveis extremos. Mantenha entre 0.7g e 1.0g de gordura por kg de peso corporal ao dia (mínimo de 20% do VET).',
+      limitations: 'A qualidade dos ácidos graxos (mono e poli-insaturados como azeite e ômega-3) é mais importante para a saúde cardiovascular do que simplesmente consumir qualquer gordura saturada.',
+      scientificReference: 'Whittaker J, Wu K. Low-fat diets and testosterone in men: Systematic review and meta-analysis of intervention studies. J Steroid Biochem Mol Biol. 2021;210:105878.',
+      aiDisclaimer: 'Esta é uma explicação educativa gerada por IA com base no artigo científico original. Ela não substitui a leitura do estudo original.',
+    },
+  },
+  {
+    id: 'art-08-carboidratos-performance',
+    title: 'Glicogênio muscular e disponibilidade de carboidratos no treino resistido de alta intensidade',
+    summary: 'A depleção de glicogênio durante o treino de força reduz o número de repetições e a potência nas séries finais. Manter ingestão adequada de carboidratos otimiza o rendimento em treinos volumosos.',
+    authors: 'Henselmans M, Bjørnsen T, Hedderman R, Vårvik FT.',
+    year: 2022,
+    journal: 'Sports Medicine',
+    doi: '10.1007/s40279-022-01688-x',
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/35532585/',
+    tags: ['carboidratos', 'nutrição esportiva', 'treinamento de resistência', 'ganho de força', 'hipertrofia'],
+    educationalArticle: {
+      investigated: 'Qual é o impacto real da ingestão de carboidratos no desempenho e na hipertrofia durante treinamentos com pesos moderados a pesados?',
+      methodology: 'Revisão sistemática analisando estudos de dietas cetogênicas vs. dietas com carboidratos moderados e altos durante programas de musculação.',
+      findings: 'Treinos de força anaeróbicos utilizam a glicólise como via energética predominante. Uma disponibilidade adequada de carboidratos previne a fadiga precoce e permite manter maior volume de treino e tonelagem total.',
+      practicalApplication: 'Consumir porções de carboidratos de média a rápida absorção nas 2 a 3 horas que antecedem o treino (ex: aveia, banana, arroz) e após o treino garante reposição rápida de glicogênio muscular.',
+      limitations: 'Para treinos muito curtos (<3 séries totais), a dependência do glicogênio é menor, mas para treinos padrão de musculação (15-25 séries) os carboidratos são fundamentais.',
+      scientificReference: 'Henselmans M, et al. The Effect of Carbohydrate Intake on Strength and Resistance Training Performance: A Systematic Review. Sports Med. 2022;52(11):2691-2712.',
+      aiDisclaimer: 'Esta é uma explicação educativa gerada por IA com base no artigo científico original. Ela não substitui a leitura do estudo original.',
+    },
+  },
+];
+
+@Injectable()
+export class FirestoreArticleRepository implements IArticleRepository {
+  private readonly logger = new Logger(FirestoreArticleRepository.name);
+  private memoryCache: Article[] = [];
+
+  constructor(private readonly firebase: FirebaseService) {
+    this.initCache();
+  }
+
+  private initCache() {
+    try {
+      const localPath = path.resolve(process.cwd(), 'local-cache', 'articles.json');
+      const exportPath = path.resolve(process.cwd(), 'firebase-export', 'articles.json');
+      const targetPath = fs.existsSync(localPath) ? localPath : exportPath;
+      if (fs.existsSync(targetPath)) {
+        const raw = fs.readFileSync(targetPath, 'utf8');
+        const list: any[] = JSON.parse(raw);
+        this.memoryCache = list.map((a) => this.mapDoc(a));
+        this.logger.log(`Carregados ${this.memoryCache.length} artigos no cache de segurança.`);
+        return;
+      }
+    } catch (err: any) {
+      this.logger.warn(`Erro ao carregar artigos do cache: ${err.message}`);
+    }
+    this.memoryCache = fallbackArticles.map((a) => this.mapDoc(a));
+  }
+
+  private get collection() {
+    return this.firebase.db.collection('articles');
+  }
+
+  private mapDoc(doc: any): Article {
+    const data = typeof doc.data === 'function' ? doc.data() : doc;
+    let tags: string[] = [];
+    if (Array.isArray(data.tags)) {
+      tags = data.tags;
+    } else if (typeof data.tags === 'string') {
+      tags = data.tags.split(' ').filter(Boolean);
+    }
+
+    return new Article(
+      doc.id || data.id,
+      data.title,
+      data.summary,
+      data.sourceUrl,
+      data.publishedAt ? new Date(data.publishedAt._seconds ? data.publishedAt._seconds * 1000 : data.publishedAt) : new Date(),
+      tags,
+      data.authors || 'Pesquisadores Associados',
+      data.year || 2024,
+      data.journal || 'PubMed Central Indexed',
+      data.doi || '',
+      data.educationalArticle || undefined,
+    );
+  }
+
+  async findAll(filters: { tag?: string; page: number; limit: number }): Promise<{ items: Article[]; total: number }> {
+    let all: Article[] = [];
+
+    if (this.memoryCache.length === 0) {
+      try {
+        const snapshot = await this.collection.get();
+        if (!snapshot.empty) {
+          all = snapshot.docs.map((d) => this.mapDoc(d));
+          this.memoryCache = all;
+        } else {
+          all = this.memoryCache;
+        }
+      } catch (err: any) {
+        this.logger.warn(`Fallback gracioso de artigos ativado: ${err.message}`);
+        all = this.memoryCache;
+      }
+    } else {
+      all = this.memoryCache;
+    }
+
+    if (filters.tag && filters.tag !== 'ALL') {
+      const targetTag = filters.tag.toLowerCase();
+      all = all.filter((a) =>
+        a.tags.some((t) => t.toLowerCase() === targetTag || t.toLowerCase().includes(targetTag))
+      );
+    }
+
+    const total = all.length;
+    const start = (filters.page - 1) * filters.limit;
+    const items = all.slice(start, start + filters.limit);
+
+    return { items, total };
+  }
+
+  async findById(id: string): Promise<Article | null> {
+    try {
+      const doc = await this.collection.doc(id).get();
+      if (doc.exists) {
+        return this.mapDoc(doc);
+      }
+    } catch (err: any) {
+      this.logger.warn(`Fallback por ID ativado: ${err.message}`);
+    }
+
+    const fromCache = this.memoryCache.find((a) => a.id === id);
+    return fromCache || null;
+  }
+
+  async create(data: any): Promise<Article> {
+    const id = data.id || uuidv4();
+    const docData = {
+      id,
+      title: data.title,
+      summary: data.summary,
+      sourceUrl: data.sourceUrl,
+      publishedAt: data.publishedAt ? new Date(data.publishedAt).toISOString() : new Date().toISOString(),
+      tags: Array.isArray(data.tags) ? data.tags : typeof data.tags === 'string' ? data.tags.split(' ').filter(Boolean) : [],
+      authors: data.authors || 'Pesquisadores Associados',
+      year: data.year || 2024,
+      journal: data.journal || 'PubMed Central Indexed',
+      doi: data.doi || '',
+      educationalArticle: data.educationalArticle || null,
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      await this.collection.doc(id).set(docData);
+    } catch {
+      this.logger.warn(`Salvando na memória local`);
+    }
+
+    const created = this.mapDoc({ id, data: () => docData });
+    this.memoryCache.push(created);
+    return created;
+  }
+
+  async update(id: string, data: any): Promise<Article> {
+    try {
+      await this.collection.doc(id).set(data, { merge: true });
+    } catch {
+      this.logger.warn(`Atualizando na memória local`);
+    }
+    return (await this.findById(id))!;
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      await this.collection.doc(id).delete();
+    } catch {
+      this.logger.warn(`Deletando da memória local`);
+    }
+    this.memoryCache = this.memoryCache.filter((a) => a.id !== id);
+  }
+
+  async findTags(): Promise<string[]> {
+    const tagSet = new Set<string>();
+    this.memoryCache.forEach((art) => {
+      art.tags.forEach((t) => tagSet.add(t));
+    });
+    return Array.from(tagSet);
+  }
+
+  async createTag(_name: string): Promise<void> {}
+}

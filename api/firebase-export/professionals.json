@@ -1,0 +1,121 @@
+[
+  {
+    "id": "prof_dra_camila",
+    "name": "Dra. Camila Barbosa",
+    "avatarUrl": "https://images.unsplash.com/photo-1594824813572-c0e6488d3d95?w=200&auto=format&fit=crop&q=80",
+    "type": "NUTRITIONIST",
+    "specialty": "Nutrição Clínica e Esportiva",
+    "bio": "Especialista em periodização nutricional para atletas, recomposição corporal e longevidade. Mestre em Ciências da Nutrição pela UNICAMP com mais de 8 anos de prática clínica baseada em evidências.",
+    "experienceYears": 8,
+    "location": "São Paulo, SP (Online & Presencial)",
+    "registrationNumber": "CRN-3 45892",
+    "status": "ACTIVE",
+    "isVerified": true,
+    "rating": 4.95,
+    "reviewCount": 54,
+    "pricing": "Consulta sob agendamento",
+    "services": [
+      "Plano Alimentar Individualizado com base na TACO",
+      "Avaliação de Exames Bioquímicos e Marcadores Inflamatórios",
+      "Suplementação Estratégica Baseada em Evidências"
+    ],
+    "userId": "user_prof_camila",
+    "createdAt": "2026-09-04T00:15:03.156Z",
+    "updatedAt": "2026-09-04T00:15:03.156Z"
+  },
+  {
+    "id": "prof_dr_lucas",
+    "name": "Dr. Lucas Mendes",
+    "avatarUrl": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=200&auto=format&fit=crop&q=80",
+    "type": "NUTRITIONIST",
+    "specialty": "Nutrição Funcional, Hipertrofia e Saúde Digestiva",
+    "bio": "Foco em estratégias nutricionais para ganho de massa muscular magra, melhora da microbiota intestinal e otimização do metabolismo energético. Atendimento humanizado e sem dietas restritivas extremas.",
+    "experienceYears": 6,
+    "location": "Campinas, SP (Atendimento Online Nacional)",
+    "registrationNumber": "CRN-3 51204",
+    "status": "ACTIVE",
+    "isVerified": true,
+    "rating": 4.88,
+    "reviewCount": 39,
+    "pricing": "Consulta sob agendamento",
+    "services": [
+      "Dieta Hipercalórica Limpa para Hipertrofia",
+      "Modulação Intestinal e Sensibilidades Alimentares",
+      "Acompanhamento e Ajustes Quinzenais"
+    ],
+    "userId": "user_prof_lucas",
+    "createdAt": "2026-09-04T00:15:03.156Z",
+    "updatedAt": "2026-09-04T00:15:03.156Z"
+  },
+  {
+    "id": "prof_rafael_torres",
+    "name": "Prof. Rafael Torres",
+    "avatarUrl": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200&auto=format&fit=crop&q=80",
+    "type": "TRAINER",
+    "specialty": "Treinamento de Força, Biomecânica e Hipertrofia",
+    "bio": "Treinador e pós-graduado em Biomecânica Aplicada ao Exercício. Mais de 10 anos lapidando a técnica de execução, prevenção de lesões articulares e periodização inteligente para praticantes de musculação.",
+    "experienceYears": 10,
+    "location": "São Paulo, SP (Consultoria Online & Presencial)",
+    "registrationNumber": "CREF 089412-G/SP",
+    "status": "ACTIVE",
+    "isVerified": true,
+    "rating": 5,
+    "reviewCount": 62,
+    "pricing": "Consultoria mensal ou trimestral",
+    "services": [
+      "Periodização Ondulatória e Bloco de Força",
+      "Análise Biomecânica de Execuções por Vídeo",
+      "Adaptação de Rotinas para Lombar e Ombros Sensíveis"
+    ],
+    "userId": "user_prof_rafael",
+    "createdAt": "2026-09-04T00:15:03.156Z",
+    "updatedAt": "2026-09-04T00:15:03.156Z"
+  },
+  {
+    "id": "prof_mariana_albuquerque",
+    "name": "Profa. Mariana Albuquerque",
+    "avatarUrl": "https://images.unsplash.com/photo-1548690312-e3b507d8c110?w=200&auto=format&fit=crop&q=80",
+    "type": "TRAINER",
+    "specialty": "Condicionamento Metabólico e Hipertrofia Feminina",
+    "bio": "Fisiologista do exercício especialista em periodização de volume para o público feminino, fortalecimento de glúteos e postura. Ajudo você a alcançar resultados consistentes com treino eficiente e sem excessos.",
+    "experienceYears": 7,
+    "location": "Curitiba, PR (Consultoria Online Nacional)",
+    "registrationNumber": "CREF 072115-G/SP",
+    "status": "ACTIVE",
+    "isVerified": true,
+    "rating": 4.92,
+    "reviewCount": 47,
+    "pricing": "Consultoria mensal",
+    "services": [
+      "Rotinas Personalizadas com Foco em Cadeia Posterior",
+      "Periodização de Cargas Progressivas",
+      "Treinos Rápidos e Eficientes para Rotinas Corridas"
+    ],
+    "userId": "user_prof_mariana",
+    "createdAt": "2026-09-04T00:15:03.156Z",
+    "updatedAt": "2026-09-04T00:15:03.156Z"
+  },
+  {
+    "id": "prof_dr_eduardo",
+    "name": "Dr. Eduardo Siqueira",
+    "avatarUrl": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=200&auto=format&fit=crop&q=80",
+    "type": "NUTRITIONIST",
+    "specialty": "Emagrecimento e Controle de Doenças Metabólicas",
+    "bio": "Médico nutrólogo e nutricionista clínico com mais de uma década de experiência no tratamento da resistência à insulina, esteatose hepática e obesidade com respeito e suporte contínuo.",
+    "experienceYears": 12,
+    "location": "Rio de Janeiro, RJ",
+    "registrationNumber": "CRN-4 38119",
+    "status": "UNAVAILABLE",
+    "isVerified": true,
+    "rating": 4.9,
+    "reviewCount": 88,
+    "pricing": "Agenda temporariamente fechada",
+    "services": [
+      "Reeducação Alimentar Estruturada",
+      "Manejo Nutricional de Síndrome Metabólica"
+    ],
+    "userId": "user_prof_eduardo",
+    "createdAt": "2026-09-04T00:15:03.156Z",
+    "updatedAt": "2026-09-04T00:15:03.156Z"
+  }
+]

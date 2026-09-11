@@ -1,0 +1,20 @@
+{
+  "name": "NutriPlan - Dieta & Treino",
+  "short_name": "NutriPlan",
+  "description": "Aplicativo inteligente de planejamento de dieta, treino e prescrição nutricional baseada em ciência.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0F17",
+  "theme_color": "#0B0F17",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle", "productivity"],
+  "screenshots": []
+}
