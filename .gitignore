@@ -6,4 +6,5 @@ serviceAccountKey.json
 local-cache/
 coverage/
 *.log
+*.tsbuildinfo
 _backup_pre_cleanup/
