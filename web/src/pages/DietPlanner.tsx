@@ -1035,6 +1035,20 @@ export const DietPlanner: React.FC = () => {
     }
     const targetMealName = currentDayMeals[targetIdx]?.name || 'Refeição';
 
+    // Previne inserção duplicada do mesmo alimento na mesma refeição
+    const isAlreadyInMeal = currentDayMeals[targetIdx]?.items.some(
+      (it) => it.foodItemId === food.id || it.foodName.toLowerCase().trim() === food.name.toLowerCase().trim()
+    );
+    if (isAlreadyInMeal) {
+      triggerHapticFeedback();
+      setStatusMsg({
+        type: 'error',
+        text: `"${food.name}" já está no ${targetMealName}! Ajuste a quantidade diretamente na lista da refeição abaixo.`,
+      });
+      setTimeout(() => setStatusMsg(null), 3500);
+      return;
+    }
+
     const units = getValidUnitsForFood(food.name);
     const defaultUnit = units[0]?.id || 'g';
     const defaultQuantityValue = defaultUnit === 'g' || defaultUnit === 'ml' ? 100 : 1;
@@ -1595,7 +1609,25 @@ export const DietPlanner: React.FC = () => {
     }
     const targetMealName = dayMeals[targetIdx]?.name || 'Refeição';
 
-    const newItems: LocalMealItem[] = combo.items.map((item) => {
+    const existingNames = new Set(
+      (dayMeals[targetIdx]?.items || []).map((it) => it.foodName.toLowerCase().trim())
+    );
+
+    const comboItemsToAdd = combo.items.filter(
+      (it) => !existingNames.has(it.foodName.toLowerCase().trim())
+    );
+
+    if (comboItemsToAdd.length === 0) {
+      triggerHapticFeedback();
+      setStatusMsg({
+        type: 'error',
+        text: `Todos os alimentos do combo "${combo.label}" já estão no ${targetMealName}!`,
+      });
+      setTimeout(() => setStatusMsg(null), 3500);
+      return;
+    }
+
+    const newItems: LocalMealItem[] = comboItemsToAdd.map((item) => {
       const baseItem: LocalMealItem = {
         foodItemId: `combo-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
         foodName: item.foodName,
@@ -1631,9 +1663,13 @@ export const DietPlanner: React.FC = () => {
 
     checkAndRewardFirstMealOfDay();
     triggerHapticFeedback();
+    const msg =
+      comboItemsToAdd.length === combo.items.length
+        ? `🎉 Combo "${combo.label}" (${newItems.length} alimentos) adicionado ao ${targetMealName}!`
+        : `🎉 Adicionado ${newItems.length} novos alimentos do combo "${combo.label}" ao ${targetMealName}!`;
     setStatusMsg({
       type: 'success',
-      text: `🎉 Combo "${combo.label}" (${combo.items.length} alimentos) adicionado ao ${targetMealName}!`,
+      text: msg,
     });
     setTimeout(() => setStatusMsg(null), 3000);
   };
@@ -2072,7 +2108,7 @@ export const DietPlanner: React.FC = () => {
                 const isRecentlyAdded = recentlyAddedFoodId === food.id;
                 const allergyCheck = checkFoodAllergens(food.name, user?.allergies);
                 const isAlreadyInTargetMeal = currentMeals[selectedTargetMealIdx]?.items.some(
-                  (it) => it.foodItemId === food.id || it.foodName === food.name
+                  (it) => it.foodItemId === food.id || it.foodName.toLowerCase().trim() === food.name.toLowerCase().trim()
                 );
 
                 return (
@@ -2111,7 +2147,7 @@ export const DietPlanner: React.FC = () => {
                         isRecentlyAdded
                           ? 'bg-emerald-500 text-slate-950 font-black'
                           : isAlreadyInTargetMeal
-                          ? 'bg-emerald-500/20 text-emerald-300'
+                          ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30'
                           : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black'
                       }`}
                     >
@@ -2122,7 +2158,8 @@ export const DietPlanner: React.FC = () => {
                         </>
                       ) : isAlreadyInTargetMeal ? (
                         <>
-                          <span>+1 Porção</span>
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          <span>Já Adicionado</span>
                         </>
                       ) : (
                         <>

@@ -1249,6 +1249,20 @@ export const WorkoutPlanner: React.FC = () => {
     if (!checkCanAddExercise(ex)) return;
     if (activeDayIdx < 0 || activeDayIdx >= workoutDays.length) return;
 
+    // Previne inserção duplicada do mesmo exercício no mesmo dia
+    const isAlreadyInWorkout = workoutDays[activeDayIdx]?.exercises.some(
+      (e) => e.exerciseId === ex.id || e.exerciseName.toLowerCase().trim() === ex.name.toLowerCase().trim()
+    );
+    if (isAlreadyInWorkout) {
+      triggerHapticFeedback();
+      setStatusMsg({
+        type: 'error',
+        text: `"${ex.name}" já está no treino! Ajuste as séries diretamente no treino montado abaixo.`,
+      });
+      setTimeout(() => setStatusMsg(null), 3500);
+      return;
+    }
+
     triggerHapticFeedback();
 
     const newEntry: LocalExerciseEntry = {
@@ -1862,7 +1876,7 @@ export const WorkoutPlanner: React.FC = () => {
                   filteredExercises.map((ex) => {
                     const isRecentlyAdded = recentlyAddedExerciseId === ex.id;
                     const isAlreadyInWorkout = workoutDays[activeDayIdx]?.exercises.some(
-                      (e) => e.exerciseId === ex.id || e.exerciseName === ex.name
+                      (e) => e.exerciseId === ex.id || e.exerciseName.toLowerCase().trim() === ex.name.toLowerCase().trim()
                     );
 
                     return (
@@ -1891,24 +1905,25 @@ export const WorkoutPlanner: React.FC = () => {
                         <span
                           className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
                             isRecentlyAdded
-                              ? 'bg-emerald-500 text-slate-950'
+                              ? 'bg-emerald-500 text-slate-950 font-black'
                               : isAlreadyInWorkout
-                              ? 'bg-blue-500/20 text-blue-300'
+                              ? 'bg-slate-800 text-blue-400 border border-blue-500/30'
                               : 'bg-blue-500 hover:bg-blue-400 text-white'
                           }`}
                         >
                           {isRecentlyAdded ? (
                             <>
-                              <Check className="w-3 h-3" />
+                              <Check className="w-3 h-3 stroke-[3]" />
                               <span>Adicionado!</span>
                             </>
                           ) : isAlreadyInWorkout ? (
                             <>
-                              <span>+1 Série</span>
+                              <Check className="w-3 h-3 stroke-[3]" />
+                              <span>Já no Treino</span>
                             </>
                           ) : (
                             <>
-                              <Plus className="w-3 h-3" />
+                              <Plus className="w-3 h-3 stroke-[3]" />
                               <span>Adicionar</span>
                             </>
                           )}
