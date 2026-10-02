@@ -127,6 +127,7 @@ Durante os ciclos de implementação, testes contínuos e testes com usuários r
 | **BUG-06** | Crítica | Desconexão súbita (Logout) e perda de estado do usuário | Token JWT configurado com expiração de 15 minutos sem refresh ativo; a inatividade do Render gerava 401 e limpava o `localStorage`. | Expansão da validade do token JWT para **30 dias** (`JWT_EXPIRES_IN=30d`), proteção do estado do perfil no logout e adição de fallback em `jwt.strategy.ts`. |
 | **BUG-07** | Baixa | Redundância visual no formulário de Perfil / Anamnese | Coexistência dos campos "Nível de Experiência" e "Tempo de Prática" | Fusão em campo único consolidado ("Tempo e Nível de Experiência") com faixas graduais. |
 | **BUG-08** | Média | Quebra de fluxo na inclusão do 1º alimento na dieta | Redirecionamento forçado para a página de perfil para informar restrições | Substituição por modal interativo *in-page* (`DietaryRestrictionsModal`), mantendo o usuário na tela de montagem. |
+| **BUG-09** | Média | Quebra de fluxo na inclusão do 1º exercício no treino | Redirecionamento forçado para a rota `/profile#exercise-limitations` | Criação do componente `WorkoutLimitationsModal` integrado na própria tela com atalho de 1-Clique e abertura automática da busca após salvar. |
 
 ---
 

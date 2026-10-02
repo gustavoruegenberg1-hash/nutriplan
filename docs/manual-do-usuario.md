@@ -76,7 +76,8 @@ Assim que você preenche seus dados corporais, o motor de cálculo clínico do N
 ### 5.1 Montagem de Rotinas de Exercícios
 1. Acesse o menu **"Treino"**.
 2. Crie uma nova rotina (e.g., *"Treino A - Peito, Deltoide e Tríceps"*) ou escolha um preset científico (*Push/Pull/Legs*, *Upper/Lower*, *Full Body*).
-3. Clique em **"Adicionar Exercício"** e filtre por grupo muscular (Peito, Costas, Quadríceps, Isquiotibiais, Ombros, Bíceps, Tríceps, Abdômen).
+3. Ao tentar adicionar o primeiro exercício, se você ainda não informou suas limitações físicas, o sistema abrirá um **modal interativo na própria página** (*WorkoutLimitationsModal*) com perguntas de segurança biomecânica (dores articulares, lesões musculares e nível de experiência), incluindo atalho de 1-Clique ("Não possuo nenhuma lesão, dor ou limitação física").
+4. Após salvar ou confirmar, a busca de exercícios abre imediatamente na mesma tela, permitindo filtrar por grupo muscular (Peito, Costas, Quadríceps, Isquiotibiais, Ombros, Bíceps, Tríceps, Abdômen).
 
 ### 5.2 Filtro Biomecânico de Segurança (Proteção contra Lesões)
 - Caso você tenha apontado no seu Perfil alguma dor articular ativa (por exemplo: dor no joelho nível 7 ou tendinite no ombro):

@@ -6,6 +6,7 @@ import { Exercise, DayOfWeek } from '../types';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { InputDialog } from '../components/InputDialog';
 import { condicoesELimitacoesPreenchidas } from '../utils/formValidation';
+import { WorkoutLimitationsModal } from '../components/workout/WorkoutLimitationsModal';
 import {
   Dumbbell,
   Plus,
@@ -24,6 +25,7 @@ import {
   Lightbulb,
   ChevronDown,
   ChevronRight,
+  Info,
 } from 'lucide-react';
 import { verificarCompatibilidade } from '../utils/workoutSafety';
 import { gamificationService } from '../services/gamificationService';
@@ -782,6 +784,7 @@ export const WorkoutPlanner: React.FC = () => {
   const [activeDayIdx, setActiveDayIdx] = useState<number>(0);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isLimitationModalOpen, setIsLimitationModalOpen] = useState<boolean>(false);
+  const [pendingExerciseForAdd, setPendingExerciseForAdd] = useState<Exercise | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('saved');
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [recentlyAddedExerciseId, setRecentlyAddedExerciseId] = useState<string | null>(null);
@@ -790,8 +793,11 @@ export const WorkoutPlanner: React.FC = () => {
   const [isLoadingExercises, setIsLoadingExercises] = useState<boolean>(true);
   const [exerciseLoadError, setExerciseLoadError] = useState<string | null>(null);
 
-  const checkCanAddExercise = (): boolean => {
+  const checkCanAddExercise = (pendingEx?: Exercise): boolean => {
     if (!condicoesELimitacoesPreenchidas(user)) {
+      if (pendingEx) {
+        setPendingExerciseForAdd(pendingEx);
+      }
       setIsLimitationModalOpen(true);
       return false;
     }
@@ -1073,7 +1079,7 @@ export const WorkoutPlanner: React.FC = () => {
 
   // Adiciona exercício com 1 clique/toque no card
   const handleSelectExercise = (ex: Exercise) => {
-    if (!checkCanAddExercise()) return;
+    if (!checkCanAddExercise(ex)) return;
     if (activeDayIdx < 0 || activeDayIdx >= workoutDays.length) return;
 
     triggerHapticFeedback();
@@ -1302,6 +1308,68 @@ export const WorkoutPlanner: React.FC = () => {
           <span>{statusMsg.text}</span>
         </div>
       )}
+
+      {/* Banner de Condições e Limitações Físicas / Biomecânica */}
+      {(() => {
+        const isFilled = condicoesELimitacoesPreenchidas(user);
+        const hasPainOrInjury =
+          user?.hasJointPain === 'YES' ||
+          user?.hasMuscleInjuries === 'YES' ||
+          user?.hasExercisePain === 'YES' ||
+          (user?.affectedJoints && user.affectedJoints.length > 0) ||
+          (user?.affectedMuscles && user.affectedMuscles.length > 0);
+
+        if (!isFilled) {
+          return (
+            <div className="p-3.5 rounded-2xl bg-[#111827] border border-[#1F2937] text-slate-400 text-xs flex items-center justify-between gap-3 animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <Info className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                <span>
+                  <strong>Limitações físicas não informadas:</strong> Responda às perguntas para ativar a checagem biomecânica de segurança e alertas de sobrecarga.
+                </span>
+              </div>
+              <button
+                onClick={() => setIsLimitationModalOpen(true)}
+                className="text-[11px] font-bold text-blue-400 hover:text-white underline whitespace-nowrap cursor-pointer"
+              >
+                Informar agora
+              </button>
+            </div>
+          );
+        }
+
+        if (hasPainOrInjury) {
+          const regions = [
+            ...(user?.affectedJoints || []),
+            ...(user?.affectedMuscles || []),
+          ].filter(Boolean);
+
+          return (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between gap-3 animate-in fade-in">
+              <div className="flex items-center gap-2.5">
+                <ShieldAlert className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                <span>
+                  <strong>Filtro Biomecânico Ativo:</strong> Exercícios de alto impacto para{' '}
+                  <span className="underline font-bold text-white">
+                    {regions.length > 0
+                      ? regions.slice(0, 3).join(', ') + (regions.length > 3 ? ` (+${regions.length - 3})` : '')
+                      : 'suas articulações/músculos'}
+                  </span>{' '}
+                  serão sinalizados e prevenidos na montagem do seu treino.
+                </span>
+              </div>
+              <button
+                onClick={() => setIsLimitationModalOpen(true)}
+                className="text-[11px] font-bold text-amber-400 hover:text-white underline whitespace-nowrap cursor-pointer"
+              >
+                Editar
+              </button>
+            </div>
+          );
+        }
+
+        return null;
+      })()}
 
       {/* Banner de Conexão com Personal Trainers Credenciados */}
       <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-950/60 via-[#111827] to-surface border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
@@ -1981,44 +2049,23 @@ export const WorkoutPlanner: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal de Bloqueio Informativo de Condições e Limitações */}
-      {isLimitationModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-slate-900 border border-blue-500/40 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-blue-400">
-              <div className="p-2.5 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-extrabold text-white text-base">Condições e Limitações Necessárias</h3>
-                <span className="text-[11px] text-blue-300/90 font-medium">Segurança e Personalização do Treino</span>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-300 leading-relaxed">
-              ⚠️ Antes de adicionar exercícios ao seu treino, preencha o formulário de condições e limitações para que possamos verificar possíveis restrições e alertas de segurança.
-            </p>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-              <button
-                onClick={() => setIsLimitationModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all"
-              >
-                Voltar
-              </button>
-              <button
-                onClick={() => {
-                  setIsLimitationModalOpen(false);
-                  navigate('/profile#exercise-limitations');
-                }}
-                className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-white text-xs font-extrabold transition-all shadow-lg shadow-blue-500/20"
-              >
-                Preencher Formulário
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal Interativo de Condições e Limitações na Mesma Página */}
+      <WorkoutLimitationsModal
+        isOpen={isLimitationModalOpen}
+        onClose={() => {
+          setIsLimitationModalOpen(false);
+          setPendingExerciseForAdd(null);
+        }}
+        onSuccess={() => {
+          setIsLimitationModalOpen(false);
+          if (pendingExerciseForAdd) {
+            handleSelectExercise(pendingExerciseForAdd);
+            setPendingExerciseForAdd(null);
+          } else {
+            setIsSearchOpen(true);
+          }
+        }}
+      />
 
       {confirmDialog && (
         <ConfirmDialog
