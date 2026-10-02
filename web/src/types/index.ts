@@ -46,6 +46,9 @@ export interface User {
   activityLevel: ActivityLevel | null;
   goal: Goal | null;
   role: 'USER' | 'ADMIN';
+  isEmailVerified?: boolean;
+  provider?: string;
+  avatarUrl?: string | null;
   bmr?: number | null;
   tdee?: number | null;
 

@@ -7,6 +7,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { VerifyEmail } from './pages/VerifyEmail';
 import { Dashboard } from './pages/Dashboard';
 import { DietPlanner } from './pages/DietPlanner';
 import { NutrientInfo } from './pages/NutrientInfo';
@@ -68,6 +69,7 @@ export function App() {
                 {/* Public Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/articles" element={<Articles />} />
                 <Route path="/articles/:id" element={<ArticleDetail />} />
 

@@ -11,6 +11,11 @@ export class UserEntity {
   activityLevel: string | null;
   goal: string | null;
   role: string;
+  isEmailVerified: boolean = false;
+  verificationCode?: string | null;
+  verificationCodeExpiresAt?: Date | string | null;
+  provider?: 'local' | 'google' | string;
+  avatarUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
 

@@ -6,11 +6,16 @@ import { RegisterUseCase } from './application/use-cases/register.use-case';
 import { LoginUseCase } from './application/use-cases/login.use-case';
 import { GetProfileUseCase } from './application/use-cases/get-profile.use-case';
 import { UpdateProfileUseCase } from './application/use-cases/update-profile.use-case';
+import { VerifyEmailUseCase } from './application/use-cases/verify-email.use-case';
+import { ResendCodeUseCase } from './application/use-cases/resend-code.use-case';
+import { GoogleAuthUseCase } from './application/use-cases/google-auth.use-case';
 import { FirestoreUserRepository } from './infrastructure/repositories/firestore-user.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
+import { MailModule } from '../../shared/mail/mail.module';
 
 @Module({
   imports: [
+    MailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: () => {
@@ -35,6 +40,9 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
     LoginUseCase,
     GetProfileUseCase,
     UpdateProfileUseCase,
+    VerifyEmailUseCase,
+    ResendCodeUseCase,
+    GoogleAuthUseCase,
     JwtStrategy,
     {
       provide: 'USER_REPOSITORY',

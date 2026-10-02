@@ -8,7 +8,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<{ requiresVerification: boolean }>;
+  verifyEmail: (email: string, code: string) => Promise<void>;
+  resendCode: (email: string) => Promise<{ success: boolean; message: string }>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
@@ -66,12 +69,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (name: string, email: string, password: string) => {
-    await api.post('/auth/register', { name, email, password });
-    await login(email, password);
+    const { data } = await api.post('/auth/register', { name, email, password });
+    return { requiresVerification: data.requiresVerification ?? true };
+  };
+
+  const verifyEmail = async (email: string, code: string) => {
+    const { data } = await api.post('/auth/verify-email', { email, code });
+    if (data.accessToken) {
+      localStorage.setItem('nutriplan_token', data.accessToken);
+      setToken(data.accessToken);
+      if (data.user) {
+        setUser(data.user);
+        localStorage.setItem('nutriplan_user', JSON.stringify(data.user));
+      } else {
+        await refreshProfile();
+      }
+    }
+  };
+
+  const resendCode = async (email: string) => {
+    const { data } = await api.post('/auth/resend-code', { email });
+    return data;
+  };
+
+  const loginWithGoogle = async (credential: string) => {
+    const { data } = await api.post('/auth/google', { credential });
+    const accessToken = data.accessToken;
+    localStorage.setItem('nutriplan_token', accessToken);
+    setToken(accessToken);
+    if (data.user) {
+      setUser(data.user);
+      localStorage.setItem('nutriplan_user', JSON.stringify(data.user));
+    } else {
+      await refreshProfile();
+    }
   };
 
   const logout = () => {
-    Object.keys(localStorage).forEach(key => {
+    Object.keys(localStorage).forEach((key) => {
       if (key.startsWith('nutriplan_') || key.startsWith('nutrihero_')) {
         localStorage.removeItem(key);
       }
@@ -101,6 +136,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         login,
         register,
+        verifyEmail,
+        resendCode,
+        loginWithGoogle,
         logout,
         refreshProfile,
         updateProfile,

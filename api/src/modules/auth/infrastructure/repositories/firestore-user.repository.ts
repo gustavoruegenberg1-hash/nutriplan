@@ -77,6 +77,11 @@ export class FirestoreUserRepository implements IUserRepository {
       activityLevel: data.activityLevel || null,
       goal: data.goal || null,
       role: data.role || 'USER',
+      isEmailVerified: data.isEmailVerified ?? false,
+      verificationCode: data.verificationCode || null,
+      verificationCodeExpiresAt: data.verificationCodeExpiresAt || null,
+      provider: data.provider || 'local',
+      avatarUrl: data.avatarUrl || null,
       createdAt: data.createdAt ? new Date(data.createdAt._seconds ? data.createdAt._seconds * 1000 : data.createdAt) : new Date(),
       updatedAt: data.updatedAt ? new Date(data.updatedAt._seconds ? data.updatedAt._seconds * 1000 : data.updatedAt) : new Date(),
 
@@ -172,6 +177,11 @@ export class FirestoreUserRepository implements IUserRepository {
       activityLevel: userData.activityLevel ? userData.activityLevel.toUpperCase() : null,
       goal: userData.goal ? userData.goal.toUpperCase() : null,
       role: userData.role ? userData.role.toUpperCase() : 'USER',
+      isEmailVerified: userData.isEmailVerified ?? false,
+      verificationCode: userData.verificationCode || null,
+      verificationCodeExpiresAt: userData.verificationCodeExpiresAt || null,
+      provider: userData.provider || 'local',
+      avatarUrl: userData.avatarUrl || null,
 
       hasFoodAllergies: userData.hasFoodAllergies ?? null,
       allergies: userData.allergies || [],

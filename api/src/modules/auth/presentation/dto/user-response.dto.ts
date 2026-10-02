@@ -11,6 +11,9 @@ export class UserResponseDto {
   activityLevel!: string | null;
   goal!: string | null;
   role!: string;
+  isEmailVerified!: boolean;
+  provider?: string;
+  avatarUrl?: string | null;
   bmr!: number | null;
   tdee!: number | null;
 
@@ -56,6 +59,9 @@ export class UserResponseDto {
     dto.activityLevel = entity.activityLevel;
     dto.goal = entity.goal;
     dto.role = entity.role;
+    dto.isEmailVerified = entity.isEmailVerified ?? false;
+    dto.provider = (entity as any).provider || 'local';
+    dto.avatarUrl = (entity as any).avatarUrl || null;
     dto.bmr = entity.calculateBMR();
     dto.tdee = entity.calculateTDEE();
 

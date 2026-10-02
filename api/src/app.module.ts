@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { FirebaseModule } from './shared/firebase/firebase.module';
+import { MailModule } from './shared/mail/mail.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DietModule } from './modules/diet/diet.module';
 import { WorkoutModule } from './modules/workout/workout.module';
@@ -11,6 +12,7 @@ import { ProfessionalsModule } from './modules/professionals/professionals.modul
 @Module({
   imports: [
     FirebaseModule,
+    MailModule,
     AuthModule,
     DietModule,
     WorkoutModule,
