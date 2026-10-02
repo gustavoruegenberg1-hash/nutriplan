@@ -321,7 +321,7 @@ export const CreateWorkoutDayModal: React.FC<CreateWorkoutDayModalProps> = ({
             onClick={handleSubmit}
             className="px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white text-xs font-extrabold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20 cursor-pointer"
           >
-            <span>{mode === 'create' ? 'Criar Treino e Ver Exercícios' : 'Salvar Alterações'}</span>
+            <span>{mode === 'create' ? 'Começar Montagem do Treino ➔' : 'Salvar Alterações e Ver Exercícios ➔'}</span>
           </button>
         </div>
       </div>

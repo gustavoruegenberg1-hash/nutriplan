@@ -29,6 +29,7 @@ import {
   Info,
   Tags,
   Edit3,
+  Sparkles,
 } from 'lucide-react';
 import { verificarCompatibilidade } from '../utils/workoutSafety';
 import { gamificationService } from '../services/gamificationService';
@@ -459,7 +460,7 @@ const WORKOUT_STORAGE_NAME_KEY = 'nutriplan_saved_workout_name';
 export function getStrictMuscleGroupsForWorkout(dayOrName: LocalWorkoutDay | string | undefined | null): string[] {
   if (!dayOrName) return [];
   if (typeof dayOrName === 'object') {
-    if (Array.isArray(dayOrName.targetMuscles) && dayOrName.targetMuscles.length > 0) {
+    if (Array.isArray(dayOrName.targetMuscles)) {
       return dayOrName.targetMuscles;
     }
     return getStrictMuscleGroupsForWorkout(dayOrName.name);
@@ -569,19 +570,26 @@ export function getStrictMuscleGroupsForWorkout(dayOrName: LocalWorkoutDay | str
 /**
  * Filtra dinamicamente as tags de grupos musculares pertinentes ao treino ativo
  */
-export function getRelevantMusclesForWorkout(dayOrName: LocalWorkoutDay | string | undefined | null): { id: string; label: string }[] {
+export function getRelevantMusclesForWorkout(dayOrName: LocalWorkoutDay | string | undefined | null): { id: string; label: string; icon?: string }[] {
   const strictGroups = getStrictMuscleGroupsForWorkout(dayOrName);
 
   if (strictGroups.length > 0) {
     return [
       { id: 'ALL', label: 'Todos do Treino' },
-      ...strictGroups.map((k) => ({ id: k, label: muscleGroupLabelsPtBr[k] || k })),
+      ...strictGroups.map((k) => {
+        const found = AVAILABLE_MUSCLE_TAGS.find((m) => m.id === k);
+        return {
+          id: k,
+          label: found?.label || muscleGroupLabelsPtBr[k] || k,
+          icon: found?.icon || '💪',
+        };
+      }),
     ];
   }
 
   return [
     { id: 'ALL', label: 'Todos os Músculos' },
-    ...AVAILABLE_MUSCLE_TAGS.map((t) => ({ id: t.id, label: t.label })),
+    ...AVAILABLE_MUSCLE_TAGS.map((t) => ({ id: t.id, label: t.label, icon: t.icon })),
   ];
 }
 
@@ -776,17 +784,28 @@ export const WorkoutPlanner: React.FC = () => {
       const saved = localStorage.getItem(WORKOUT_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((d: any) => ({
+            ...d,
+            targetMuscles: Array.isArray(d.targetMuscles)
+              ? d.targetMuscles
+              : getStrictMuscleGroupsForWorkout(d.name),
+          }));
+        }
       }
     } catch (e) {
       console.error(e);
     }
-    return defaultPreset.days.map((d) => ({ ...d, exercises: [] }));
+    return defaultPreset.days.map((d) => ({
+      ...d,
+      targetMuscles: getStrictMuscleGroupsForWorkout(d.name),
+      exercises: [],
+    }));
   });
 
   const navigate = useNavigate();
   const [activeDayIdx, setActiveDayIdx] = useState<number>(0);
-  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(true); // Aberto por padrão para montagem direta e ágil
   const [isLimitationModalOpen, setIsLimitationModalOpen] = useState<boolean>(false);
   const [pendingExerciseForAdd, setPendingExerciseForAdd] = useState<Exercise | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('saved');
@@ -819,12 +838,19 @@ export const WorkoutPlanner: React.FC = () => {
   const relevantMuscleGroups = useMemo(() => {
     if (showAllMusclesOverride) {
       return [
-        { id: 'ALL', label: 'Todos os Músculos' },
-        ...AVAILABLE_MUSCLE_TAGS.map((t) => ({ id: t.id, label: t.label })),
+        { id: 'ALL', label: 'Todos os Músculos', icon: '🌐' },
+        ...AVAILABLE_MUSCLE_TAGS.map((t) => ({ id: t.id, label: t.label, icon: t.icon })),
       ];
     }
     return getRelevantMusclesForWorkout(currentDay);
   }, [currentDay, showAllMusclesOverride]);
+
+  // Sincroniza automaticamente a seleção de exercício quando as tags forem alteradas
+  useEffect(() => {
+    if (selectedMuscle !== 'ALL' && !strictAllowedGroups.includes(selectedMuscle) && !showAllMusclesOverride) {
+      setSelectedMuscle('ALL');
+    }
+  }, [strictAllowedGroups, selectedMuscle, showAllMusclesOverride]);
 
   // Carrega catálogo de exercícios via exerciseService resiliente
   const fetchExercises = useCallback(async () => {
@@ -1031,13 +1057,16 @@ export const WorkoutPlanner: React.FC = () => {
           return {
             name: d.name,
             dayOfWeek: d.dayOfWeek,
+            targetMuscles: getStrictMuscleGroupsForWorkout(d.name),
             exercises: loadedPresetExs,
           };
         });
 
         setWorkoutDays(newDays);
         setActiveDayIdx(0);
-        setIsSearchOpen(false);
+        setIsSearchOpen(true);
+        setSelectedMuscle('ALL');
+        setShowAllMusclesOverride(false);
         triggerWorkoutAutoSave(preset.title, newDays);
         setStatusMsg({ type: 'success', text: `Estratégia "${preset.title}" aplicada com sucesso!` });
         setTimeout(() => setStatusMsg(null), 3000);
@@ -1072,47 +1101,60 @@ export const WorkoutPlanner: React.FC = () => {
       setWorkoutDays(updated);
       setActiveDayIdx(updated.length - 1);
       setSelectedMuscle('ALL');
+      setShowAllMusclesOverride(false);
       setIsSearchOpen(true);
       setStatusMsg({
         type: 'success',
-        text: `Treino "${data.name}" criado! Adicione os exercícios das tags abaixo para montá-lo.`,
+        text: `Treino "${data.name}" criado! Comece a montagem escolhendo os exercícios abaixo.`,
       });
       setTimeout(() => setStatusMsg(null), 3500);
     } else {
-      const updated = [...workoutDays];
-      if (updated[activeDayIdx]) {
-        updated[activeDayIdx].name = data.name;
-        updated[activeDayIdx].dayOfWeek = data.dayOfWeek;
-        updated[activeDayIdx].targetMuscles = data.targetMuscles;
-        setWorkoutDays(updated);
-        setStatusMsg({
-          type: 'success',
-          text: `Treino "${data.name}" atualizado com sucesso!`,
-        });
-        setTimeout(() => setStatusMsg(null), 2500);
-      }
+      const updated = workoutDays.map((day, i) =>
+        i === activeDayIdx
+          ? {
+              ...day,
+              name: data.name,
+              dayOfWeek: data.dayOfWeek,
+              targetMuscles: data.targetMuscles,
+            }
+          : day
+      );
+      setWorkoutDays(updated);
+      setSelectedMuscle('ALL');
+      setShowAllMusclesOverride(false);
+      setStatusMsg({
+        type: 'success',
+        text: `Treino "${data.name}" atualizado com sucesso!`,
+      });
+      setTimeout(() => setStatusMsg(null), 2500);
     }
   };
 
-  // Alterna tag muscular diretamente na tela do treino ativo com 1 clique
+  // Alterna tag muscular diretamente na tela do treino ativo com 1 clique e atualiza os exercícios instantaneamente
   const toggleMuscleTagForCurrentDay = (tagId: string) => {
     if (activeDayIdx < 0 || activeDayIdx >= workoutDays.length) return;
     triggerHapticFeedback();
-    const updated = [...workoutDays];
-    const currentTags =
-      updated[activeDayIdx].targetMuscles && updated[activeDayIdx].targetMuscles!.length > 0
-        ? [...updated[activeDayIdx].targetMuscles!]
-        : [...getStrictMuscleGroupsForWorkout(updated[activeDayIdx].name)];
+    const currentDay = workoutDays[activeDayIdx];
+    const initialTags =
+      Array.isArray(currentDay.targetMuscles)
+        ? [...currentDay.targetMuscles]
+        : [...getStrictMuscleGroupsForWorkout(currentDay.name)];
 
-    const idx = currentTags.indexOf(tagId);
+    const idx = initialTags.indexOf(tagId);
+    let newTags: string[];
     if (idx >= 0) {
-      currentTags.splice(idx, 1);
+      newTags = initialTags.filter((t) => t !== tagId);
     } else {
-      currentTags.push(tagId);
+      newTags = [...initialTags, tagId];
     }
 
-    updated[activeDayIdx].targetMuscles = currentTags;
+    const updated = workoutDays.map((day, i) =>
+      i === activeDayIdx ? { ...day, targetMuscles: newTags } : day
+    );
+
     setWorkoutDays(updated);
+    setSelectedMuscle('ALL');
+    setShowAllMusclesOverride(false);
   };
 
   // Remove dia de treino
@@ -1429,231 +1471,225 @@ export const WorkoutPlanner: React.FC = () => {
         return null;
       })()}
 
-      {/* Banner de Conexão com Personal Trainers Credenciados */}
-      <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-950/60 via-[#111827] to-surface border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0">
-            <Dumbbell className="w-5 h-5" />
+      {/* Banner Compacto de Conexão com Personal Trainers Credenciados */}
+      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-[#111827] to-surface border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+            <Dumbbell className="w-4 h-4" />
           </div>
-          <div>
-            <h4 className="text-xs sm:text-sm font-bold text-white">
-              Dúvidas sobre postura, biomecânica ou periodização de cargas?
-            </h4>
-            <p className="text-[11px] text-slate-300">
-              Conecte-se diretamente com Personal Trainers credenciados no CREF pelo chat do aplicativo.
-            </p>
-          </div>
+          <p className="text-xs text-slate-300">
+            Dúvidas sobre postura ou periodização? Conecte-se com <strong>Personal Trainers credenciados (CREF)</strong>.
+          </p>
         </div>
         <button
           onClick={() => navigate('/professionals?type=TRAINER')}
-          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer flex-shrink-0"
+          className="w-full sm:w-auto px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
         >
           <span>Consultar Treinadores</span>
           <ChevronRight className="w-3.5 h-3.5 text-slate-950" />
         </button>
       </div>
 
-      {/* PAINEL RECOLHÍVEL DE RECOMENDAÇÕES DE TREINO */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl transition-all">
-        <button
-          type="button"
-          onClick={() => {
-            triggerHapticFeedback();
-            setIsRecommendationsOpen(!isRecommendationsOpen);
-          }}
-          className="w-full flex items-center justify-between text-left group active:scale-[0.99] transition-transform"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xl">💡</span>
-            <div>
-              <h2 className="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
-                <span>Recomendações & Estratégias Científicas</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20">
-                  {availablePresets.length} rotinas
-                </span>
-              </h2>
-              <p className="text-[11px] text-slate-400">
-                Toque para {isRecommendationsOpen ? 'recolher' : 'expandir'} estratégias pré-montadas para o seu perfil
-              </p>
-            </div>
+      {/* BOTÃO GRANDE DE CRIAÇÃO DE NOVO TREINO - MONTADOR DE TREINO */}
+      <div className="bg-gradient-to-r from-blue-950/40 via-[#131B26] to-indigo-950/40 border-2 border-blue-500/30 hover:border-blue-500/50 rounded-3xl p-6 sm:p-7 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-5 transition-all">
+        <div className="space-y-1.5 text-center sm:text-left flex-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-bold">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Montagem Direta & Simplificada</span>
           </div>
-
-          <div className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 group-hover:text-white transition-colors">
-            {isRecommendationsOpen ? (
-              <ChevronDown className="w-4 h-4 text-blue-400" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
-            )}
-          </div>
-        </button>
-
-        {isRecommendationsOpen && (
-          <div className="mt-4 pt-4 border-t border-slate-800/80 space-y-4 animate-in fade-in duration-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-slate-400">
-              <span className="font-semibold text-slate-300">
-                Estratégias calibradas para seu objetivo {user?.gender ? `(${user.gender === 'male' || user.gender === 'MALE' ? 'Masculino' : 'Feminino'})` : ''}
-              </span>
-              <span>Clique para carregar a rotina completa</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {availablePresets.map((preset) => (
-                <button
-                  key={preset.id}
-                  onClick={() => applyPreset(preset)}
-                  className="p-4 rounded-2xl bg-slate-950/80 hover:bg-slate-900 border border-slate-800 hover:border-blue-500/40 text-left transition-all group flex flex-col justify-between active:scale-98"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold">
-                        {preset.badge}
-                      </span>
-                      <span className="text-[10px] text-slate-500">{preset.days.length} sessões</span>
-                    </div>
-                    <h3 className="font-extrabold text-sm text-white group-hover:text-blue-300 transition-colors">
-                      {preset.title}
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
-                      {preset.description}
-                    </p>
-                  </div>
-
-                  <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                    <span className="text-blue-400 font-semibold text-[11px]">Aplicar Estratégia</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-blue-400 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Cabeçalho da Rotina e Dias */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-            Nome da Rotina de Treino
-          </label>
-          <input
-            type="text"
-            value={routineName}
-            onChange={(e) => setRoutineName(e.target.value)}
-            className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm font-semibold focus:outline-none focus:border-blue-500"
-          />
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            Comece um Novo Treino
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300 max-w-lg leading-relaxed">
+            Escolha o nome e as tags musculares (peito, costas, bíceps...) para carregar e montar os exercícios correspondentes na hora.
+          </p>
         </div>
 
-        {/* Abas dos Dias de Treino */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Dias da Rotina ({workoutDays.length} dias configurados)
-            </label>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => {
+              triggerHapticFeedback();
+              setIsRecommendationsOpen(!isRecommendationsOpen);
+            }}
+            className="px-4 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap"
+          >
+            <Lightbulb className="w-4 h-4 text-amber-400" />
+            <span>{isRecommendationsOpen ? 'Fechar Modelos' : 'Modelos Prontos'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={addNewWorkoutDay}
+            className="flex-1 sm:flex-none px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-3 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shrink-0"
+          >
+            <Plus className="w-5 h-5 stroke-[2.5]" />
+            <span>+ Criar Novo Treino</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Modelos Prontos Recomendados (Expandível sob demanda) */}
+      {isRecommendationsOpen && (
+        <div className="bg-slate-900/90 border border-blue-500/30 rounded-3xl p-5 shadow-xl space-y-4 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-amber-400" />
+              <span>Modelos Prontos de Treino (Presets Baseados em Evidência)</span>
+            </h3>
             <button
-              onClick={addNewWorkoutDay}
-              className="px-3.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all border border-blue-500/20"
+              onClick={() => setIsRecommendationsOpen(false)}
+              className="p-1 rounded-lg text-slate-400 hover:text-white"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Adicionar Novo Dia de Treino</span>
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {workoutDays.map((day, idx) => (
-              <div key={idx} className="flex items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {availablePresets.map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => applyPreset(preset)}
+                className="p-4 rounded-2xl bg-slate-950/80 hover:bg-slate-900 border border-slate-800 hover:border-blue-500/40 text-left transition-all group flex flex-col justify-between active:scale-98"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold">
+                      {preset.badge}
+                    </span>
+                    <span className="text-[10px] text-slate-500">{preset.days.length} sessões</span>
+                  </div>
+                  <h4 className="font-extrabold text-sm text-white group-hover:text-blue-300 transition-colors">
+                    {preset.title}
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+                    {preset.description}
+                  </p>
+                </div>
+
+                <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                  <span className="text-blue-400 font-semibold text-[11px]">Carregar Rotina</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-blue-400 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Seletor de Sessões e Abas da Semana */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+              Sessões da Semana ({workoutDays.length})
+            </span>
+            <span className="text-xs text-slate-500">
+              (Clique para alternar o treino ativo)
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={addNewWorkoutDay}
+            className="text-xs font-bold text-blue-400 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Adicionar Outro Treino</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {workoutDays.map((day, idx) => {
+            const isActive = activeDayIdx === idx;
+            return (
+              <div key={idx} className="flex items-center shrink-0">
                 <button
+                  type="button"
                   onClick={() => {
                     setActiveDayIdx(idx);
-                    setIsSearchOpen(false);
-                    setShowAllMusclesOverride(false);
                     setSelectedMuscle('ALL');
+                    setShowAllMusclesOverride(false);
                   }}
-                  className={`px-4 py-2.5 rounded-l-2xl text-xs font-bold transition-all flex items-center gap-2 ${
-                    activeDayIdx === idx
-                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  className={`px-4 py-2.5 rounded-l-2xl text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer ${
+                    isActive
+                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/50'
+                      : 'bg-[#151D28] text-slate-300 hover:text-white border-y border-l border-[#243044] hover:border-slate-600'
                   }`}
                 >
+                  <Dumbbell className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-blue-400'}`} />
                   <span>{day.name}</span>
-                  <span className="px-1.5 py-0.5 rounded-md bg-slate-900/60 text-[10px]">
+                  <span
+                    className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold ${
+                      isActive ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400'
+                    }`}
+                  >
                     {day.exercises.length} ex
                   </span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => removeWorkoutDay(idx)}
-                  className={`px-2.5 py-2.5 rounded-r-2xl border-y border-r text-xs transition-colors ${
-                    activeDayIdx === idx
+                  className={`px-2.5 py-2.5 rounded-r-2xl border-y border-r text-xs transition-colors cursor-pointer ${
+                    isActive
                       ? 'bg-blue-600 border-blue-400 text-white hover:bg-rose-600'
-                      : 'bg-slate-950 border-slate-800 text-slate-500 hover:text-rose-400 hover:bg-slate-900'
+                      : 'bg-[#151D28] border-[#243044] text-slate-500 hover:text-rose-400 hover:bg-slate-900'
                   }`}
-                  title="Excluir este dia"
+                  title="Excluir este dia de treino"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
-        {/* Configurações do Dia Ativo e Tonelagem */}
+        {/* Card de Configuração e Tags do Treino Ativo */}
         {workoutDays[activeDayIdx] && (
-          <div className="pt-4 border-t border-slate-800 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-                    Nome da Sessão:
-                  </label>
-                  <input
-                    type="text"
-                    value={workoutDays[activeDayIdx].name}
-                    onChange={(e) => {
-                      const updated = [...workoutDays];
-                      updated[activeDayIdx].name = e.target.value;
-                      setWorkoutDays(updated);
-                    }}
-                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs font-semibold focus:outline-none focus:border-blue-500"
-                  />
+          <div className="bg-[#151D28] border border-[#243044] rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#243044]">
+              <div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h3 className="text-lg sm:text-xl font-black text-white">
+                    {workoutDays[activeDayIdx].name}
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold">
+                    {daysOfWeekOptions.find((d) => d.id === workoutDays[activeDayIdx].dayOfWeek)?.label ||
+                      workoutDays[activeDayIdx].dayOfWeek}
+                  </span>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-                    Dia da Semana:
-                  </label>
-                  <select
-                    value={workoutDays[activeDayIdx].dayOfWeek}
-                    onChange={(e) => {
-                      const updated = [...workoutDays];
-                      updated[activeDayIdx].dayOfWeek = e.target.value as DayOfWeek;
-                      setWorkoutDays(updated);
-                    }}
-                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs font-semibold focus:outline-none"
-                  >
-                    {daysOfWeekOptions.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <p className="text-xs text-slate-400 mt-1">
+                  {workoutDays[activeDayIdx].exercises.length}{' '}
+                  {workoutDays[activeDayIdx].exercises.length === 1 ? 'exercício montado' : 'exercícios montados'}{' '}
+                  nesta sessão
+                </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
-                  <Activity className="w-4 h-4" />
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="px-3.5 py-2 rounded-2xl bg-slate-950 border border-slate-800 flex items-center gap-2.5">
+                  <Activity className="w-4 h-4 text-blue-400" />
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block leading-tight">
+                      Tonelagem
+                    </span>
+                    <span className="text-xs font-black text-blue-400">
+                      {currentDayVolume.toLocaleString('pt-BR')} kg
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                    Tonelagem Total da Sessão
-                  </span>
-                  <span className="text-sm font-extrabold text-blue-400">
-                    {currentDayVolume.toLocaleString('pt-BR')} kg
-                  </span>
-                </div>
+
+                <button
+                  type="button"
+                  onClick={handleOpenEditDayModal}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Configurar Treino</span>
+                </button>
               </div>
             </div>
 
-            {/* Tags Musculares Escolhidas para o Treino */}
-            <div className="pt-3 border-t border-slate-800/80 space-y-2">
+            {/* Tags Musculares Escolhidas com Alternância em 1 Toque */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <Tags className="w-4 h-4 text-blue-400" />
@@ -1661,28 +1697,21 @@ export const WorkoutPlanner: React.FC = () => {
                     Tags Musculares deste Treino:
                   </span>
                   <span className="text-[11px] text-slate-400">
-                    (Os exercícios exibidos abaixo seguirão estas tags)
+                    (Clique para ativar/desativar tags e atualizar a seleção de exercícios abaixo automaticamente)
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={handleOpenEditDayModal}
-                  className="text-xs text-blue-400 hover:text-white underline font-semibold flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-blue-400 hover:text-white font-bold underline cursor-pointer"
                 >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  <span>Configurar Treino Completo</span>
+                  Configurar Nome & Combos
                 </button>
               </div>
 
-              {/* Botões clicáveis de todas as tags para selecionar com 1 toque */}
               <div className="flex flex-wrap gap-1.5 pt-0.5">
                 {AVAILABLE_MUSCLE_TAGS.map((tag) => {
-                  const currentTags =
-                    workoutDays[activeDayIdx]?.targetMuscles && workoutDays[activeDayIdx].targetMuscles!.length > 0
-                      ? workoutDays[activeDayIdx].targetMuscles!
-                      : getStrictMuscleGroupsForWorkout(workoutDays[activeDayIdx]?.name || '');
-                  const isSelected = currentTags.includes(tag.id);
-
+                  const isSelected = strictAllowedGroups.includes(tag.id);
                   return (
                     <button
                       type="button"
@@ -1706,50 +1735,7 @@ export const WorkoutPlanner: React.FC = () => {
         )}
       </div>
 
-      {/* Sugestões Inteligentes Estritas e Complementares */}
-      {smartSuggestions.length > 0 && (
-        <div className="bg-gradient-to-r from-blue-950/40 via-slate-900 to-slate-900 border border-blue-500/30 rounded-3xl p-5 shadow-xl space-y-3">
-          <div className="flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-amber-400" />
-            <h3 className="font-extrabold text-sm text-white">
-              Sugestões Inteligentes para o {workoutDays[activeDayIdx]?.name} (Restrito aos Músculos do Treino)
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {smartSuggestions.map((sug, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleSelectExercise(sug.exercise)}
-                className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 hover:border-blue-400 hover:bg-slate-900/90 transition-all cursor-pointer group flex flex-col justify-between text-left touch-manipulation select-none active:scale-[0.98]"
-              >
-                <div>
-                  <span className="text-[10px] text-amber-400 font-semibold block mb-1">
-                    💡 {sug.reason}
-                  </span>
-                  <span className="font-extrabold text-xs text-white group-hover:text-blue-300 block transition-colors">
-                    {sug.exercise.name}
-                  </span>
-                  <span className="text-[10px] text-slate-400 mt-1 block">
-                    {muscleGroupLabelsPtBr[sug.exercise.muscleGroup] || sug.exercise.muscleGroup}{' '}
-                    {sug.exercise.equipment && `· ${sug.exercise.equipment}`}
-                  </span>
-                </div>
-
-                <div className="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-bold text-blue-400 w-full">
-                  <span>
-                    {recentlyAddedExerciseId === sug.exercise.id ? '✓ Adicionado à sessão!' : 'Adicionar à sessão'}
-                  </span>
-                  <span>{recentlyAddedExerciseId === sug.exercise.id ? '✓' : '+'}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Conteúdo da Rotina com Pesquisa e Seleção Direta */}
+      {/* Lista de Exercícios Adicionados ao Treino Ativo */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -1779,6 +1765,7 @@ export const WorkoutPlanner: React.FC = () => {
           </div>
 
           <button
+            type="button"
             onClick={() => {
               if (!isSearchOpen && !checkCanAddExercise()) return;
               setIsSearchOpen(!isSearchOpen);
@@ -1786,87 +1773,347 @@ export const WorkoutPlanner: React.FC = () => {
             className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md shadow-blue-500/20 self-start sm:self-auto cursor-pointer"
           >
             {isSearchOpen ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            <span>{isSearchOpen ? 'Fechar Busca' : 'Buscar Exercício no Catálogo'}</span>
+            <span>{isSearchOpen ? 'Recolher Catálogo' : 'Adicionar Exercícios'}</span>
           </button>
         </div>
 
-        {/* Painel de Busca com Tags e Exercícios Estritamente Compatíveis */}
+        {/* Exercícios Cadastrados nesta Sessão */}
+        <div className="space-y-4">
+          {workoutDays[activeDayIdx]?.exercises.map((ex, exIdx) => {
+            const compat = verificarCompatibilidade(user, {
+              name: ex.exerciseName,
+              muscleGroup: ex.muscleGroup,
+              equipment: ex.equipment,
+            });
+
+            return (
+              <div
+                key={exIdx}
+                className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-md space-y-4"
+              >
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs">
+                      {exIdx + 1}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-extrabold text-white text-base">{ex.exerciseName}</h4>
+                        {compat.level !== 'NONE' && (
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border ${compat.badgeBg} ${compat.badgeColor} ${compat.badgeBorder}`}
+                          >
+                            {compat.badgeLabel}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-blue-400 font-semibold">
+                          {muscleGroupLabelsPtBr[ex.muscleGroup] || ex.muscleGroup}
+                        </span>
+                        {ex.equipment && (
+                          <span className="text-xs text-slate-400">&middot; {ex.equipment}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => removeExercise(exIdx)}
+                    className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                    title="Remover exercício"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Alerta de Segurança Contextual do Exercício (se aplicável) */}
+                {compat.level !== 'NONE' && (
+                  <div className={`p-3.5 rounded-2xl border text-xs space-y-1.5 ${compat.badgeBg} ${compat.badgeBorder}`}>
+                    <div className="flex items-center gap-2 font-bold text-slate-200">
+                      <ShieldAlert className={`w-4 h-4 ${compat.badgeColor}`} />
+                      <span>Orientações de Segurança Biomecânica</span>
+                    </div>
+                    {compat.reasons.map((r, rIdx) => (
+                      <p key={rIdx} className="text-slate-300 pl-6 text-[11px] leading-relaxed">
+                        &bull; {r}
+                      </p>
+                    ))}
+                    {compat.recommendation && (
+                      <p className="text-slate-400 pl-6 text-[11px] italic">
+                        💡 {compat.recommendation}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Tabela de Séries com Técnicas Avançadas */}
+                <div className="space-y-2">
+                  <div className="grid grid-cols-12 gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">
+                    <span className="col-span-1">Série</span>
+                    <span className="col-span-3">Técnica Avançada</span>
+                    <span className="col-span-2">Reps</span>
+                    <span className="col-span-2">Carga (kg)</span>
+                    <span className="col-span-2">Descanso</span>
+                    <span className="col-span-1">RPE</span>
+                    <span className="col-span-1 text-right">Ação</span>
+                  </div>
+
+                  {ex.sets.map((set, sIdx) => {
+                    const activeTech = set.technique || 'NORMAL';
+                    const techInfo = techniqueDetails[activeTech];
+
+                    return (
+                      <div
+                        key={sIdx}
+                        className={`grid grid-cols-12 gap-2 items-center p-2 rounded-2xl border text-xs transition-colors ${
+                          activeTech !== 'NORMAL'
+                            ? `${techInfo.bg} ${techInfo.border}`
+                            : 'bg-slate-950/60 border-slate-800/60'
+                        }`}
+                      >
+                        <div className="col-span-1 flex items-center gap-1 font-bold text-slate-300">
+                          <span className="w-5 h-5 rounded-full bg-slate-900 text-[10px] flex items-center justify-center border border-slate-800">
+                            {set.setNumber}
+                          </span>
+                        </div>
+
+                        {/* Seletor de Técnicas Avançadas */}
+                        <div className="col-span-3">
+                          <select
+                            value={activeTech}
+                            onChange={(e) =>
+                              updateSet(exIdx, sIdx, 'technique', e.target.value as TrainingTechnique)
+                            }
+                            className={`w-full px-2 py-1 rounded-lg text-[11px] font-bold border focus:outline-none ${techInfo.bg} ${techInfo.color} ${techInfo.border}`}
+                            title={techInfo.desc}
+                          >
+                            {Object.entries(techniqueDetails).map(([key, val]) => (
+                              <option key={key} value={key} className="bg-slate-950 text-slate-200">
+                                {val.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={set.reps}
+                            onChange={(e) => updateSet(exIdx, sIdx, 'reps', e.target.value)}
+                            className="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold text-center focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={set.weightKg}
+                            onChange={(e) => updateSet(exIdx, sIdx, 'weightKg', e.target.value)}
+                            className="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold text-center focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={set.restSeconds}
+                            onChange={(e) => updateSet(exIdx, sIdx, 'restSeconds', e.target.value)}
+                            className="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 text-center focus:outline-none focus:border-blue-500 text-[11px]"
+                          />
+                        </div>
+
+                        <div className="col-span-1">
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={set.rpe ?? 8}
+                            onChange={(e) => updateSet(exIdx, sIdx, 'rpe', e.target.value)}
+                            className="w-full px-1 py-1 bg-slate-900 border border-slate-700 rounded-lg text-amber-400 font-bold text-center focus:outline-none focus:border-blue-500 text-[11px]"
+                          />
+                        </div>
+
+                        <div className="col-span-1 text-right">
+                          <button
+                            onClick={() => removeSet(exIdx, sIdx)}
+                            className="p-1 text-slate-400 opacity-40 hover:opacity-100 hover:text-red-400 transition-opacity cursor-pointer"
+                            title="Remover série"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => addSetToExercise(exIdx)}
+                    className="w-full py-2 rounded-xl border border-dashed border-slate-800 hover:border-blue-500/40 text-blue-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors mt-2 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Adicionar Série neste Exercício</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+
+          {workoutDays[activeDayIdx]?.exercises.length === 0 && (
+            <div className="p-8 sm:p-10 rounded-3xl bg-slate-900/40 border-2 border-dashed border-slate-800 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
+                <Dumbbell className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-base font-bold text-white">
+                  Treino pronto para montagem!
+                </p>
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  {strictAllowedGroups.length > 0
+                    ? `Escolha abaixo os exercícios filtrados para ${strictAllowedGroups
+                        .map((t) => AVAILABLE_MUSCLE_TAGS.find((m) => m.id === t)?.label || t)
+                        .join(', ')} e adicione à sessão.`
+                    : 'Selecione as tags ou busque exercícios no catálogo abaixo para montar este dia.'}
+                </p>
+              </div>
+
+              {!isSearchOpen && (
+                <button
+                  type="button"
+                  onClick={() => setIsSearchOpen(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-extrabold text-xs shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Abrir Catálogo de Exercícios</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* ÁREA DE MONTAGEM DO TREINO - CATÁLOGO DE EXERCÍCIOS FILTRADO */}
         {isSearchOpen && (
-          <div className="bg-slate-900/95 border border-blue-500/40 rounded-3xl p-6 shadow-2xl space-y-4 animate-in fade-in">
-            <div className="flex items-center justify-between">
+          <div className="bg-[#151D28] border border-blue-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#243044]">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <div className="p-2.5 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
                   <Dumbbell className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">
-                    Exercícios compatíveis com {workoutDays[activeDayIdx]?.name}
+                  <h3 className="font-extrabold text-white text-base">
+                    Montagem de Exercícios: {workoutDays[activeDayIdx]?.name}
                   </h3>
-                  {strictAllowedGroups.length > 0 && (
-                    <p className="text-xs text-slate-400">
-                      Exibindo catálogo filtrado pelas tags do treino selecionado
-                    </p>
-                  )}
+                  <p className="text-xs text-slate-400">
+                    {strictAllowedGroups.length > 0
+                      ? `Exibindo exercícios para: ${strictAllowedGroups
+                          .map((t) => AVAILABLE_MUSCLE_TAGS.find((m) => m.id === t)?.label || t)
+                          .join(', ')}`
+                      : 'Todas as tags disponíveis'}
+                  </p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsSearchOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={exerciseSearch}
-                onChange={(e) => setExerciseSearch(e.target.value)}
-                placeholder="Busque por máquina ou exercício..."
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-
-            {/* Feedback Visual Inline de Adição */}
-            {recentlyAddedMsg && (
-              <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-in fade-in">
-                <Check className="w-4 h-4 flex-shrink-0" />
-                <span>{recentlyAddedMsg}</span>
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={exerciseSearch}
+                  onChange={(e) => setExerciseSearch(e.target.value)}
+                  placeholder="Buscar exercício ou máquina..."
+                  className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                />
               </div>
-            )}
+            </div>
 
-            {/* Tags Musculares Contextuais */}
+            {/* BARRA DE TAGS DA SELEÇÃO DE EXERCÍCIOS - SINCRONIZADA AUTOMATICAMENTE */}
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex flex-wrap gap-1.5 items-center">
-                {relevantMuscleGroups.map((group: { id: string; label: string }) => (
-                  <button
-                    key={group.id}
-                    onClick={() => setSelectedMuscle(group.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      selectedMuscle === group.id
-                        ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20'
-                        : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    {group.label}
-                  </button>
-                ))}
+                {relevantMuscleGroups.map((group) => {
+                  const count = exercises.filter((e) => {
+                    const m = (e.muscleGroup || '').toUpperCase();
+                    if (group.id === 'ALL') {
+                      return strictAllowedGroups.length > 0 ? strictAllowedGroups.includes(m) : true;
+                    }
+                    return m === group.id;
+                  }).length;
+
+                  const isSelected = selectedMuscle === group.id;
+
+                  return (
+                    <button
+                      key={group.id}
+                      type="button"
+                      onClick={() => setSelectedMuscle(group.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer select-none active:scale-95 ${
+                        isSelected
+                          ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20 ring-1 ring-blue-400'
+                          : 'bg-slate-950 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      {group.icon && <span>{group.icon}</span>}
+                      <span>{group.label}</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-md ${
+                          isSelected ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
               {!showAllMusclesOverride && (
                 <button
-                  onClick={() => setShowAllMusclesOverride(true)}
-                  className="text-[11px] text-blue-400 hover:underline flex items-center gap-1 font-semibold"
+                  type="button"
+                  onClick={() => {
+                    setShowAllMusclesOverride(true);
+                    setSelectedMuscle('ALL');
+                  }}
+                  className="text-[11px] text-blue-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
                 >
                   <Filter className="w-3 h-3" />
-                  <span>Ver outros grupos musculares</span>
+                  <span>Ver todos os outros músculos</span>
                 </button>
               )}
             </div>
 
-            {/* Resultados Clicáveis Diretamente com Análise de Compatibilidade */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-72 overflow-y-auto pr-1">
+            {/* Feedback Visual de Adição */}
+            {recentlyAddedMsg && (
+              <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+                <Check className="w-4 h-4 shrink-0" />
+                <span>{recentlyAddedMsg}</span>
+              </div>
+            )}
+
+            {/* Sugestões Inteligentes Compactas */}
+            {smartSuggestions.length > 0 && selectedMuscle === 'ALL' && !exerciseSearch && (
+              <div className="p-3.5 rounded-2xl bg-blue-950/20 border border-blue-500/20 space-y-2">
+                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                  <Lightbulb className="w-3.5 h-3.5" />
+                  Sugestões biomecânicas prioritárias para este dia:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {smartSuggestions.map((sug, sIdx) => (
+                    <button
+                      key={sIdx}
+                      type="button"
+                      onClick={() => handleSelectExercise(sug.exercise)}
+                      className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-blue-600/30 border border-slate-700 hover:border-blue-400 text-left text-xs font-semibold text-white transition-all flex items-center gap-2 cursor-pointer group"
+                    >
+                      <span>{sug.exercise.name}</span>
+                      <span className="text-[10px] text-blue-400 group-hover:text-blue-300 font-bold">+ Adicionar</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Grade de Exercícios Filtrados */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-1">
               {isLoadingExercises ? (
                 <div className="col-span-full py-10 flex flex-col items-center justify-center gap-3 text-slate-400">
                   <RefreshCw className="w-6 h-6 animate-spin text-blue-400" />
@@ -1925,7 +2172,6 @@ export const WorkoutPlanner: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Botão de adicionar visível no celular e desktop com feedback */}
                       <span
                         className={`shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
                           isRecentlyAdded
@@ -1979,239 +2225,6 @@ export const WorkoutPlanner: React.FC = () => {
             </div>
           </div>
         )}
-
-        {/* Lista de Exercícios com Técnicas Avançadas e Alertas de Segurança */}
-        <div className="space-y-4">
-          {workoutDays[activeDayIdx]?.exercises.map((ex, exIdx) => {
-            const compat = verificarCompatibilidade(user, {
-              name: ex.exerciseName,
-              muscleGroup: ex.muscleGroup,
-              equipment: ex.equipment,
-            });
-
-            return (
-              <div
-                key={exIdx}
-                className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-md space-y-4"
-              >
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs">
-                      {exIdx + 1}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-extrabold text-white text-base">{ex.exerciseName}</h4>
-                        {compat.level !== 'NONE' && (
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border ${compat.badgeBg} ${compat.badgeColor} ${compat.badgeBorder}`}
-                          >
-                            {compat.badgeLabel}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-blue-400 font-semibold">
-                          {muscleGroupLabelsPtBr[ex.muscleGroup] || ex.muscleGroup}
-                        </span>
-                        {ex.equipment && (
-                          <span className="text-xs text-slate-400">&middot; {ex.equipment}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => removeExercise(exIdx)}
-                    className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-                    title="Remover exercício"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Alerta de Segurança Contextual do Exercício (se aplicável) */}
-                {compat.level !== 'NONE' && (
-                  <div className={`p-3.5 rounded-2xl border text-xs space-y-1.5 ${compat.badgeBg} ${compat.badgeBorder}`}>
-                    <div className="flex items-center gap-2 font-bold text-slate-200">
-                      <ShieldAlert className={`w-4 h-4 ${compat.badgeColor}`} />
-                      <span>Orientações de Segurança Biomecânica</span>
-                    </div>
-                    {compat.reasons.map((r, rIdx) => (
-                      <p key={rIdx} className="text-slate-300 pl-6 text-[11px] leading-relaxed">
-                        &bull; {r}
-                      </p>
-                    ))}
-                    {compat.recommendation && (
-                      <p className="text-slate-400 pl-6 text-[11px] italic">
-                        💡 {compat.recommendation}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-              {/* Tabela de Séries com Técnicas Avançadas */}
-              <div className="space-y-2">
-                <div className="grid grid-cols-12 gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">
-                  <span className="col-span-1">Série</span>
-                  <span className="col-span-3">Técnica Avançada</span>
-                  <span className="col-span-2">Reps</span>
-                  <span className="col-span-2">Carga (kg)</span>
-                  <span className="col-span-2">Descanso</span>
-                  <span className="col-span-1">RPE</span>
-                  <span className="col-span-1 text-right">Ação</span>
-                </div>
-
-                {ex.sets.map((set, sIdx) => {
-                  const activeTech = set.technique || 'NORMAL';
-                  const techInfo = techniqueDetails[activeTech];
-
-                  return (
-                    <div
-                      key={sIdx}
-                      className={`grid grid-cols-12 gap-2 items-center p-2 rounded-2xl border text-xs transition-colors ${
-                        activeTech !== 'NORMAL'
-                          ? `${techInfo.bg} ${techInfo.border}`
-                          : 'bg-slate-950/60 border-slate-800/60'
-                      }`}
-                    >
-                      <div className="col-span-1 flex items-center gap-1 font-bold text-slate-300">
-                        <span className="w-5 h-5 rounded-full bg-slate-900 text-[10px] flex items-center justify-center border border-slate-800">
-                          {set.setNumber}
-                        </span>
-                      </div>
-
-                      {/* Seletor de Técnicas Avançadas */}
-                      <div className="col-span-3">
-                        <select
-                          value={activeTech}
-                          onChange={(e) =>
-                            updateSet(exIdx, sIdx, 'technique', e.target.value as TrainingTechnique)
-                          }
-                          className={`w-full px-2 py-1 rounded-lg text-[11px] font-bold border focus:outline-none ${techInfo.bg} ${techInfo.color} ${techInfo.border}`}
-                          title={techInfo.desc}
-                        >
-                          {Object.entries(techniqueDetails).map(([key, val]) => (
-                            <option key={key} value={key} className="bg-slate-950 text-slate-200">
-                              {val.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="col-span-2">
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          value={set.reps}
-                          onChange={(e) => updateSet(exIdx, sIdx, 'reps', e.target.value)}
-                          className="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold text-center focus:outline-none focus:border-blue-500"
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          value={set.weightKg}
-                          onChange={(e) => updateSet(exIdx, sIdx, 'weightKg', e.target.value)}
-                          className="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold text-center focus:outline-none focus:border-blue-500"
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          value={set.restSeconds}
-                          onChange={(e) => updateSet(exIdx, sIdx, 'restSeconds', e.target.value)}
-                          className="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 text-center focus:outline-none focus:border-blue-500 text-[11px]"
-                        />
-                      </div>
-
-                      <div className="col-span-1">
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          value={set.rpe ?? 8}
-                          onChange={(e) => updateSet(exIdx, sIdx, 'rpe', e.target.value)}
-                          className="w-full px-1 py-1 bg-slate-900 border border-slate-700 rounded-lg text-amber-400 font-bold text-center focus:outline-none focus:border-blue-500 text-[11px]"
-                        />
-                      </div>
-
-                      <div className="col-span-1 text-right">
-                        <button
-                          onClick={() => removeSet(exIdx, sIdx)}
-                          className="p-1 text-slate-400 opacity-40 hover:opacity-100 hover:text-red-400 transition-opacity"
-                          title="Remover série"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                <button
-                  onClick={() => addSetToExercise(exIdx)}
-                  className="w-full py-2 rounded-xl border border-dashed border-slate-800 hover:border-blue-500/40 text-blue-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors mt-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Adicionar Série neste Exercício</span>
-                </button>
-              </div>
-            </div>
-            );
-          })}
-
-          {workoutDays[activeDayIdx]?.exercises.length === 0 && (
-            <div className="p-10 rounded-3xl bg-slate-900/40 border-2 border-dashed border-slate-800 text-center space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
-                <Dumbbell className="w-6 h-6" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-base font-bold text-white">
-                  Monte seu {workoutDays[activeDayIdx]?.name || 'Treino'}
-                </p>
-                <p className="text-xs text-slate-400 max-w-md mx-auto">
-                  {strictAllowedGroups.length > 0
-                    ? `Adicione os exercícios focados em ${strictAllowedGroups
-                        .map((t) => AVAILABLE_MUSCLE_TAGS.find((m) => m.id === t)?.label || t)
-                        .join(', ')} para estruturar este dia de treino.`
-                    : 'Clique no botão abaixo para buscar e incluir exercícios diretamente nesta sessão.'}
-                </p>
-              </div>
-
-              {strictAllowedGroups.length > 0 && (
-                <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
-                  {strictAllowedGroups.map((tagId) => {
-                    const tagInfo = AVAILABLE_MUSCLE_TAGS.find((t) => t.id === tagId);
-                    return (
-                      <span
-                        key={tagId}
-                        className="px-2.5 py-1 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-bold flex items-center gap-1.5"
-                      >
-                        <span>{tagInfo?.icon || '💪'}</span>
-                        <span>{tagInfo?.label || tagId}</span>
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-
-              <button
-                onClick={() => {
-                  if (!checkCanAddExercise()) return;
-                  setIsSearchOpen(true);
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-extrabold text-xs shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Adicionar Exercícios das Tags</span>
-              </button>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Modal Interativo de Condições e Limitações na Mesma Página */}
