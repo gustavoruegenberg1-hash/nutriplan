@@ -7,6 +7,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { InputDialog } from '../components/InputDialog';
 import { condicoesELimitacoesPreenchidas } from '../utils/formValidation';
 import { WorkoutLimitationsModal } from '../components/workout/WorkoutLimitationsModal';
+import { CreateWorkoutDayModal, AVAILABLE_MUSCLE_TAGS } from '../components/workout/CreateWorkoutDayModal';
 import {
   Dumbbell,
   Plus,
@@ -26,6 +27,8 @@ import {
   ChevronDown,
   ChevronRight,
   Info,
+  Tags,
+  Edit3,
 } from 'lucide-react';
 import { verificarCompatibilidade } from '../utils/workoutSafety';
 import { gamificationService } from '../services/gamificationService';
@@ -141,6 +144,7 @@ export interface LocalExerciseEntry {
 export interface LocalWorkoutDay {
   name: string;
   dayOfWeek: DayOfWeek;
+  targetMuscles?: string[];
   exercises: LocalExerciseEntry[];
 }
 
@@ -150,7 +154,7 @@ export interface TrainingPreset {
   badge: string;
   description: string;
   targetGender: 'MALE' | 'FEMALE' | 'UNISEX';
-  days: { name: string; dayOfWeek: DayOfWeek; presetExercises?: string[] }[];
+  days: { name: string; dayOfWeek: DayOfWeek; targetMuscles?: string[]; presetExercises?: string[] }[];
 }
 
 export const trainingPresets: TrainingPreset[] = [
@@ -452,7 +456,16 @@ const WORKOUT_STORAGE_NAME_KEY = 'nutriplan_saved_workout_name';
  * Analisador Estrito de Grupos Musculares do Treino Ativo:
  * Retorna ESTRITAMENTE os grupos musculares que compõem o dia selecionado.
  */
-export function getStrictMuscleGroupsForWorkout(dayName: string): string[] {
+export function getStrictMuscleGroupsForWorkout(dayOrName: LocalWorkoutDay | string | undefined | null): string[] {
+  if (!dayOrName) return [];
+  if (typeof dayOrName === 'object') {
+    if (Array.isArray(dayOrName.targetMuscles) && dayOrName.targetMuscles.length > 0) {
+      return dayOrName.targetMuscles;
+    }
+    return getStrictMuscleGroupsForWorkout(dayOrName.name);
+  }
+
+  const dayName = dayOrName;
   const lower = dayName.toLowerCase();
   const detected: string[] = [];
 
@@ -556,8 +569,8 @@ export function getStrictMuscleGroupsForWorkout(dayName: string): string[] {
 /**
  * Filtra dinamicamente as tags de grupos musculares pertinentes ao treino ativo
  */
-export function getRelevantMusclesForWorkout(dayName: string): { id: string; label: string }[] {
-  const strictGroups = getStrictMuscleGroupsForWorkout(dayName);
+export function getRelevantMusclesForWorkout(dayOrName: LocalWorkoutDay | string | undefined | null): { id: string; label: string }[] {
+  const strictGroups = getStrictMuscleGroupsForWorkout(dayOrName);
 
   if (strictGroups.length > 0) {
     return [
@@ -568,16 +581,7 @@ export function getRelevantMusclesForWorkout(dayName: string): { id: string; lab
 
   return [
     { id: 'ALL', label: 'Todos os Músculos' },
-    { id: 'CHEST', label: 'Peitoral' },
-    { id: 'BACK', label: 'Dorsal / Costas' },
-    { id: 'SHOULDERS', label: 'Deltoides / Ombros' },
-    { id: 'BICEPS', label: 'Bíceps' },
-    { id: 'TRICEPS', label: 'Tríceps' },
-    { id: 'QUADRICEPS', label: 'Quadríceps' },
-    { id: 'HAMSTRINGS', label: 'Posterior de Coxa' },
-    { id: 'GLUTES', label: 'Glúteos' },
-    { id: 'CALVES', label: 'Panturrilhas' },
-    { id: 'ABS', label: 'Abdômen & Core' },
+    ...AVAILABLE_MUSCLE_TAGS.map((t) => ({ id: t.id, label: t.label })),
   ];
 }
 
@@ -596,7 +600,7 @@ export function getSmartExerciseSuggestions(
   if (!currentDay) return [];
 
   const currentDayName = currentDay.name;
-  const allowedGroups = new Set(getStrictMuscleGroupsForWorkout(currentDayName));
+  const allowedGroups = new Set(getStrictMuscleGroupsForWorkout(currentDay));
   const currentSessionExercises = currentDay.exercises || [];
 
   // Mapeia todos os exercícios cadastrados na rotina inteira
@@ -806,32 +810,21 @@ export const WorkoutPlanner: React.FC = () => {
 
   const isInitialSyncDone = useRef(false);
 
-  // Músculos relevantes contextuais baseados no nome do treino atual
-  const currentDayName = workoutDays[activeDayIdx]?.name || '';
+  // Músculos relevantes contextuais baseados no treino e tags ativas
+  const currentDay = workoutDays[activeDayIdx];
   const strictAllowedGroups = useMemo(() => {
-    return getStrictMuscleGroupsForWorkout(currentDayName);
-  }, [currentDayName]);
+    return getStrictMuscleGroupsForWorkout(currentDay);
+  }, [currentDay]);
 
   const relevantMuscleGroups = useMemo(() => {
     if (showAllMusclesOverride) {
       return [
         { id: 'ALL', label: 'Todos os Músculos' },
-        { id: 'CHEST', label: 'Peitoral' },
-        { id: 'BACK', label: 'Dorsal / Costas' },
-        { id: 'SHOULDERS', label: 'Deltoides / Ombros' },
-        { id: 'BICEPS', label: 'Bíceps' },
-        { id: 'TRICEPS', label: 'Tríceps' },
-        { id: 'FOREARMS', label: 'Antebraço' },
-        { id: 'QUADRICEPS', label: 'Quadríceps' },
-        { id: 'HAMSTRINGS', label: 'Posterior de Coxa' },
-        { id: 'GLUTES', label: 'Glúteos' },
-        { id: 'CALVES', label: 'Panturrilhas' },
-        { id: 'ABS', label: 'Abdômen & Core' },
-        { id: 'CARDIO', label: 'Cardiorrespiratório' },
+        ...AVAILABLE_MUSCLE_TAGS.map((t) => ({ id: t.id, label: t.label })),
       ];
     }
-    return getRelevantMusclesForWorkout(currentDayName);
-  }, [currentDayName, showAllMusclesOverride]);
+    return getRelevantMusclesForWorkout(currentDay);
+  }, [currentDay, showAllMusclesOverride]);
 
   // Carrega catálogo de exercícios via exerciseService resiliente
   const fetchExercises = useCallback(async () => {
@@ -867,9 +860,27 @@ export const WorkoutPlanner: React.FC = () => {
           const hasExercisesInApi = active.days.some((d: any) => d.exercises && d.exercises.length > 0);
           if (hasExercisesInApi) {
             setRoutineName(active.name);
+
+            // Preserva as tags musculares salvas localmente caso a API não as retorne
+            const savedLocal = localStorage.getItem(WORKOUT_STORAGE_KEY);
+            const localTagsMap: Record<string, string[]> = {};
+            if (savedLocal) {
+              try {
+                const parsedLocal = JSON.parse(savedLocal);
+                if (Array.isArray(parsedLocal)) {
+                  parsedLocal.forEach((pd: any) => {
+                    if (pd.name && Array.isArray(pd.targetMuscles)) {
+                      localTagsMap[pd.name] = pd.targetMuscles;
+                    }
+                  });
+                }
+              } catch (_) {}
+            }
+
             const loadedDays: LocalWorkoutDay[] = active.days.map((d: any) => ({
               name: d.name,
               dayOfWeek: d.dayOfWeek,
+              targetMuscles: d.targetMuscles || localTagsMap[d.name] || undefined,
               exercises: (d.exercises || []).map((e: any) => ({
                 exerciseId: e.exerciseId,
                 exerciseName: e.exercise?.name || 'Exercício',
@@ -1034,27 +1045,74 @@ export const WorkoutPlanner: React.FC = () => {
     });
   };
 
-  // Adiciona novo dia de treino
+  const [isDayConfigModalOpen, setIsDayConfigModalOpen] = useState<boolean>(false);
+  const [dayConfigModalMode, setDayConfigModalMode] = useState<'create' | 'edit'>('create');
+
+  // Adiciona novo dia de treino com nome e tags
   const addNewWorkoutDay = () => {
-    setInputDialog({
-      isOpen: true,
-      title: 'Novo Dia de Treino',
-      message: 'Nome do novo dia de treino:',
-      placeholder: 'ex: Treino D - Ombros e Abdômen',
-      onConfirm: (dayName) => {
-        if (dayName?.trim()) {
-          setWorkoutDays((prev) => [
-            ...prev,
-            {
-              name: dayName.trim(),
-              dayOfWeek: 'THURSDAY',
-              exercises: [],
-            },
-          ]);
-          setActiveDayIdx(workoutDays.length);
-        }
+    if (!checkCanAddExercise()) return;
+    setDayConfigModalMode('create');
+    setIsDayConfigModalOpen(true);
+  };
+
+  const handleOpenEditDayModal = () => {
+    setDayConfigModalMode('edit');
+    setIsDayConfigModalOpen(true);
+  };
+
+  const handleSaveDayConfig = (data: { name: string; dayOfWeek: DayOfWeek; targetMuscles: string[] }) => {
+    if (dayConfigModalMode === 'create') {
+      const newDay: LocalWorkoutDay = {
+        name: data.name,
+        dayOfWeek: data.dayOfWeek,
+        targetMuscles: data.targetMuscles,
+        exercises: [],
+      };
+      const updated = [...workoutDays, newDay];
+      setWorkoutDays(updated);
+      setActiveDayIdx(updated.length - 1);
+      setSelectedMuscle('ALL');
+      setIsSearchOpen(true);
+      setStatusMsg({
+        type: 'success',
+        text: `Treino "${data.name}" criado! Adicione os exercícios das tags abaixo para montá-lo.`,
+      });
+      setTimeout(() => setStatusMsg(null), 3500);
+    } else {
+      const updated = [...workoutDays];
+      if (updated[activeDayIdx]) {
+        updated[activeDayIdx].name = data.name;
+        updated[activeDayIdx].dayOfWeek = data.dayOfWeek;
+        updated[activeDayIdx].targetMuscles = data.targetMuscles;
+        setWorkoutDays(updated);
+        setStatusMsg({
+          type: 'success',
+          text: `Treino "${data.name}" atualizado com sucesso!`,
+        });
+        setTimeout(() => setStatusMsg(null), 2500);
       }
-    });
+    }
+  };
+
+  // Alterna tag muscular diretamente na tela do treino ativo com 1 clique
+  const toggleMuscleTagForCurrentDay = (tagId: string) => {
+    if (activeDayIdx < 0 || activeDayIdx >= workoutDays.length) return;
+    triggerHapticFeedback();
+    const updated = [...workoutDays];
+    const currentTags =
+      updated[activeDayIdx].targetMuscles && updated[activeDayIdx].targetMuscles!.length > 0
+        ? [...updated[activeDayIdx].targetMuscles!]
+        : [...getStrictMuscleGroupsForWorkout(updated[activeDayIdx].name)];
+
+    const idx = currentTags.indexOf(tagId);
+    if (idx >= 0) {
+      currentTags.splice(idx, 1);
+    } else {
+      currentTags.push(tagId);
+    }
+
+    updated[activeDayIdx].targetMuscles = currentTags;
+    setWorkoutDays(updated);
   };
 
   // Remove dia de treino
@@ -1539,56 +1597,109 @@ export const WorkoutPlanner: React.FC = () => {
 
         {/* Configurações do Dia Ativo e Tonelagem */}
         {workoutDays[activeDayIdx] && (
-          <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-                  Nome da Sessão:
-                </label>
-                <input
-                  type="text"
-                  value={workoutDays[activeDayIdx].name}
-                  onChange={(e) => {
-                    const updated = [...workoutDays];
-                    updated[activeDayIdx].name = e.target.value;
-                    setWorkoutDays(updated);
-                  }}
-                  className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs font-semibold focus:outline-none focus:border-blue-500"
-                />
+          <div className="pt-4 border-t border-slate-800 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                    Nome da Sessão:
+                  </label>
+                  <input
+                    type="text"
+                    value={workoutDays[activeDayIdx].name}
+                    onChange={(e) => {
+                      const updated = [...workoutDays];
+                      updated[activeDayIdx].name = e.target.value;
+                      setWorkoutDays(updated);
+                    }}
+                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs font-semibold focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                    Dia da Semana:
+                  </label>
+                  <select
+                    value={workoutDays[activeDayIdx].dayOfWeek}
+                    onChange={(e) => {
+                      const updated = [...workoutDays];
+                      updated[activeDayIdx].dayOfWeek = e.target.value as DayOfWeek;
+                      setWorkoutDays(updated);
+                    }}
+                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs font-semibold focus:outline-none"
+                  >
+                    {daysOfWeekOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-                  Dia da Semana:
-                </label>
-                <select
-                  value={workoutDays[activeDayIdx].dayOfWeek}
-                  onChange={(e) => {
-                    const updated = [...workoutDays];
-                    updated[activeDayIdx].dayOfWeek = e.target.value as DayOfWeek;
-                    setWorkoutDays(updated);
-                  }}
-                  className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs font-semibold focus:outline-none"
-                >
-                  {daysOfWeekOptions.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+
+              <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center gap-3">
+                <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                    Tonelagem Total da Sessão
+                  </span>
+                  <span className="text-sm font-extrabold text-blue-400">
+                    {currentDayVolume.toLocaleString('pt-BR')} kg
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center gap-3">
-              <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
-                <Activity className="w-4 h-4" />
+            {/* Tags Musculares Escolhidas para o Treino */}
+            <div className="pt-3 border-t border-slate-800/80 space-y-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <Tags className="w-4 h-4 text-blue-400" />
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    Tags Musculares deste Treino:
+                  </span>
+                  <span className="text-[11px] text-slate-400">
+                    (Os exercícios exibidos abaixo seguirão estas tags)
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleOpenEditDayModal}
+                  className="text-xs text-blue-400 hover:text-white underline font-semibold flex items-center gap-1 cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Configurar Treino Completo</span>
+                </button>
               </div>
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                  Tonelagem Total da Sessão
-                </span>
-                <span className="text-sm font-extrabold text-blue-400">
-                  {currentDayVolume.toLocaleString('pt-BR')} kg
-                </span>
+
+              {/* Botões clicáveis de todas as tags para selecionar com 1 toque */}
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                {AVAILABLE_MUSCLE_TAGS.map((tag) => {
+                  const currentTags =
+                    workoutDays[activeDayIdx]?.targetMuscles && workoutDays[activeDayIdx].targetMuscles!.length > 0
+                      ? workoutDays[activeDayIdx].targetMuscles!
+                      : getStrictMuscleGroupsForWorkout(workoutDays[activeDayIdx]?.name || '');
+                  const isSelected = currentTags.includes(tag.id);
+
+                  return (
+                    <button
+                      type="button"
+                      key={tag.id}
+                      onClick={() => toggleMuscleTagForCurrentDay(tag.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer select-none active:scale-95 ${
+                        isSelected
+                          ? 'bg-blue-500 text-white shadow-md shadow-blue-500/25 ring-1 ring-blue-400'
+                          : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <span>{tag.icon}</span>
+                      <span>{tag.label}</span>
+                      {isSelected && <Check className="w-3 h-3 text-white" />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -1640,20 +1751,39 @@ export const WorkoutPlanner: React.FC = () => {
 
       {/* Conteúdo da Rotina com Pesquisa e Seleção Direta */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <span>Exercícios de {workoutDays[activeDayIdx]?.name}</span>
-            <span className="text-xs text-slate-400 font-normal">
-              ({workoutDays[activeDayIdx]?.exercises.length || 0} exercícios cadastrados)
-            </span>
-          </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+              <span>Exercícios de {workoutDays[activeDayIdx]?.name}</span>
+              <span className="text-xs text-slate-400 font-normal">
+                ({workoutDays[activeDayIdx]?.exercises.length || 0} exercícios cadastrados)
+              </span>
+            </h2>
+            {strictAllowedGroups.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                <span className="text-[11px] text-slate-400 font-semibold">Foco muscular:</span>
+                {strictAllowedGroups.map((tagId) => {
+                  const tagInfo = AVAILABLE_MUSCLE_TAGS.find((t) => t.id === tagId);
+                  return (
+                    <span
+                      key={tagId}
+                      className="px-2 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[11px] font-bold flex items-center gap-1"
+                    >
+                      <span>{tagInfo?.icon || '💪'}</span>
+                      <span>{tagInfo?.label || tagId}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           <button
             onClick={() => {
               if (!isSearchOpen && !checkCanAddExercise()) return;
               setIsSearchOpen(!isSearchOpen);
             }}
-            className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md shadow-blue-500/20"
+            className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md shadow-blue-500/20 self-start sm:self-auto cursor-pointer"
           >
             {isSearchOpen ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             <span>{isSearchOpen ? 'Fechar Busca' : 'Buscar Exercício no Catálogo'}</span>
@@ -1664,15 +1794,24 @@ export const WorkoutPlanner: React.FC = () => {
         {isSearchOpen && (
           <div className="bg-slate-900/95 border border-blue-500/40 rounded-3xl p-6 shadow-2xl space-y-4 animate-in fade-in">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Dumbbell className="w-5 h-5 text-blue-400" />
-                <h3 className="font-bold text-white text-base">
-                  Exercícios compatíveis com {workoutDays[activeDayIdx]?.name}
-                </h3>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  <Dumbbell className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base">
+                    Exercícios compatíveis com {workoutDays[activeDayIdx]?.name}
+                  </h3>
+                  {strictAllowedGroups.length > 0 && (
+                    <p className="text-xs text-slate-400">
+                      Exibindo catálogo filtrado pelas tags do treino selecionado
+                    </p>
+                  )}
+                </div>
               </div>
               <button
                 onClick={() => setIsSearchOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg"
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2026,23 +2165,49 @@ export const WorkoutPlanner: React.FC = () => {
           })}
 
           {workoutDays[activeDayIdx]?.exercises.length === 0 && (
-            <div className="p-12 rounded-3xl bg-slate-900/40 border-2 border-dashed border-slate-800 text-center space-y-3">
-              <Dumbbell className="w-10 h-10 text-slate-600 mx-auto" />
-              <p className="text-base font-bold text-slate-300">
-                Nenhum exercício adicionado neste treino ainda.
-              </p>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Clique no botão abaixo para buscar e incluir exercícios diretamente nesta sessão.
-              </p>
+            <div className="p-10 rounded-3xl bg-slate-900/40 border-2 border-dashed border-slate-800 text-center space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
+                <Dumbbell className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-base font-bold text-white">
+                  Monte seu {workoutDays[activeDayIdx]?.name || 'Treino'}
+                </p>
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  {strictAllowedGroups.length > 0
+                    ? `Adicione os exercícios focados em ${strictAllowedGroups
+                        .map((t) => AVAILABLE_MUSCLE_TAGS.find((m) => m.id === t)?.label || t)
+                        .join(', ')} para estruturar este dia de treino.`
+                    : 'Clique no botão abaixo para buscar e incluir exercícios diretamente nesta sessão.'}
+                </p>
+              </div>
+
+              {strictAllowedGroups.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+                  {strictAllowedGroups.map((tagId) => {
+                    const tagInfo = AVAILABLE_MUSCLE_TAGS.find((t) => t.id === tagId);
+                    return (
+                      <span
+                        key={tagId}
+                        className="px-2.5 py-1 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-bold flex items-center gap-1.5"
+                      >
+                        <span>{tagInfo?.icon || '💪'}</span>
+                        <span>{tagInfo?.label || tagId}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
               <button
                 onClick={() => {
                   if (!checkCanAddExercise()) return;
                   setIsSearchOpen(true);
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-bold text-xs shadow-lg shadow-blue-500/20 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-extrabold text-xs shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                <span>Adicionar Primeiro Exercício</span>
+                <span>Adicionar Exercícios das Tags</span>
               </button>
             </div>
           )}
@@ -2065,6 +2230,24 @@ export const WorkoutPlanner: React.FC = () => {
             setIsSearchOpen(true);
           }
         }}
+      />
+
+      {/* Modal Intuitivo de Criação e Configuração de Treino com Tags */}
+      <CreateWorkoutDayModal
+        isOpen={isDayConfigModalOpen}
+        onClose={() => setIsDayConfigModalOpen(false)}
+        onSave={handleSaveDayConfig}
+        initialData={
+          dayConfigModalMode === 'edit' && workoutDays[activeDayIdx]
+            ? {
+                name: workoutDays[activeDayIdx].name || '',
+                dayOfWeek: workoutDays[activeDayIdx].dayOfWeek || 'MONDAY',
+                targetMuscles: workoutDays[activeDayIdx].targetMuscles || [],
+              }
+            : null
+        }
+        mode={dayConfigModalMode}
+        existingDayCount={workoutDays.length}
       />
 
       {confirmDialog && (
