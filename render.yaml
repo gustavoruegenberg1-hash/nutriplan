@@ -12,6 +12,8 @@ services:
         value: 3000
       - key: JWT_SECRET
         generateValue: true
+      - key: RESEND_API_KEY
+        sync: false
 
   # Frontend React (Vite)
   - type: web
@@ -30,3 +32,5 @@ services:
           type: web
           name: nutriplan-api
           envVarKey: RENDER_EXTERNAL_URL
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false
