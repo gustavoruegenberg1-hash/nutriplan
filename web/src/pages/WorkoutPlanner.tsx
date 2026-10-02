@@ -1425,57 +1425,6 @@ export const WorkoutPlanner: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              <Dumbbell className="w-6 h-6" />
-            </div>
-            <span>Montador de Treino com IA & Biomecânica</span>
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Sugestões inteligentes conscientes da rotina semanal, técnicas avançadas e catálogo de máquinas
-          </p>
-        </div>
-
-        {/* Status de Salvamento e Ações */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold">
-            {saveStatus === 'saving' ? (
-              <>
-                <RefreshCw className="w-3.5 h-3.5 text-amber-400 animate-spin" />
-                <span className="text-amber-400">Salvando alterações...</span>
-              </>
-            ) : saveStatus === 'saved' ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
-                <span className="text-blue-400">Salvo automaticamente</span>
-              </>
-            ) : (
-              <span className="text-slate-400">Pronto</span>
-            )}
-          </div>
-
-          <button
-            onClick={handleExportJson}
-            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-semibold flex items-center gap-2 transition-all"
-          >
-            <Download className="w-4 h-4 text-slate-400" />
-            <span>Exportar JSON</span>
-          </button>
-
-          <button
-            onClick={handleCompleteWorkout}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 text-white text-xs font-extrabold shadow-md shadow-rose-600/20 flex items-center gap-1.5 transition-all"
-            title="Concluir treino e resgatar Baú do Titã (+1 Força)"
-          >
-            <Check className="w-4 h-4" />
-            <span>Concluir Treino de Hoje</span>
-          </button>
-        </div>
-      </div>
-
       {statusMsg && (
         <div
           className={`p-4 rounded-xl flex items-center space-x-3 text-sm ${
@@ -1493,7 +1442,7 @@ export const WorkoutPlanner: React.FC = () => {
         </div>
       )}
 
-      {/* Banner de Condições e Limitações Físicas / Biomecânica */}
+            {/* Banner de Condições e Limitações Físicas / Biomecânica */}
       {(() => {
         const isFilled = condicoesELimitacoesPreenchidas(user);
         const hasPainOrInjury =
@@ -1576,6 +1525,33 @@ export const WorkoutPlanner: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Status de Salvamento */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold">
+              {saveStatus === 'saving' ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                  <span className="text-amber-400 hidden sm:inline">Salvando...</span>
+                </>
+              ) : saveStatus === 'saved' ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-blue-400 hidden sm:inline">Salvo</span>
+                </>
+              ) : (
+                <span className="text-slate-400">Pronto</span>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleExportJson}
+              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Exportar rotina em JSON"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-400" />
+              <span className="hidden sm:inline">Exportar JSON</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -2002,12 +1978,22 @@ export const WorkoutPlanner: React.FC = () => {
           </div>
 
           {/* Botões de Ação Global do Treino Montado */}
-          {workoutDays[activeDayIdx]?.exercises && workoutDays[activeDayIdx].exercises.length > 0 && (() => {
-            const currentExercises = workoutDays[activeDayIdx].exercises;
-            const areAllExpanded = currentExercises.every((_, idx) => expandedExercises[idx]);
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={handleCompleteWorkout}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 text-white text-xs font-extrabold shadow-md shadow-rose-600/20 flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+              title="Concluir treino e resgatar Baú do Titã (+1 Força)"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Concluir Treino de Hoje</span>
+            </button>
 
-            return (
-              <div className="flex items-center gap-2">
+            {workoutDays[activeDayIdx]?.exercises && workoutDays[activeDayIdx].exercises.length > 0 && (() => {
+              const currentExercises = workoutDays[activeDayIdx].exercises;
+              const areAllExpanded = currentExercises.every((_, idx) => expandedExercises[idx]);
+
+              return (
                 <button
                   type="button"
                   onClick={toggleExpandAllExercises}
@@ -2016,9 +2002,9 @@ export const WorkoutPlanner: React.FC = () => {
                   {areAllExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                   <span>{areAllExpanded ? 'Recolher Todos' : 'Ver Todos Detalhes'}</span>
                 </button>
-              </div>
-            );
-          })()}
+              );
+            })()}
+          </div>
         </div>
 
         {/* LISTA DOS EXERCÍCIOS ESCOLHIDOS (APENAS O NOME ATÉ CLICAR PARA INICIAR) */}

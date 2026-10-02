@@ -53,6 +53,62 @@ import {
 export type PortionUnit = 'g' | 'ml' | 'un' | 'scoop' | 'colher' | 'fatia' | 'copo' | 'lata' | 'file';
 
 
+
+export const QUICK_DIET_COMBOS = [
+  {
+    label: 'Café Tradicional',
+    icon: '🍳',
+    calories: 380,
+    items: [
+      { foodName: 'Ovo de galinha inteiro cozido', quantityValue: 2, unit: 'un' as PortionUnit, quantityGrams: 100, caloriesPer100g: 146, proteinPer100g: 13.3, carbsPer100g: 0.6, fatPer100g: 9.5, fiberPer100g: 0 },
+      { foodName: 'Pão de forma 100% integral', quantityValue: 2, unit: 'fatia' as PortionUnit, quantityGrams: 50, caloriesPer100g: 245, proteinPer100g: 9.5, carbsPer100g: 45.0, fatPer100g: 2.8, fiberPer100g: 7.0 },
+      { foodName: 'Banana prata', quantityValue: 1, unit: 'un' as PortionUnit, quantityGrams: 100, caloriesPer100g: 98, proteinPer100g: 1.3, carbsPer100g: 26.0, fatPer100g: 0.1, fiberPer100g: 2.0 },
+    ],
+  },
+  {
+    label: 'Almoço Fit Clássico',
+    icon: '🍗',
+    calories: 540,
+    items: [
+      { foodName: 'Frango filé de peito grelhado sem pele', quantityValue: 180, unit: 'g' as PortionUnit, quantityGrams: 180, caloriesPer100g: 159, proteinPer100g: 32.0, carbsPer100g: 0, fatPer100g: 2.5, fiberPer100g: 0 },
+      { foodName: 'Arroz branco cozido', quantityValue: 180, unit: 'g' as PortionUnit, quantityGrams: 180, caloriesPer100g: 128, proteinPer100g: 2.5, carbsPer100g: 28.1, fatPer100g: 0.2, fiberPer100g: 1.6 },
+      { foodName: 'Feijão carioca cozido (50% grão/caldo)', quantityValue: 100, unit: 'g' as PortionUnit, quantityGrams: 100, caloriesPer100g: 76, proteinPer100g: 4.8, carbsPer100g: 13.6, fatPer100g: 0.5, fiberPer100g: 8.5 },
+      { foodName: 'Azeite de oliva extravirgem', quantityValue: 1, unit: 'colher' as PortionUnit, quantityGrams: 10, caloriesPer100g: 884, proteinPer100g: 0, carbsPer100g: 0, fatPer100g: 100, fiberPer100g: 0 },
+    ],
+  },
+  {
+    label: 'Almoço Carne & Batata',
+    icon: '🥩',
+    calories: 520,
+    items: [
+      { foodName: 'Carne bovina patinho grelhado / moído', quantityValue: 160, unit: 'g' as PortionUnit, quantityGrams: 160, caloriesPer100g: 219, proteinPer100g: 35.9, carbsPer100g: 0, fatPer100g: 7.3, fiberPer100g: 0 },
+      { foodName: 'Batata doce cozida', quantityValue: 200, unit: 'g' as PortionUnit, quantityGrams: 200, caloriesPer100g: 77, proteinPer100g: 0.6, carbsPer100g: 18.4, fatPer100g: 0.1, fiberPer100g: 2.2 },
+      { foodName: 'Brócolis cozido no vapor', quantityValue: 100, unit: 'g' as PortionUnit, quantityGrams: 100, caloriesPer100g: 25, proteinPer100g: 2.1, carbsPer100g: 4.4, fatPer100g: 0.5, fiberPer100g: 3.4 },
+    ],
+  },
+  {
+    label: 'Shake / Pré-Treino',
+    icon: '🥤',
+    calories: 440,
+    items: [
+      { foodName: 'Whey Protein Concentrado 80%', quantityValue: 1, unit: 'scoop' as PortionUnit, quantityGrams: 30, caloriesPer100g: 385, proteinPer100g: 80.0, carbsPer100g: 5.0, fatPer100g: 4.5, fiberPer100g: 0 },
+      { foodName: 'Banana prata', quantityValue: 1, unit: 'un' as PortionUnit, quantityGrams: 100, caloriesPer100g: 98, proteinPer100g: 1.3, carbsPer100g: 26.0, fatPer100g: 0.1, fiberPer100g: 2.0 },
+      { foodName: 'Aveia em flocos finos/grossos', quantityValue: 40, unit: 'g' as PortionUnit, quantityGrams: 40, caloriesPer100g: 394, proteinPer100g: 13.9, carbsPer100g: 66.6, fatPer100g: 8.5, fiberPer100g: 9.1 },
+      { foodName: 'Pasta de amendoim integral 100%', quantityValue: 1, unit: 'colher' as PortionUnit, quantityGrams: 15, caloriesPer100g: 593, proteinPer100g: 28.0, carbsPer100g: 18.0, fatPer100g: 46.0, fiberPer100g: 6.0 },
+    ],
+  },
+  {
+    label: 'Jantar Leve & Peixe',
+    icon: '🐟',
+    calories: 360,
+    items: [
+      { foodName: 'Peixe tilápia filé grelhado', quantityValue: 180, unit: 'g' as PortionUnit, quantityGrams: 180, caloriesPer100g: 128, proteinPer100g: 26.0, carbsPer100g: 0, fatPer100g: 2.7, fiberPer100g: 0 },
+      { foodName: 'Brócolis cozido no vapor', quantityValue: 150, unit: 'g' as PortionUnit, quantityGrams: 150, caloriesPer100g: 25, proteinPer100g: 2.1, carbsPer100g: 4.4, fatPer100g: 0.5, fiberPer100g: 3.4 },
+      { foodName: 'Azeite de oliva extravirgem', quantityValue: 1, unit: 'colher' as PortionUnit, quantityGrams: 10, caloriesPer100g: 884, proteinPer100g: 0, carbsPer100g: 0, fatPer100g: 100, fiberPer100g: 0 },
+    ],
+  },
+];
+
 export const FOOD_CATEGORIES = [
   { id: 'ALL', label: 'Todos os Alimentos', icon: '🍽️' },
   { id: 'PROTEIN', label: 'Proteínas', icon: '🍗' },
@@ -1528,7 +1584,61 @@ export const DietPlanner: React.FC = () => {
     );
   }, [currentMeals, expandedFoods, totalFoodsCount]);
 
-    // Exportar JSON
+  
+  // Aplica combo pronto de alimentos com 1 toque na refeição ativa
+  const handleApplyQuickCombo = (combo: typeof QUICK_DIET_COMBOS[0]) => {
+    if (!checkCanAddFood()) return;
+    const dayMeals = mealsByDay[selectedDay] || [];
+    let targetIdx = selectedTargetMealIdx;
+    if (targetIdx < 0 || targetIdx >= dayMeals.length) {
+      targetIdx = 0;
+    }
+    const targetMealName = dayMeals[targetIdx]?.name || 'Refeição';
+
+    const newItems: LocalMealItem[] = combo.items.map((item) => {
+      const baseItem: LocalMealItem = {
+        foodItemId: `combo-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        foodName: item.foodName,
+        quantityValue: item.quantityValue,
+        unit: item.unit,
+        quantityGrams: item.quantityGrams,
+        caloriesPer100g: item.caloriesPer100g,
+        proteinPer100g: item.proteinPer100g,
+        carbsPer100g: item.carbsPer100g,
+        fatPer100g: item.fatPer100g,
+        fiberPer100g: item.fiberPer100g,
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        fiber: 0,
+        completed: false,
+      };
+      return recalculateItemNutrients(baseItem, item.quantityValue, item.unit);
+    });
+
+    setMealsByDay((prev) => {
+      const currentList = [...(prev[selectedDay] || [])];
+      if (!currentList[targetIdx]) {
+        currentList[targetIdx] = { name: targetMealName, items: [] };
+      }
+      currentList[targetIdx] = {
+        ...currentList[targetIdx],
+        items: [...currentList[targetIdx].items, ...newItems],
+      };
+      return { ...prev, [selectedDay]: currentList };
+    });
+
+    checkAndRewardFirstMealOfDay();
+    triggerHapticFeedback();
+    setStatusMsg({
+      type: 'success',
+      text: `🎉 Combo "${combo.label}" (${combo.items.length} alimentos) adicionado ao ${targetMealName}!`,
+    });
+    setTimeout(() => setStatusMsg(null), 3000);
+  };
+
+  // Exportar JSON
   const handleExportJson = () => {
     const exportData = {
       name: planName,
@@ -1546,49 +1656,7 @@ export const DietPlanner: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <Utensils className="w-6 h-6" />
-            </div>
-            <span>Montador de Dieta Científico</span>
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Planejamento nutricional modular com cálculo proporcional de macros e gasto energético individual
-          </p>
-        </div>
-
-        {/* Status de Salvamento e Ações */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold">
-            {saveStatus === 'saving' ? (
-              <>
-                <RefreshCw className="w-3.5 h-3.5 text-amber-400 animate-spin" />
-                <span className="text-amber-400">Salvando alterações...</span>
-              </>
-            ) : saveStatus === 'saved' ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-emerald-400">Salvo automaticamente</span>
-              </>
-            ) : (
-              <span className="text-slate-400">Pronto</span>
-            )}
-          </div>
-
-          <button
-            onClick={handleExportJson}
-            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-semibold flex items-center gap-2 transition-all"
-          >
-            <Download className="w-4 h-4 text-slate-400" />
-            <span>Exportar JSON</span>
-          </button>
-        </div>
-      </div>
-
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {statusMsg && (
         <div
           className={`p-4 rounded-xl flex items-center space-x-3 text-sm ${
@@ -1649,10 +1717,10 @@ export const DietPlanner: React.FC = () => {
       })()}
 
       {/* ========================================================================= */}
-      {/* CAIXA 1: MONTADOR DE DIETA (Tudo condensado em uma única caixa)           */}
+      {/* CAIXA 1: MONTADOR DE DIETA DINÂMICO E CONDENSADO                          */}
       {/* ========================================================================= */}
-      <div className="bg-[#151D28] border border-[#243044] rounded-3xl p-5 sm:p-7 shadow-2xl space-y-6">
-        {/* Cabeçalho do Montador e Ações Rápidas */}
+      <div className="bg-[#151D28] border border-[#243044] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-5">
+        {/* Cabeçalho do Montador com Ações e Status Integrados */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#243044]">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -1663,19 +1731,46 @@ export const DietPlanner: React.FC = () => {
                 Montador de Dieta
               </h2>
               <p className="text-xs text-slate-400">
-                Defina o plano, escolha a refeição alvo e adicione alimentos da Tabela TACO
+                Selecione a refeição com 1 toque, use combos prontos ou adicione alimentos da TACO
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Status de Salvamento */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold">
+              {saveStatus === 'saving' ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                  <span className="text-amber-400 hidden sm:inline">Salvando...</span>
+                </>
+              ) : saveStatus === 'saved' ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-400 hidden sm:inline">Salvo</span>
+                </>
+              ) : (
+                <span className="text-slate-400">Pronto</span>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleExportJson}
+              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Exportar plano em JSON"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-400" />
+              <span className="hidden sm:inline">Exportar JSON</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
                 triggerHapticFeedback();
                 setIsRecommendationsOpen(!isRecommendationsOpen);
               }}
-              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
               <span>{isRecommendationsOpen ? 'Fechar Modelos' : 'Modelos Prontos'}</span>
@@ -1684,7 +1779,7 @@ export const DietPlanner: React.FC = () => {
             <button
               type="button"
               onClick={addMealSection}
-              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/25 transition-all cursor-pointer active:scale-95"
+              className="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/25 transition-all cursor-pointer active:scale-95"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>+ Nova Refeição</span>
@@ -1740,22 +1835,9 @@ export const DietPlanner: React.FC = () => {
           </div>
         )}
 
-        {/* Abas dos Dias da Semana */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-              Dia da Semana:
-            </span>
-            <button
-              type="button"
-              onClick={handleReplicateToAllDays}
-              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/20 cursor-pointer"
-            >
-              <Copy className="w-3 h-3" />
-              <span>Replicar este dia para a semana toda</span>
-            </button>
-          </div>
-          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+        {/* Abas dos Dias da Semana - Barra Horizontal Condensada */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none flex-1">
             {daysList.map((day) => {
               const isSelected = selectedDay === day.id;
               const count = (mealsByDay[day.id] || []).reduce((acc, m) => acc + m.items.length, 0);
@@ -1764,245 +1846,299 @@ export const DietPlanner: React.FC = () => {
                   key={day.id}
                   type="button"
                   onClick={() => setSelectedDay(day.id)}
-                  className={`py-2 px-1 rounded-xl text-xs font-extrabold tracking-wider transition-all uppercase flex flex-col items-center justify-center cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold tracking-wider transition-all uppercase flex items-center gap-1.5 cursor-pointer shrink-0 ${
                     isSelected
-                      ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400'
+                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-400'
                       : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
                   }`}
                   title={day.fullLabel}
                 >
                   <span>{day.shortLabel}</span>
-                  <span className={`text-[9px] font-medium mt-0.5 ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-500'}`}>
-                    {count} it
+                  <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                    isSelected ? 'bg-slate-950 text-emerald-400 font-bold' : 'bg-slate-950 text-slate-500'
+                  }`}>
+                    {count}
                   </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleReplicateToAllDays}
+            className="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-400 hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-800 hover:border-emerald-500/40 cursor-pointer shrink-0"
+            title="Copiar o cardápio deste dia para todos os outros 6 dias da semana"
+          >
+            <Copy className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Replicar Semana</span>
+          </button>
+        </div>
+
+        {/* Nome do Plano Alimentar com Sugestões Rápidas */}
+        <div className="pt-2 border-t border-[#243044] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-1">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0">
+              Plano:
+            </span>
+            <input
+              type="text"
+              value={planName}
+              onChange={(e) => setPlanName(e.target.value)}
+              placeholder="Ex: Minha Dieta Hipertrofia Limpa"
+              className="flex-1 max-w-sm px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+            <span className="text-[10px] text-slate-500 font-semibold uppercase shrink-0">Sugestões:</span>
+            {['Hipertrofia', 'Cutting', 'Manutenção', 'Low Carb'].map((sug) => (
+              <button
+                type="button"
+                key={sug}
+                onClick={() => setPlanName(`Dieta ${sug}`)}
+                className="text-[11px] px-2 py-0.5 rounded-lg border bg-slate-900 border-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer shrink-0"
+              >
+                {sug}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ======================================================================= */}
+        {/* FORMA DINÂMICA: ABAS INTERATIVAS DAS REFEIÇÕES DO DIA (1-TOQUE)          */}
+        {/* ======================================================================= */}
+        <div className="space-y-2 pt-2 border-t border-[#243044]">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-extrabold text-white flex items-center gap-1.5 text-xs">
+              <Utensils className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Adicionando Alimentos Na Refeição:</span>
+            </span>
+            <span className="text-[11px] text-emerald-400 font-bold">
+              (Toque na refeição para alternar o destino)
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {currentMeals.map((meal, idx) => {
+              const isTarget = selectedTargetMealIdx === idx;
+              const mealCals = meal.items.reduce((s, it) => s + (Number(it.calories) || 0), 0);
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    triggerHapticFeedback();
+                    setSelectedTargetMealIdx(idx);
+                  }}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer shrink-0 active:scale-95 ${
+                    isTarget
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-400'
+                      : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <span>{meal.name}</span>
+                  <span
+                    className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                      isTarget ? 'bg-slate-950 text-emerald-400' : 'bg-slate-950 text-slate-400'
+                    }`}
+                  >
+                    {meal.items.length} {meal.items.length === 1 ? 'item' : 'itens'} &middot; {Math.round(mealCals)} kcal
+                  </span>
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={addMealSection}
+              className="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-900 text-emerald-400 border border-dashed border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Nova</span>
+            </button>
+          </div>
+        </div>
+
+        {/* COMBOS RÁPIDOS DE 1-TOQUE (PRATOS PRONTOS BALANCEADOS) */}
+        <div className="space-y-1.5 pt-1">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              Combos Prontos de 1-Toque (Adiciona direto ao {currentMeals[selectedTargetMealIdx]?.name || 'Refeição'}):
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {QUICK_DIET_COMBOS.map((combo) => (
+              <button
+                key={combo.label}
+                type="button"
+                onClick={() => handleApplyQuickCombo(combo)}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/40 text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+              >
+                <span>{combo.icon}</span>
+                <span>{combo.label}</span>
+                <span className="text-[10px] text-amber-400/90 font-normal">({combo.calories} kcal)</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Seleção de Tags / Categorias Nutricionais */}
+        <div className="space-y-2 pt-1 border-t border-[#243044]">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <span>Categorias de Alimentos:</span>
+            </label>
+            <span className="text-[11px] text-emerald-400 font-bold">
+              {filteredFoods.length} {filteredFoods.length === 1 ? 'disponível' : 'disponíveis'}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {FOOD_CATEGORIES.map((cat) => {
+              const isSelected = selectedCategory === cat.id;
+              return (
+                <button
+                  type="button"
+                  key={cat.id}
+                  onClick={() => {
+                    triggerHapticFeedback();
+                    setSelectedCategory(cat.id);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+                    isSelected
+                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25 ring-1 ring-emerald-400 font-extrabold'
+                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <span>{cat.icon}</span>
+                  <span>{cat.label}</span>
+                  {isSelected && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Configuração da Dieta: Nome + Refeição Alvo para Inserção */}
-        <div className="space-y-4 pt-2 border-t border-[#243044]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* Nome do Plano */}
-            <div className="md:col-span-2 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
-                Nome do Plano Alimentar:
-              </label>
+        {/* BUSCA E GRADE DE ALIMENTOS DA TABELA TACO */}
+        <div className="space-y-3 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2">
+                <span>Alimentos da Tabela TACO:</span>
+                <span className="text-[11px] text-slate-400 font-normal">
+                  (Entrando em: <strong className="text-emerald-400">{currentMeals[selectedTargetMealIdx]?.name || 'Refeição'}</strong>)
+                </span>
+              </h3>
+            </div>
+
+            <div className="relative w-full sm:w-72">
+              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                value={planName}
-                onChange={(e) => setPlanName(e.target.value)}
-                placeholder="Ex: Minha Dieta Hipertrofia Limpa"
-                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm font-semibold focus:outline-none focus:border-emerald-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar (ex: Frango, Arroz, Ovo...)"
+                className="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500"
               />
-              <div className="flex flex-wrap items-center gap-1 pt-1">
-                <span className="text-[10px] text-slate-500 font-semibold uppercase">Sugestões:</span>
-                {['Dieta Hipertrofia', 'Dieta Cutting', 'Manutenção Limpa', 'Dieta Sem Lactose', 'Low Carb'].map((sug) => (
-                  <button
-                    type="button"
-                    key={sug}
-                    onClick={() => setPlanName(sug)}
-                    className="text-[11px] px-2 py-0.5 rounded-lg border bg-slate-900 border-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
-                  >
-                    {sug}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Refeição Alvo Onde os Alimentos Selecionados Entram */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
-                  Adicionar Alimentos Em:
-                </label>
+              {searchQuery && (
                 <button
-                  type="button"
-                  onClick={addMealSection}
-                  className="text-[10px] text-emerald-400 font-bold hover:underline cursor-pointer"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                 >
-                  + Nova
+                  <X className="w-3.5 h-3.5" />
                 </button>
-              </div>
-              <select
-                value={selectedTargetMealIdx}
-                onChange={(e) => setSelectedTargetMealIdx(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
-              >
-                {currentMeals.map((meal, idx) => (
-                  <option key={idx} value={idx}>
-                    {meal.name} ({meal.items.length} {meal.items.length === 1 ? 'item' : 'itens'})
-                  </option>
-                ))}
-              </select>
-              <p className="text-[10px] text-slate-500">
-                Alimentos clicados abaixo serão inseridos nesta refeição.
-              </p>
-            </div>
-          </div>
-
-          {/* Seleção de Tags / Categorias Nutricionais */}
-          <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Filtrar Alimentos por Categoria:</span>
-              </label>
-              <span className="text-[11px] text-emerald-400 font-bold">
-                {filteredFoods.length} {filteredFoods.length === 1 ? 'alimento disponível' : 'alimentos disponíveis'}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {FOOD_CATEGORIES.map((cat) => {
-                const isSelected = selectedCategory === cat.id;
-                return (
-                  <button
-                    type="button"
-                    key={cat.id}
-                    onClick={() => {
-                      triggerHapticFeedback();
-                      setSelectedCategory(cat.id);
-                    }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                      isSelected
-                        ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25 ring-1 ring-emerald-400 font-extrabold'
-                        : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    <span>{cat.icon}</span>
-                    <span>{cat.label}</span>
-                    {isSelected && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* SELEÇÃO DE ALIMENTOS DA TABELA TACO (LOGO ABAIXO NA MESMA CAIXA) */}
-          <div className="space-y-3 pt-3 border-t border-[#243044]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-                  <Utensils className="w-4 h-4 text-emerald-400" />
-                  <span>Selecione os Alimentos da Tabela TACO:</span>
-                </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Clique em "+ Adicionar" para enviar direto para{' '}
-                  <strong className="text-white">
-                    {currentMeals[selectedTargetMealIdx]?.name || 'Refeição'}
-                  </strong>
-                </p>
-              </div>
-
-              <div className="relative w-full sm:w-72">
-                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar na TACO (ex: Frango, Arroz, Ovo...)"
-                  className="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Mensagem de Feedback de Adição */}
-            {recentlyAddedFoodMsg && (
-              <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-in fade-in">
-                <Check className="w-4 h-4 shrink-0" />
-                <span>{recentlyAddedFoodMsg}</span>
-              </div>
-            )}
-
-            {/* Grade de Alimentos para Adicionar */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-72 overflow-y-auto pr-1">
-              {isSearchingFoods ? (
-                <div className="col-span-full py-8 text-center text-xs text-slate-400">
-                  <RefreshCw className="w-5 h-5 animate-spin text-emerald-400 mx-auto mb-2" />
-                  Consultando Tabela TACO...
-                </div>
-              ) : filteredFoods.length > 0 ? (
-                filteredFoods.map((food) => {
-                  const isRecentlyAdded = recentlyAddedFoodId === food.id;
-                  const allergyCheck = checkFoodAllergens(food.name, user?.allergies);
-                  const isAlreadyInTargetMeal = currentMeals[selectedTargetMealIdx]?.items.some(
-                    (it) => it.foodItemId === food.id || it.foodName === food.name
-                  );
-
-                  return (
-                    <button
-                      key={food.id}
-                      type="button"
-                      onClick={() => addFoodToMeal(food)}
-                      className={`w-full text-left p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer select-none active:scale-[0.98] ${
-                        isRecentlyAdded
-                          ? 'bg-emerald-950/40 border-emerald-500/60 ring-2 ring-emerald-500/30'
-                          : allergyCheck.isAllergen
-                          ? 'bg-rose-950/20 border-rose-500/40 hover:border-rose-500'
-                          : isAlreadyInTargetMeal
-                          ? 'bg-slate-950/70 border-emerald-500/30'
-                          : 'bg-slate-950 hover:bg-slate-900 border-slate-800 hover:border-emerald-500/50'
-                      }`}
-                    >
-                      <div className="flex-1 pr-2 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-extrabold text-xs text-white block truncate">
-                            {food.name}
-                          </span>
-                          {allergyCheck.isAllergen && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                              ⚠️ Alérgeno
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-emerald-400 font-semibold block mt-0.5">
-                          {food.caloriesPer100g} kcal &middot; P: {food.proteinPer100g}g &middot; C: {food.carbsPer100g}g &middot; G: {food.fatPer100g}g
-                        </span>
-                      </div>
-
-                      <span
-                        className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
-                          isRecentlyAdded
-                            ? 'bg-emerald-500 text-slate-950 font-black'
-                            : isAlreadyInTargetMeal
-                            ? 'bg-emerald-500/20 text-emerald-300'
-                            : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black'
-                        }`}
-                      >
-                        {isRecentlyAdded ? (
-                          <>
-                            <Check className="w-3 h-3 stroke-[3]" />
-                            <span>Adicionado!</span>
-                          </>
-                        ) : isAlreadyInTargetMeal ? (
-                          <>
-                            <span>+1 Porção</span>
-                          </>
-                        ) : (
-                          <>
-                            <Plus className="w-3 h-3 stroke-[3]" />
-                            <span>Adicionar</span>
-                          </>
-                        )}
-                      </span>
-                    </button>
-                  );
-                })
-              ) : (
-                <div className="col-span-full py-6 text-center text-xs text-slate-400">
-                  Nenhum alimento encontrado para "{searchQuery}". Tente palavras simples como "arroz", "frango", "ovo", "aveia" ou "banana".
-                </div>
               )}
             </div>
+          </div>
+
+          {/* Mensagem de Feedback de Adição */}
+          {recentlyAddedFoodMsg && (
+            <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+              <Check className="w-4 h-4 shrink-0" />
+              <span>{recentlyAddedFoodMsg}</span>
+            </div>
+          )}
+
+          {/* Grade de Alimentos para Adicionar */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-72 overflow-y-auto pr-1">
+            {isSearchingFoods ? (
+              <div className="col-span-full py-8 text-center text-xs text-slate-400">
+                <RefreshCw className="w-5 h-5 animate-spin text-emerald-400 mx-auto mb-2" />
+                Consultando Tabela TACO...
+              </div>
+            ) : filteredFoods.length > 0 ? (
+              filteredFoods.map((food) => {
+                const isRecentlyAdded = recentlyAddedFoodId === food.id;
+                const allergyCheck = checkFoodAllergens(food.name, user?.allergies);
+                const isAlreadyInTargetMeal = currentMeals[selectedTargetMealIdx]?.items.some(
+                  (it) => it.foodItemId === food.id || it.foodName === food.name
+                );
+
+                return (
+                  <button
+                    key={food.id}
+                    type="button"
+                    onClick={() => addFoodToMeal(food)}
+                    className={`w-full text-left p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer select-none active:scale-[0.98] ${
+                      isRecentlyAdded
+                        ? 'bg-emerald-950/40 border-emerald-500/60 ring-2 ring-emerald-500/30'
+                        : allergyCheck.isAllergen
+                        ? 'bg-rose-950/20 border-rose-500/40 hover:border-rose-500'
+                        : isAlreadyInTargetMeal
+                        ? 'bg-slate-950/70 border-emerald-500/30'
+                        : 'bg-slate-950 hover:bg-slate-900 border-slate-800 hover:border-emerald-500/50'
+                    }`}
+                  >
+                    <div className="flex-1 pr-2 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-extrabold text-xs text-white block truncate">
+                          {food.name}
+                        </span>
+                        {allergyCheck.isAllergen && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                            ⚠️ Alérgeno
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-emerald-400 font-semibold block mt-0.5">
+                        {food.caloriesPer100g} kcal &middot; P: {food.proteinPer100g}g &middot; C: {food.carbsPer100g}g &middot; G: {food.fatPer100g}g
+                      </span>
+                    </div>
+
+                    <span
+                      className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                        isRecentlyAdded
+                          ? 'bg-emerald-500 text-slate-950 font-black'
+                          : isAlreadyInTargetMeal
+                          ? 'bg-emerald-500/20 text-emerald-300'
+                          : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black'
+                      }`}
+                    >
+                      {isRecentlyAdded ? (
+                        <>
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          <span>Adicionado!</span>
+                        </>
+                      ) : isAlreadyInTargetMeal ? (
+                        <>
+                          <span>+1 Porção</span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-3 h-3 stroke-[3]" />
+                          <span>Adicionar</span>
+                        </>
+                      )}
+                    </span>
+                  </button>
+                );
+              })
+            ) : (
+              <div className="col-span-full py-6 text-center text-xs text-slate-400">
+                Nenhum alimento encontrado para "{searchQuery}". Tente palavras simples como "arroz", "frango", "ovo", "aveia" ou "banana".
+              </div>
+            )}
           </div>
         </div>
       </div>
