@@ -6,10 +6,9 @@ const getBaseUrl = () => {
   }
   if (typeof window !== 'undefined' && window.location) {
     const { protocol, hostname } = window.location;
-    // Se estiver hospedado no Render (ex: nutriplan-web...onrender.com)
+    // Se estiver hospedado no Render
     if (hostname.includes('onrender.com')) {
-      const apiHost = hostname.replace('nutriplan-web', 'nutriplan-api');
-      return `${protocol}//${apiHost}`;
+      return 'https://nutriplan-api-p20v.onrender.com';
     }
     return `${protocol}//${hostname}:3000`;
   }
