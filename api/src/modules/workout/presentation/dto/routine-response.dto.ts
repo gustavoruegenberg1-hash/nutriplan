@@ -20,6 +20,7 @@ export class ExerciseEntryResponseDto {
   @ApiProperty() id: string;
   @ApiProperty({ type: ExerciseResponseDto }) exercise: ExerciseResponseDto;
   @ApiProperty({ required: false }) notes?: string;
+  @ApiProperty({ required: false }) completed?: boolean;
   @ApiProperty({ type: [WorkoutSetResponseDto] }) sets: WorkoutSetResponseDto[];
 }
 

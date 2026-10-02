@@ -63,7 +63,7 @@ export class FirestoreWorkoutRepository implements IWorkoutRepository {
             s.rpe !== undefined && s.rpe !== null ? Number(s.rpe) : null,
           )
         );
-        return new ExerciseEntry(e.id || uuidv4(), exercise, e.notes || null, sets);
+        return new ExerciseEntry(e.id || uuidv4(), exercise, e.notes || null, sets, Boolean(e.completed));
       });
       return new WorkoutDay(d.id || uuidv4(), d.name, d.dayOfWeek, entries);
     });

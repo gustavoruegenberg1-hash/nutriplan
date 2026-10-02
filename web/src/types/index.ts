@@ -164,6 +164,7 @@ export interface WorkoutExercise {
   equipment?: string;
   notes?: string;
   sets: WorkoutSet[];
+  completed?: boolean;
 }
 
 export interface WorkoutDay {

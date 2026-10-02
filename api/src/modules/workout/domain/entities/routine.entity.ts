@@ -7,6 +7,7 @@ export class ExerciseEntry {
     public exercise: Exercise,
     public notes: string | null,
     public sets: WorkoutSet[],
+    public completed?: boolean,
   ) {}
 }
 
@@ -85,6 +86,7 @@ export class Routine {
                         s.rpe ? Number(s.rpe) : null,
                       ),
                   ) || [],
+                  Boolean(e.completed),
                 ),
             ) || [],
           ),

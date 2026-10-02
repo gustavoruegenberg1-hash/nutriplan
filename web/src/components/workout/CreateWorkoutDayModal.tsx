@@ -29,11 +29,10 @@ export const AVAILABLE_MUSCLE_TAGS: { id: string; label: string; icon: string }[
 export const QUICK_TAG_COMBOS = [
   { label: 'Peito + Tríceps', tags: ['CHEST', 'TRICEPS'], defaultName: 'Treino - Peito e Tríceps' },
   { label: 'Costas + Bíceps', tags: ['BACK', 'BICEPS'], defaultName: 'Treino - Costas e Bíceps' },
-  { label: 'Pernas Completo', tags: ['QUADRICEPS', 'HAMSTRINGS', 'GLUTES', 'CALVES'], defaultName: 'Treino - Pernas Completo' },
+  { label: 'Pernas (Inferiores)', tags: ['QUADRICEPS', 'HAMSTRINGS', 'GLUTES', 'CALVES'], defaultName: 'Treino - Pernas (Inferiores)' },
   { label: 'Ombros + Braços', tags: ['SHOULDERS', 'BICEPS', 'TRICEPS'], defaultName: 'Treino - Ombros e Braços' },
   { label: 'Push (Empurrar)', tags: ['CHEST', 'SHOULDERS', 'TRICEPS'], defaultName: 'Treino Push (Peito, Ombros e Tríceps)' },
   { label: 'Pull (Puxar)', tags: ['BACK', 'BICEPS', 'FOREARMS'], defaultName: 'Treino Pull (Costas e Bíceps)' },
-  { label: 'Legs (Inferiores)', tags: ['QUADRICEPS', 'HAMSTRINGS', 'GLUTES', 'CALVES'], defaultName: 'Treino Legs (Inferiores)' },
   { label: 'Full Body', tags: ['CHEST', 'BACK', 'SHOULDERS', 'QUADRICEPS', 'HAMSTRINGS', 'ABS'], defaultName: 'Treino Full Body' },
 ];
 
@@ -54,9 +53,9 @@ const NAME_SUGGESTIONS = [
   'Treino D',
   'Push',
   'Pull',
-  'Legs',
+  'Pernas (Inferiores)',
   'Superiores',
-  'Inferiores',
+  'Corpo Inteiro',
 ];
 
 export const CreateWorkoutDayModal: React.FC<CreateWorkoutDayModalProps> = ({

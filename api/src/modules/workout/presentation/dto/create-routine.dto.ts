@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsString, IsNumber, IsOptional, ValidateNested, IsArray, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, ValidateNested, IsArray, Min, IsBoolean } from 'class-validator';
 
 export class CreateWorkoutSetDto {
   @ApiProperty()
@@ -33,6 +33,11 @@ export class CreateExerciseEntryDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  completed?: boolean;
 
   @ApiProperty({ type: [CreateWorkoutSetDto] })
   @IsArray()
