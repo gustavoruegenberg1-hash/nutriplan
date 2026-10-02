@@ -9,13 +9,17 @@ vi.mock('argon2');
 describe('RegisterUseCase', () => {
   let useCase: RegisterUseCase;
   let mockUserRepository: any;
+  let mockMailService: any;
 
   beforeEach(() => {
     mockUserRepository = {
       findByEmail: vi.fn(),
       create: vi.fn(),
     };
-    useCase = new RegisterUseCase(mockUserRepository);
+    mockMailService = {
+      sendVerificationEmail: vi.fn().mockResolvedValue(true),
+    };
+    useCase = new RegisterUseCase(mockUserRepository, mockMailService);
     vi.mocked(argon2.hash).mockResolvedValue('hashed_password');
   });
 

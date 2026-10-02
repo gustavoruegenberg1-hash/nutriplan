@@ -23,8 +23,8 @@ export class VerifyEmailUseCase {
 
     if (user.isEmailVerified) {
       const payload = { sub: user.id, email: user.email, role: user.role };
-      const accessToken = await this.jwtService.signAsync(payload);
-      const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+      const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '30d' });
+      const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '90d' });
       return {
         accessToken,
         refreshToken,
@@ -53,8 +53,8 @@ export class VerifyEmailUseCase {
     });
 
     const payload = { sub: updatedUser.id, email: updatedUser.email, role: updatedUser.role };
-    const accessToken = await this.jwtService.signAsync(payload);
-    const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+    const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '30d' });
+    const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '90d' });
 
     return {
       accessToken,

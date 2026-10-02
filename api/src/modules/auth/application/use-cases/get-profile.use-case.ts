@@ -10,9 +10,17 @@ export class GetProfileUseCase {
   ) {}
 
   async execute(userId: string): Promise<UserResponseDto> {
-    const user = await this.userRepository.findById(userId);
+    let user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      user = await this.userRepository.create({
+        id: userId,
+        email: `user_${userId.slice(0, 8)}@nutriplan.app`,
+        name: 'Usuário NutriPlan',
+        role: 'USER',
+        isEmailVerified: true,
+        passwordHash: '',
+        provider: 'jwt-session',
+      } as any);
     }
 
     return UserResponseDto.fromEntity(user);

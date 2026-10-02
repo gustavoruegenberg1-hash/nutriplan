@@ -27,9 +27,12 @@ import { MailModule } from '../../shared/mail/mail.module';
           jwtSecret = 'nutriplan-super-secret-jwt-key-change-in-production';
         }
         
+        const rawExpiry = process.env.JWT_EXPIRES_IN;
+        const expiresIn = rawExpiry && rawExpiry !== '15m' ? rawExpiry : '30d';
+        
         return {
           secret: jwtSecret,
-          signOptions: { expiresIn: (process.env.JWT_EXPIRES_IN || '24h') as any },
+          signOptions: { expiresIn: expiresIn as any },
         };
       },
     }),

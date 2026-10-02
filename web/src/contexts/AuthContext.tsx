@@ -105,12 +105,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('nutriplan_') || key.startsWith('nutrihero_')) {
-        localStorage.removeItem(key);
-      }
-    });
+  const logout = (clearAll = false) => {
+    localStorage.removeItem('nutriplan_token');
+    localStorage.removeItem('nutriplan_user');
+    if (clearAll) {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('nutriplan_') || key.startsWith('nutrihero_')) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
     setToken(null);
     setUser(null);
   };

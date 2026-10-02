@@ -11,13 +11,7 @@ export class UpdateProfileUseCase {
   ) {}
 
   async execute(userId: string, dto: UpdateProfileDto): Promise<UserResponseDto> {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado.');
-    }
-
     const updatedUser = await this.userRepository.update(userId, dto as any);
-    
     return UserResponseDto.fromEntity(updatedUser);
   }
 }
