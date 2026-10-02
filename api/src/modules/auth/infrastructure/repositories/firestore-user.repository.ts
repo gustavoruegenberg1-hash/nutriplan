@@ -161,8 +161,8 @@ export class FirestoreUserRepository implements IUserRepository {
     return null;
   }
 
-  async create(userData: Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt' | 'calculateBMR' | 'calculateTDEE'>): Promise<UserEntity> {
-    const id = uuidv4();
+  async create(userData: Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt' | 'calculateBMR' | 'calculateTDEE'> & { id?: string }): Promise<UserEntity> {
+    const id = (userData as any).id || uuidv4();
     const now = new Date();
 
     const dataToSave = {
@@ -233,6 +233,13 @@ export class FirestoreUserRepository implements IUserRepository {
     delete updateData.createdAt;
     delete updateData.calculateBMR;
     delete updateData.calculateTDEE;
+
+    // Remove campos com undefined para não sobreescrever dados salvos previamente
+    Object.keys(updateData).forEach((key) => {
+      if (updateData[key] === undefined) {
+        delete updateData[key];
+      }
+    });
 
     if (updateData.gender !== undefined) {
       updateData.gender = updateData.gender ? updateData.gender.toUpperCase() : null;

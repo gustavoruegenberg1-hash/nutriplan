@@ -126,9 +126,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const updateProfile = async (data: Partial<User>) => {
-    const { data: updated } = await api.patch('/auth/profile', data);
-    setUser(updated);
-    localStorage.setItem('nutriplan_user', JSON.stringify(updated));
+    try {
+      const { data: updated } = await api.patch('/auth/profile', data);
+      setUser(updated);
+      localStorage.setItem('nutriplan_user', JSON.stringify(updated));
+    } catch (err) {
+      console.warn('Falha na API ao atualizar perfil, salvando no cache local do navegador', err);
+      setUser((prev) => {
+        if (!prev) return null;
+        const merged = { ...prev, ...data };
+        localStorage.setItem('nutriplan_user', JSON.stringify(merged));
+        return merged as User;
+      });
+      throw err;
+    }
   };
 
   return (

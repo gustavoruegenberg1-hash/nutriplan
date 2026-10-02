@@ -230,9 +230,9 @@ export const Profile: React.FC = () => {
         height: height ? parseFloat(height) : null,
         age: age ? parseInt(age, 10) : null,
         bodyFatPct: bodyFatPct ? Math.min(60, Math.max(3, parseFloat(bodyFatPct))) : null,
-        gender: gender.toLowerCase() as Gender,
-        activityLevel: activityLevel.toLowerCase() as ActivityLevel,
-        goal: goal.toLowerCase() as Goal,
+        gender: gender ? (gender.toLowerCase() as Gender) : null,
+        activityLevel: activityLevel ? (activityLevel.toLowerCase() as ActivityLevel) : null,
+        goal: goal ? (goal.toLowerCase() as Goal) : null,
 
         hasFoodAllergies,
         allergies: hasFoodAllergies ? allergies : [],

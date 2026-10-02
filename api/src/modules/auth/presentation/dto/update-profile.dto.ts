@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsIn, IsBoolean, IsArray, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsIn, IsBoolean, IsArray, Min, Max, ValidateIf } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
@@ -10,36 +10,39 @@ export class UpdateProfileDto {
 
   @ApiPropertyOptional({ example: 75.5 })
   @IsOptional()
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsNumber()
   @Min(20)
   @Max(400)
-  weight?: number;
+  weight?: number | null;
 
   @ApiPropertyOptional({ example: 180 })
   @IsOptional()
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsNumber()
   @Min(50)
   @Max(260)
-  height?: number;
+  height?: number | null;
 
   @ApiPropertyOptional({ example: 30 })
   @IsOptional()
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsNumber()
   @Min(10)
   @Max(120)
-  age?: number;
+  age?: number | null;
 
   @ApiPropertyOptional({ example: 'male' })
   @IsOptional()
-  @IsString()
-  @Transform(({ value }) => (typeof value === 'string' ? value.toLowerCase() : value))
+  @Transform(({ value }) => (!value || (typeof value === 'string' && value.trim() === '') ? null : value.toLowerCase()))
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsIn(['male', 'female', 'MALE', 'FEMALE'])
-  gender?: string;
+  gender?: string | null;
 
   @ApiPropertyOptional({ example: 'moderately_active' })
   @IsOptional()
-  @IsString()
-  @Transform(({ value }) => (typeof value === 'string' ? value.toLowerCase() : value))
+  @Transform(({ value }) => (!value || (typeof value === 'string' && value.trim() === '') ? null : value.toLowerCase()))
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsIn([
     'sedentary',
     'lightly_active',
@@ -52,13 +55,12 @@ export class UpdateProfileDto {
     'VERY_ACTIVE',
     'EXTRA_ACTIVE',
   ])
-  activityLevel?: string;
+  activityLevel?: string | null;
 
   @ApiPropertyOptional({ example: 'lose_weight' })
   @IsOptional()
-  @IsString()
-  @Transform(({ value }) => (typeof value === 'string' ? value.toLowerCase() : value))
-  goal?: string;
+  @Transform(({ value }) => (!value || (typeof value === 'string' && value.trim() === '') ? null : value.toLowerCase()))
+  goal?: string | null;
 
   // Avaliação de Alergias e Restrições Alimentares
   @ApiPropertyOptional({ example: true })
