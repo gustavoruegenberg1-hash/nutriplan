@@ -38,8 +38,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('nutriplan_user', JSON.stringify(data));
     } catch (err: any) {
       console.error('Failed to fetch profile', err);
-      // Apenas limpa a sessão se o token for explicitamente rejeitado com 401
-      if (err.response?.status === 401) {
+      // Se o token for rejeitado ou o usuário não existir no banco, desconecta sem usar usuário genérico
+      if (err.response?.status === 401 || err.response?.status === 404) {
         setUser(null);
         setToken(null);
         localStorage.removeItem('nutriplan_token');

@@ -26,27 +26,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     if (!payload || !payload.sub) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Token inválido.');
     }
 
-    let user = await this.userRepository.findById(payload.sub);
-    if (!user && payload.email) {
-      // Se o usuário possui token JWT válido e assinado mas o servidor reiniciou (cache em memória do Render),
-      // restaura o usuário para manter a sessão ativa sem deslogar o cliente
-      try {
-        user = await this.userRepository.create({
-          email: payload.email,
-          name: payload.email.split('@')[0],
-          role: payload.role || 'USER',
-          isEmailVerified: true,
-          passwordHash: '',
-          provider: 'jwt-session',
-        } as any);
-      } catch {
-        return { id: payload.sub, email: payload.email, role: payload.role || 'USER' };
-      }
+    const user = await this.userRepository.findById(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException('Sessão expirada ou usuário não encontrado.');
     }
 
-    return { id: payload.sub, email: payload.email, role: payload.role || 'USER' };
+    return { id: user.id, email: user.email, role: user.role || 'USER' };
   }
 }
