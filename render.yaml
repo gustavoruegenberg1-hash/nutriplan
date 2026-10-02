@@ -8,18 +8,14 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm run start:prod
     envVars:
-      - key: NODE_VERSION
-        value: 20
       - key: PORT
         value: 3000
       - key: JWT_SECRET
         generateValue: true
 
   # Frontend React (Vite)
-  - type: web
+  - type: static
     name: nutriplan-web
-    runtime: static
-    plan: free
     rootDir: web
     buildCommand: npm install && npm run build
     staticPublishPath: dist
