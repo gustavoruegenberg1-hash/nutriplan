@@ -22,12 +22,10 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { label: 'Hoje', path: '/', icon: LayoutDashboard },
     { label: 'Dieta', path: '/diet', icon: Utensils },
     { label: 'Treino', path: '/workout', icon: Dumbbell },
-    { label: 'Profissionais', path: '/professionals', icon: Users },
-    { label: 'NutriHero', path: '/jogo', icon: Swords },
-    { label: 'Ciência & Artigos', path: '/articles', icon: BookOpen },
+    { label: 'Artigos', path: '/articles', icon: BookOpen },
   ];
 
   const isActive = (path: string) => {

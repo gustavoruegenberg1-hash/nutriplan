@@ -138,6 +138,7 @@ export const Profile: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'metas' | 'dieta' | 'treino'>('metas');
 
   useEffect(() => {
     if (user) {
@@ -335,14 +336,55 @@ export const Profile: React.FC = () => {
         </div>
       </div>
 
+      {/* Seletor de Abas para Organização e Foco */}
+      <div className="flex rounded-2xl bg-surface border border-surface-border p-1.5 gap-1.5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setActiveTab('metas')}
+          className={`flex-1 py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            activeTab === 'metas'
+              ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-canvas/50'
+          }`}
+        >
+          <Scale className="w-4 h-4" />
+          <span>1. Dados & Metas</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('dieta')}
+          className={`flex-1 py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            activeTab === 'dieta'
+              ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-canvas/50'
+          }`}
+        >
+          <Utensils className="w-4 h-4" />
+          <span>2. Restrições & Alergias</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('treino')}
+          className={`flex-1 py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            activeTab === 'treino'
+              ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-canvas/50'
+          }`}
+        >
+          <Dumbbell className="w-4 h-4" />
+          <span>3. Treino & Lesões</span>
+        </button>
+      </div>
+
       {/* Formulário Principal */}
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* SEÇÃO 1: Dados Antropométricos e Metas */}
-        <div className="bg-surface border border-surface-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
-          <div className="flex items-center gap-2 pb-3 border-b border-surface-border">
-            <Scale className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-extrabold text-white">1. Dados Corporais & Objetivos</h2>
-          </div>
+        {activeTab === 'metas' && (
+          <div className="bg-surface border border-surface-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+            <div className="flex items-center gap-2 pb-3 border-b border-surface-border">
+              <Scale className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-lg font-extrabold text-white">1. Dados Corporais & Objetivos</h2>
+            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -466,13 +508,15 @@ export const Profile: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
 
         {/* SEÇÃO 2: Restrições e Cuidados Alimentares */}
-        <div className="bg-surface border border-surface-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
-          <div className="flex items-center gap-2 pb-3 border-b border-surface-border">
-            <Utensils className="w-5 h-5 text-amber-400" />
-            <h2 className="text-lg font-extrabold text-white">2. Restrições e Cuidados Alimentares</h2>
-          </div>
+        {activeTab === 'dieta' && (
+          <div className="bg-surface border border-surface-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+            <div className="flex items-center gap-2 pb-3 border-b border-surface-border">
+              <Utensils className="w-5 h-5 text-amber-400" />
+              <h2 className="text-lg font-extrabold text-white">2. Restrições e Cuidados Alimentares</h2>
+            </div>
 
           {/* Pergunta Alergias */}
           <div className="space-y-3">
@@ -648,8 +692,10 @@ export const Profile: React.FC = () => {
             )}
           </div>
         </div>
+      )}
 
-        {/* SEÇÃO 3: Condições e Limitações para Exercícios */}
+      {/* SEÇÃO 3: Condições e Limitações para Exercícios */}
+      {activeTab === 'treino' && (
         <div className="bg-surface border border-surface-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
           <div className="flex items-center gap-2 pb-3 border-b border-surface-border">
             <Dumbbell className="w-5 h-5 text-blue-400" />
@@ -1046,6 +1092,7 @@ export const Profile: React.FC = () => {
             </p>
           </div>
         </div>
+      )}
 
         {/* Mensagens de Feedback */}
         {error && (

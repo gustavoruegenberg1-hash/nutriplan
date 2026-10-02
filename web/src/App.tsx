@@ -25,14 +25,12 @@ import { useAuth } from './contexts/AuthContext';
 
 function WaterReminderWatcher() {
   const { user, isAuthenticated } = useAuth();
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (!isAuthenticated || !user) return;
 
     const checkReminder = () => {
       if (waterReminderService.shouldRemind(user.id)) {
-        setIsModalOpen(true);
         waterReminderService.sendNativeNotification(
           '💧 Hora de Beber Água! - NutriPlan',
           'Mantenha seu corpo hidratado para otimizar o metabolismo e a recuperação muscular.'
@@ -41,19 +39,11 @@ function WaterReminderWatcher() {
     };
 
     checkReminder();
-    const interval = setInterval(checkReminder, 45000);
+    const interval = setInterval(checkReminder, 60000);
     return () => clearInterval(interval);
   }, [user, isAuthenticated]);
 
-  if (!isAuthenticated || !user) return null;
-
-  return (
-    <WaterReminderModal
-      userId={user.id}
-      isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
-    />
-  );
+  return null;
 }
 
 export function App() {

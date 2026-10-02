@@ -13,11 +13,10 @@ export const BottomNav: React.FC = () => {
   }
 
   const tabs = [
-    { label: 'Início', path: '/', icon: LayoutDashboard },
+    { label: 'Hoje', path: '/', icon: LayoutDashboard },
     { label: 'Dieta', path: '/diet', icon: Utensils },
     { label: 'Treino', path: '/workout', icon: Dumbbell },
-    { label: 'NutriHero', path: '/jogo', icon: Swords },
-    { label: 'Ciência', path: '/articles', icon: BookOpen },
+    { label: 'Perfil', path: '/profile', icon: User },
   ];
 
   const isTabActive = (path: string) => {
