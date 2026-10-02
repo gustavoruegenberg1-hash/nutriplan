@@ -6,6 +6,7 @@ import { FoodItem, DayOfWeek } from '../types';
 import { MacroCard } from '../components/MacroCard';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { InputDialog } from '../components/InputDialog';
+import { DietaryRestrictionsModal } from '../components/diet/DietaryRestrictionsModal';
 import { checkFoodAllergens, getAllergyBannerInfo } from '../utils/allergySafety';
 import { restricoesAlimentaresPreenchidas } from '../utils/formValidation';
 import { calibrateDietMeals } from '../utils/unitClassification';
@@ -714,9 +715,13 @@ export const DietPlanner: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('saved');
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isRestrictionModalOpen, setIsRestrictionModalOpen] = useState(false);
+  const [pendingMealIdxForAdd, setPendingMealIdxForAdd] = useState<number | null>(null);
 
-  const checkCanAddFood = (): boolean => {
+  const checkCanAddFood = (mealIdx?: number): boolean => {
     if (!restricoesAlimentaresPreenchidas(user)) {
+      if (typeof mealIdx === 'number') {
+        setPendingMealIdxForAdd(mealIdx);
+      }
       setIsRestrictionModalOpen(true);
       return false;
     }
@@ -1405,10 +1410,10 @@ export const DietPlanner: React.FC = () => {
                 </span>
               </div>
               <button
-                onClick={() => navigate('/profile')}
+                onClick={() => setIsRestrictionModalOpen(true)}
                 className="text-[11px] font-bold text-rose-400 hover:text-white underline whitespace-nowrap"
               >
-                Editar no Perfil
+                Editar
               </button>
             </div>
           );
@@ -1418,14 +1423,14 @@ export const DietPlanner: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Info className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span>
-                  <strong>Alergias não informadas:</strong> Preencha suas restrições alimentares no perfil para ativar a exclusão automática de ingredientes alérgenos.
+                  <strong>Alergias não informadas:</strong> Preencha suas restrições alimentares para ativar a exclusão automática de ingredientes alérgenos.
                 </span>
               </div>
               <button
-                onClick={() => navigate('/profile')}
+                onClick={() => setIsRestrictionModalOpen(true)}
                 className="text-[11px] font-bold text-emerald-400 hover:text-white underline whitespace-nowrap"
               >
-                Informar no Perfil
+                Informar agora
               </button>
             </div>
           );
@@ -1783,6 +1788,7 @@ export const DietPlanner: React.FC = () => {
 
                     <button
                       onClick={() => {
+                        if (!checkCanAddFood(mealIdx)) return;
                         setFavoriteTargetMealIdx(mealIdx);
                         setIsFavoritesModalOpen(true);
                       }}
@@ -1794,7 +1800,7 @@ export const DietPlanner: React.FC = () => {
 
                     <button
                       onClick={() => {
-                        if (!checkCanAddFood()) return;
+                        if (!checkCanAddFood(mealIdx)) return;
                         setActiveSearchMealIdx(activeSearchMealIdx === mealIdx ? null : mealIdx);
                         setSearchQuery('');
                       }}
@@ -2069,44 +2075,21 @@ export const DietPlanner: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de Bloqueio Informativo de Restrições Alimentares */}
-      {isRestrictionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-amber-400">
-              <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-extrabold text-white text-base">Restrições Alimentares Necessárias</h3>
-                <span className="text-[11px] text-amber-300/90 font-medium">Segurança e Personalização da Dieta</span>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-300 leading-relaxed">
-              ⚠️ Antes de adicionar alimentos à sua dieta, preencha o formulário de restrições alimentares para que possamos verificar possíveis alergias, intolerâncias e restrições.
-            </p>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-              <button
-                onClick={() => setIsRestrictionModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all"
-              >
-                Voltar
-              </button>
-              <button
-                onClick={() => {
-                  setIsRestrictionModalOpen(false);
-                  navigate('/profile#dietary-restrictions');
-                }}
-                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition-all shadow-lg shadow-amber-500/20"
-              >
-                Preencher Formulário
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal de Perguntas de Restrições Alimentares na Mesma Página */}
+      <DietaryRestrictionsModal
+        isOpen={isRestrictionModalOpen}
+        onClose={() => {
+          setIsRestrictionModalOpen(false);
+          setPendingMealIdxForAdd(null);
+        }}
+        onSuccess={() => {
+          if (pendingMealIdxForAdd !== null) {
+            setActiveSearchMealIdx(pendingMealIdxForAdd);
+            setSearchQuery('');
+            setPendingMealIdxForAdd(null);
+          }
+        }}
+      />
 
       {confirmDialog && (
         <ConfirmDialog
