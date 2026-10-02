@@ -2731,23 +2731,6 @@ export const DietPlanner: React.FC = () => {
         )}
       </div>
 
-      {/* Rodapé discreto com link para nutricionistas */}
-      <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-        <div className="flex items-center gap-2.5">
-          <Utensils className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>
-            Precisa de um plano individualizado com acompanhamento clínico? Conecte-se com nutricionistas credenciados no CRN.
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate('/professionals?type=NUTRITIONIST')}
-          className="text-emerald-400 hover:text-emerald-300 font-bold underline whitespace-nowrap cursor-pointer"
-        >
-          Consultar Nutricionistas &rarr;
-        </button>
-      </div>
-
       {/* Modal de Refeições Favoritas */}
       {isFavoritesModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">

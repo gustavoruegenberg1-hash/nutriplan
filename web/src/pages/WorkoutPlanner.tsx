@@ -2278,16 +2278,9 @@ export const WorkoutPlanner: React.FC = () => {
         </div>
       </div>
 
-      {/* Rodapé discreto com link para treinadores */}
+      {/* Rodapé discreto */}
       <div className="pt-4 flex items-center justify-between text-xs text-slate-500 border-t border-slate-900 flex-wrap gap-2">
         <span>Planejamento e periodização biomecânica NutriPlan</span>
-        <button
-          onClick={() => navigate('/professionals?type=TRAINER')}
-          className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 hover:underline cursor-pointer"
-        >
-          <span>Dúvidas com o treino? Consulte um Personal Trainer credenciado</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
       </div>
 
       {/* Modal Interativo de Condições e Limitações na Mesma Página */}

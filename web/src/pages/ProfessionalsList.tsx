@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { professionalsService } from '../services/professionalsService';
 import { Professional, ProfessionalType } from '../types/professionals';
 import { ProfessionalCard } from '../components/professionals/ProfessionalCard';
@@ -15,14 +15,26 @@ import {
 
 export const ProfessionalsList: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filtros
-  const [selectedType, setSelectedType] = useState<'ALL' | ProfessionalType>('ALL');
+  // Filtros inicializados com base na URL (?type=NUTRITIONIST ou ?type=TRAINER)
+  const initialType = searchParams.get('type') as ProfessionalType | null;
+  const [selectedType, setSelectedType] = useState<'ALL' | ProfessionalType>(
+    initialType === 'NUTRITIONIST' || initialType === 'TRAINER' ? initialType : 'ALL'
+  );
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
+
+  // Atualiza o filtro se os searchParams mudarem
+  useEffect(() => {
+    const currentType = searchParams.get('type') as ProfessionalType | null;
+    if (currentType === 'NUTRITIONIST' || currentType === 'TRAINER') {
+      setSelectedType(currentType);
+    }
+  }, [searchParams]);
 
   // Contagem de conversas ativas
   const [activeConversationsCount, setActiveConversationsCount] = useState<number>(0);

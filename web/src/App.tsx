@@ -20,6 +20,7 @@ import { ChatScreen } from './pages/ChatScreen';
 import { WaterReminderModal } from './components/water/WaterReminderModal';
 import { waterReminderService } from './services/waterReminderService';
 import { useAuth } from './contexts/AuthContext';
+import { FloatingConsultationWidget } from './components/FloatingConsultationWidget';
 
 function WaterReminderWatcher() {
   const { user, isAuthenticated } = useAuth();
@@ -83,6 +84,9 @@ export function App() {
 
           {/* Barra de Navegação Inferior Nativa para Mobile */}
           <BottomNav />
+
+          {/* Balão Flutuante de Consulta com Personal Trainer ou Nutricionista */}
+          <FloatingConsultationWidget />
 
           {/* Footer visível no Desktop */}
           <footer className="hidden md:block border-t border-surface-border bg-canvas/90 py-6 text-center text-xs text-slate-500">
