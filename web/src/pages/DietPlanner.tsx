@@ -45,9 +45,22 @@ import {
   HeartPulse,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
+  Play,
+  Lightbulb,
 } from 'lucide-react';
 
 export type PortionUnit = 'g' | 'ml' | 'un' | 'scoop' | 'colher' | 'fatia' | 'copo' | 'lata' | 'file';
+
+
+export const FOOD_CATEGORIES = [
+  { id: 'ALL', label: 'Todos os Alimentos', icon: '🍽️' },
+  { id: 'PROTEIN', label: 'Proteínas', icon: '🍗' },
+  { id: 'CARBS', label: 'Carboidratos', icon: '🍚' },
+  { id: 'FATS', label: 'Gorduras Boas', icon: '🥑' },
+  { id: 'FIBERS', label: 'Fibras & Vegetais', icon: '🥦' },
+  { id: 'FRUITS', label: 'Frutas', icon: '🍎' },
+];
 
 export interface LocalMealItem {
   foodItemId: string;
@@ -65,6 +78,7 @@ export interface LocalMealItem {
   carbs: number;
   fat: number;
   fiber: number;
+  completed?: boolean;
 }
 
 export interface LocalMeal {
@@ -693,6 +707,13 @@ export const DietPlanner: React.FC = () => {
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
   const [isSearchingFoods, setIsSearchingFoods] = useState<boolean>(false);
   const [foodSearchError, setFoodSearchError] = useState<string | null>(null);
+  const [selectedTargetMealIdx, setSelectedTargetMealIdx] = useState<number>(0);
+  const [expandedFoods, setExpandedFoods] = useState<Record<string, boolean>>({});
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [recentlyAddedFoodId, setRecentlyAddedFoodId] = useState<string | null>(null);
+  const [recentlyAddedFoodMsg, setRecentlyAddedFoodMsg] = useState<string | null>(null);
+  const [isDiagnosisOpen, setIsDiagnosisOpen] = useState<boolean>(false);
+  const [isHydrationOpen, setIsHydrationOpen] = useState<boolean>(false);
 
   // Refeições Favoritas
   const [favoriteMeals, setFavoriteMeals] = useState<FavoriteMeal[]>(() => {
@@ -845,20 +866,13 @@ export const DietPlanner: React.FC = () => {
 
   // Busca de alimentos resiliente com Tabela TACO e sugestões
   useEffect(() => {
-    if (activeSearchMealIdx === null) {
-      setSearchResults([]);
-      setIsSearchingFoods(false);
-      setFoodSearchError(null);
-      return;
-    }
-
     let isMounted = true;
     setIsSearchingFoods(true);
     setFoodSearchError(null);
 
     const timer = setTimeout(async () => {
       try {
-        const data = await foodService.searchFoods(searchQuery, 30);
+        const data = await foodService.searchFoods(searchQuery, 40);
         if (isMounted) {
           setSearchResults(data || []);
         }
@@ -878,9 +892,65 @@ export const DietPlanner: React.FC = () => {
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [searchQuery, activeSearchMealIdx]);
+  }, [searchQuery]);
 
-  // Regra de Ouro do NutriHero: 1ª Refeição do dia desbloqueia Baú da Dieta (+1 Agilidade)
+  // Alterna expansão de detalhes do alimento
+  const toggleExpandFood = (mealIdx: number, itemIdx: number) => {
+    const key = `${mealIdx}_${itemIdx}`;
+    setExpandedFoods((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  // Expande ou recolhe todos os alimentos
+  const toggleExpandAllFoods = () => {
+    const allKeys: string[] = [];
+    currentMeals.forEach((meal, mIdx) => {
+      meal.items.forEach((_, iIdx) => {
+        allKeys.push(`${mIdx}_${iIdx}`);
+      });
+    });
+    const areAllExpanded = allKeys.length > 0 && allKeys.every((k) => expandedFoods[k]);
+    const nextState: Record<string, boolean> = {};
+    if (!areAllExpanded) {
+      allKeys.forEach((k) => {
+        nextState[k] = true;
+      });
+    }
+    setExpandedFoods(nextState);
+  };
+
+  // Marca/desmarca alimento como consumido e recolhe detalhes automaticamente
+  const toggleFoodCompletion = (mealIdx: number, itemIdx: number) => {
+    triggerHapticFeedback();
+    const key = `${mealIdx}_${itemIdx}`;
+
+    setMealsByDay((prev) => {
+      const dayMeals = [...(prev[selectedDay] || [])];
+      const targetMeal = dayMeals[mealIdx];
+      if (!targetMeal) return prev;
+      const items = [...targetMeal.items];
+      const item = items[itemIdx];
+      if (!item) return prev;
+
+      const isNowCompleted = !item.completed;
+      items[itemIdx] = {
+        ...item,
+        completed: isNowCompleted,
+      };
+      dayMeals[mealIdx] = { ...targetMeal, items };
+      return { ...prev, [selectedDay]: dayMeals };
+    });
+
+    // Ao marcar como concluído, recolhe automaticamente os detalhes
+    setExpandedFoods((prev) => ({
+      ...prev,
+      [key]: false,
+    }));
+  };
+
+    // Regra de Ouro do NutriHero: 1ª Refeição do dia desbloqueia Baú da Dieta (+1 Agilidade)
   const checkAndRewardFirstMealOfDay = async () => {
     if (!user?.id) return;
     try {
@@ -898,10 +968,16 @@ export const DietPlanner: React.FC = () => {
     }
   };
 
-  // Adiciona alimento à refeição
-  const addFoodToMeal = (food: FoodItem) => {
+  // Adiciona alimento à refeição alvo
+  const addFoodToMeal = (food: FoodItem, specificMealIdx?: number) => {
     if (!checkCanAddFood()) return;
-    if (activeSearchMealIdx === null) return;
+
+    const currentDayMeals = mealsByDay[selectedDay] || [];
+    let targetIdx = specificMealIdx !== undefined ? specificMealIdx : selectedTargetMealIdx;
+    if (targetIdx < 0 || targetIdx >= currentDayMeals.length) {
+      targetIdx = 0;
+    }
+    const targetMealName = currentDayMeals[targetIdx]?.name || 'Refeição';
 
     const units = getValidUnitsForFood(food.name);
     const defaultUnit = units[0]?.id || 'g';
@@ -923,27 +999,33 @@ export const DietPlanner: React.FC = () => {
       carbs: 0,
       fat: 0,
       fiber: 0,
+      completed: false,
     };
 
     const newItem = recalculateItemNutrients(baseItem, defaultQuantityValue, defaultUnit);
 
     setMealsByDay((prev) => {
-      const dayMeals = [...prev[selectedDay]];
-      dayMeals[activeSearchMealIdx] = {
-        ...dayMeals[activeSearchMealIdx],
-        items: [...dayMeals[activeSearchMealIdx].items, newItem],
+      const dayMeals = [...(prev[selectedDay] || [])];
+      if (!dayMeals[targetIdx]) {
+        dayMeals[targetIdx] = { name: 'Café da Manhã', items: [] };
+      }
+      dayMeals[targetIdx] = {
+        ...dayMeals[targetIdx],
+        items: [...dayMeals[targetIdx].items, newItem],
       };
       return { ...prev, [selectedDay]: dayMeals };
     });
 
     // REGRA DO NUTRI HERO: Primeira refeição do dia desbloqueia Baú da Dieta (+1 AGI)
     checkAndRewardFirstMealOfDay();
+    triggerHapticFeedback();
 
-    setStatusMsg({
-      type: 'success',
-      text: `${food.name} adicionado ao ${currentMeals[activeSearchMealIdx]?.name}!`,
-    });
-    setTimeout(() => setStatusMsg(null), 2500);
+    setRecentlyAddedFoodId(food.id);
+    setRecentlyAddedFoodMsg(`✓ ${food.name} adicionado ao ${targetMealName}!`);
+    setTimeout(() => {
+      setRecentlyAddedFoodId(null);
+      setRecentlyAddedFoodMsg(null);
+    }, 2500);
   };
 
   // Edição funcional e precisa de quantidade
@@ -1318,7 +1400,135 @@ export const DietPlanner: React.FC = () => {
     return diagnosis;
   }, [currentMeals, dayTotals, user, userMetabolism]);
 
-  // Exportar JSON
+  // Filtro de alimentos da busca TACO por categoria selecionada
+  const filteredFoods = useMemo(() => {
+    if (selectedCategory === 'ALL') return searchResults;
+
+    return searchResults.filter((f: FoodItem) => {
+      const lower = f.name.toLowerCase();
+      const p = Number(f.proteinPer100g) || 0;
+      const c = Number(f.carbsPer100g) || 0;
+      const g = Number(f.fatPer100g) || 0;
+      const fib = Number(f.fiberPer100g) || 0;
+
+      switch (selectedCategory) {
+        case 'PROTEIN':
+          return (
+            p >= 12 ||
+            lower.includes('frango') ||
+            lower.includes('carne') ||
+            lower.includes('patinho') ||
+            lower.includes('alcatra') ||
+            lower.includes('bovina') ||
+            lower.includes('ovo') ||
+            lower.includes('peixe') ||
+            lower.includes('tilápia') ||
+            lower.includes('tilapia') ||
+            lower.includes('salmão') ||
+            lower.includes('salmao') ||
+            lower.includes('atum') ||
+            lower.includes('whey') ||
+            lower.includes('queijo') ||
+            lower.includes('iogurte') ||
+            lower.includes('leite')
+          );
+        case 'CARBS':
+          return (
+            c >= 18 ||
+            lower.includes('arroz') ||
+            lower.includes('batata') ||
+            lower.includes('aveia') ||
+            lower.includes('pão') ||
+            lower.includes('pao') ||
+            lower.includes('macarrão') ||
+            lower.includes('macarrao') ||
+            lower.includes('mandioca') ||
+            lower.includes('tapioca') ||
+            lower.includes('cuscuz') ||
+            lower.includes('milho') ||
+            lower.includes('granola')
+          );
+        case 'FATS':
+          return (
+            g >= 12 ||
+            lower.includes('azeite') ||
+            lower.includes('óleo') ||
+            lower.includes('oleo') ||
+            lower.includes('pasta de amendoim') ||
+            lower.includes('castanha') ||
+            lower.includes('nozes') ||
+            lower.includes('amêndoa') ||
+            lower.includes('amendoa') ||
+            lower.includes('abacate') ||
+            lower.includes('manteiga')
+          );
+        case 'FIBERS':
+          return (
+            fib >= 2.5 ||
+            lower.includes('brócolis') ||
+            lower.includes('brocolis') ||
+            lower.includes('couve') ||
+            lower.includes('alface') ||
+            lower.includes('espinafre') ||
+            lower.includes('feijão') ||
+            lower.includes('feijao') ||
+            lower.includes('lentilha') ||
+            lower.includes('cenoura') ||
+            lower.includes('tomate') ||
+            lower.includes('rúcula') ||
+            lower.includes('rucula') ||
+            lower.includes('salada')
+          );
+        case 'FRUITS':
+          return (
+            lower.includes('banana') ||
+            lower.includes('maçã') ||
+            lower.includes('maca') ||
+            lower.includes('laranja') ||
+            lower.includes('morango') ||
+            lower.includes('kiwi') ||
+            lower.includes('uva') ||
+            lower.includes('abacaxi') ||
+            lower.includes('mamão') ||
+            lower.includes('mamao') ||
+            lower.includes('melancia') ||
+            lower.includes('manga') ||
+            lower.includes('limão') ||
+            lower.includes('limao')
+          );
+        default:
+          return true;
+      }
+    });
+  }, [searchResults, selectedCategory]);
+
+  // Contadores e métricas para a Caixa 2 (Dieta Montada)
+  const totalFoodsCount = useMemo(() => {
+    return currentMeals.reduce((acc, m) => acc + m.items.length, 0);
+  }, [currentMeals]);
+
+  const completedFoodsCount = useMemo(() => {
+    return currentMeals.reduce(
+      (acc, m) => acc + m.items.filter((i) => i.completed).length,
+      0
+    );
+  }, [currentMeals]);
+
+  const consumedPercent = totalFoodsCount > 0 ? Math.round((completedFoodsCount / totalFoodsCount) * 100) : 0;
+  const isAllConsumed = totalFoodsCount > 0 && completedFoodsCount === totalFoodsCount;
+
+  const calPercent = userMetabolism.targetCalories > 0
+    ? Math.round((dayTotals.calories / userMetabolism.targetCalories) * 100)
+    : 0;
+
+  const areAllFoodsExpanded = useMemo(() => {
+    if (totalFoodsCount === 0) return false;
+    return currentMeals.every((meal, mIdx) =>
+      meal.items.every((_, iIdx) => expandedFoods[`${mIdx}_${iIdx}`])
+    );
+  }, [currentMeals, expandedFoods, totalFoodsCount]);
+
+    // Exportar JSON
   const handleExportJson = () => {
     const exportData = {
       name: planName,
@@ -1438,294 +1648,492 @@ export const DietPlanner: React.FC = () => {
         return null;
       })()}
 
-      {/* Banner de Conexão com Nutricionistas Credenciados */}
-      <div className="p-4 rounded-3xl bg-gradient-to-r from-emerald-950/60 via-[#111827] to-surface border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
-            <Utensils className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-xs sm:text-sm font-bold text-white">
-              Precisa de um plano alimentar individualizado ou avaliação clínica?
-            </h4>
-            <p className="text-[11px] text-slate-300">
-              Conecte-se diretamente com nutricionistas credenciados no CRN pelo chat do aplicativo.
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => navigate('/professionals?type=NUTRITIONIST')}
-          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer flex-shrink-0"
-        >
-          <span>Consultar Nutricionistas</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      {/* PAINEL RECOLHÍVEL DE RECOMENDAÇÕES DE DIETA */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl transition-all">
-        <button
-          type="button"
-          onClick={() => {
-            triggerHapticFeedback();
-            setIsRecommendationsOpen(!isRecommendationsOpen);
-          }}
-          className="w-full flex items-center justify-between text-left group active:scale-[0.99] transition-transform"
-        >
+      {/* ========================================================================= */}
+      {/* CAIXA 1: MONTADOR DE DIETA (Tudo condensado em uma única caixa)           */}
+      {/* ========================================================================= */}
+      <div className="bg-[#151D28] border border-[#243044] rounded-3xl p-5 sm:p-7 shadow-2xl space-y-6">
+        {/* Cabeçalho do Montador e Ações Rápidas */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#243044]">
           <div className="flex items-center gap-3">
-            <span className="text-xl">💡</span>
+            <div className="p-2.5 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <Utensils className="w-5 h-5" />
+            </div>
             <div>
-              <h2 className="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
-                <span>Recomendações & Cardápios Pré-Montados</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
-                  {dietPresets.length} cardápios
-                </span>
+              <h2 className="text-lg sm:text-xl font-black text-white">
+                Montador de Dieta
               </h2>
-              <p className="text-[11px] text-slate-400">
-                Toque para {isRecommendationsOpen ? 'recolher' : 'expandir'} estratégias nutricionais calibradas para {userMetabolism.targetCalories} kcal
+              <p className="text-xs text-slate-400">
+                Defina o plano, escolha a refeição alvo e adicione alimentos da Tabela TACO
               </p>
             </div>
           </div>
 
-          <div className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 group-hover:text-white transition-colors">
-            {isRecommendationsOpen ? (
-              <ChevronDown className="w-4 h-4 text-emerald-400" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
-            )}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                triggerHapticFeedback();
+                setIsRecommendationsOpen(!isRecommendationsOpen);
+              }}
+              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isRecommendationsOpen ? 'Fechar Modelos' : 'Modelos Prontos'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={addMealSection}
+              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/25 transition-all cursor-pointer active:scale-95"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>+ Nova Refeição</span>
+            </button>
           </div>
-        </button>
+        </div>
 
+        {/* Modelos Prontos (se expandido) */}
         {isRecommendationsOpen && (
-          <div className="mt-4 pt-4 border-t border-slate-800/80 space-y-4 animate-in fade-in duration-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-slate-400">
-              <span className="font-semibold text-slate-300">
-                Estratégias de Dieta Baseadas em Evidências (Calibradas para {userMetabolism.targetCalories} kcal)
+          <div className="p-4 rounded-2xl bg-slate-950/70 border border-emerald-500/30 space-y-3 animate-in fade-in duration-150">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Lightbulb className="w-3.5 h-3.5" />
+                Modelos de Cardápios Baseados em Evidência (Calibrados para {userMetabolism.targetCalories} kcal)
               </span>
-              <span>Porções ajustadas automaticamente para seu gasto</span>
+              <button onClick={() => setIsRecommendationsOpen(false)} className="text-slate-400 hover:text-white p-1">
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {dietPresets.map((preset) => {
                 const IconComp = preset.icon;
                 return (
                   <button
                     key={preset.id}
-                    onClick={() => handleApplyDietPreset(preset, true)}
-                    className="p-4 rounded-2xl bg-slate-950/80 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/40 text-left transition-all group flex flex-col justify-between active:scale-98"
+                    onClick={() => {
+                      handleApplyDietPreset(preset, true);
+                      setIsRecommendationsOpen(false);
+                    }}
+                    className="p-3.5 rounded-xl bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left transition-all group flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold">
                           {preset.badge}
                         </span>
-                        <IconComp className="w-4 h-4 text-emerald-400" />
+                        <IconComp className="w-3.5 h-3.5 text-emerald-400" />
                       </div>
-                      <h3 className="font-extrabold text-sm text-white group-hover:text-emerald-300 transition-colors">
+                      <h4 className="font-extrabold text-xs text-white group-hover:text-emerald-300 mt-1">
                         {preset.name}
-                      </h3>
-                      <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-3">
+                      </h4>
+                      <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
                         {preset.description}
                       </p>
                     </div>
-
-                    <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                      <span className="text-emerald-400 font-semibold text-[11px]">Calibrar & Aplicar</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-emerald-400 group-hover:translate-x-1 transition-transform" />
-                    </div>
+                    <span className="text-emerald-400 font-bold text-[11px] mt-2 flex items-center gap-1">
+                      Calibrar & Aplicar <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                    </span>
                   </button>
                 );
               })}
             </div>
           </div>
         )}
-      </div>
 
-      {/* Seletor de Dias e Nome do Plano */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-            Nome do Plano Alimentar
-          </label>
-          <input
-            type="text"
-            value={planName}
-            onChange={(e) => setPlanName(e.target.value)}
-            className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm font-semibold focus:outline-none focus:border-emerald-500"
-          />
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Dia da Semana
-            </label>
+        {/* Abas dos Dias da Semana */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+              Dia da Semana:
+            </span>
             <button
+              type="button"
               onClick={handleReplicateToAllDays}
-              className="px-3 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/20"
+              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/20 cursor-pointer"
             >
               <Copy className="w-3 h-3" />
-              <span>Replicar este dia para toda a semana</span>
+              <span>Replicar este dia para a semana toda</span>
             </button>
           </div>
-
           <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
             {daysList.map((day) => {
               const isSelected = selectedDay === day.id;
+              const count = (mealsByDay[day.id] || []).reduce((acc, m) => acc + m.items.length, 0);
               return (
                 <button
                   key={day.id}
+                  type="button"
                   onClick={() => setSelectedDay(day.id)}
-                  className={`py-2 px-1 rounded-xl text-xs font-extrabold tracking-wider transition-all uppercase flex items-center justify-center ${
+                  className={`py-2 px-1 rounded-xl text-xs font-extrabold tracking-wider transition-all uppercase flex flex-col items-center justify-center cursor-pointer ${
                     isSelected
-                      ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20 ring-1 ring-emerald-400'
-                      : 'bg-[#0B0F17] text-slate-400 hover:text-white border border-[#1F2937] hover:border-[#374151]'
+                      ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400'
+                      : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
                   }`}
                   title={day.fullLabel}
                 >
-                  <span>{day.shortLabel.toUpperCase()}</span>
+                  <span>{day.shortLabel}</span>
+                  <span className={`text-[9px] font-medium mt-0.5 ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-500'}`}>
+                    {count} it
+                  </span>
                 </button>
               );
             })}
           </div>
         </div>
-      </div>
 
-      {/* Cards de Totais Nutricionais Interativos (Apenas na página de dieta) */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs text-slate-400 px-1">
-          <span className="font-semibold text-slate-300">
-            Balanço de Nutrientes do Dia ({daysList.find((d) => d.id === selectedDay)?.fullLabel})
-          </span>
-          <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-medium">
-            <Info className="w-3.5 h-3.5" />
-            <span>Clique no card de qualquer nutriente para ver o guia educativo</span>
-          </span>
-        </div>
+        {/* Configuração da Dieta: Nome + Refeição Alvo para Inserção */}
+        <div className="space-y-4 pt-2 border-t border-[#243044]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Nome do Plano */}
+            <div className="md:col-span-2 space-y-1.5">
+              <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
+                Nome do Plano Alimentar:
+              </label>
+              <input
+                type="text"
+                value={planName}
+                onChange={(e) => setPlanName(e.target.value)}
+                placeholder="Ex: Minha Dieta Hipertrofia Limpa"
+                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm font-semibold focus:outline-none focus:border-emerald-500"
+              />
+              <div className="flex flex-wrap items-center gap-1 pt-1">
+                <span className="text-[10px] text-slate-500 font-semibold uppercase">Sugestões:</span>
+                {['Dieta Hipertrofia', 'Dieta Cutting', 'Manutenção Limpa', 'Dieta Sem Lactose', 'Low Carb'].map((sug) => (
+                  <button
+                    type="button"
+                    key={sug}
+                    onClick={() => setPlanName(sug)}
+                    className="text-[11px] px-2 py-0.5 rounded-lg border bg-slate-900 border-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
+                  >
+                    {sug}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-          <MacroCard
-            label="Calorias"
-            value={dayTotals.calories}
-            unit="kcal"
-            target={userMetabolism.targetCalories}
-            type="calories"
-            clickable={true}
-            onClick={() => navigate('/diet/info/calories')}
-            showAlert={true}
-          />
-          <MacroCard
-            label="Proteínas"
-            value={dayTotals.protein}
-            unit="g"
-            target={userMetabolism.targetProteinGrams}
-            type="protein"
-            clickable={true}
-            onClick={() => navigate('/diet/info/protein')}
-            showAlert={true}
-          />
-          <MacroCard
-            label="Carboidratos"
-            value={dayTotals.carbs}
-            unit="g"
-            target={userMetabolism.targetCarbsGrams}
-            type="carbs"
-            clickable={true}
-            onClick={() => navigate('/diet/info/carbs')}
-            showAlert={true}
-          />
-          <MacroCard
-            label="Gorduras"
-            value={dayTotals.fat}
-            unit="g"
-            target={userMetabolism.targetFatGrams}
-            type="fat"
-            clickable={true}
-            onClick={() => navigate('/diet/info/fat')}
-            showAlert={true}
-          />
-          <MacroCard
-            label="Fibras"
-            value={dayTotals.fiber}
-            unit="g"
-            target={28}
-            type="fiber"
-            clickable={true}
-            onClick={() => navigate('/diet/info/fiber')}
-            showAlert={true}
-          />
-        </div>
-      </div>
-
-      {/* Seção de Hidratação & Lembretes de Água */}
-      <HydrationTrackerCard />
-
-      {/* Diagnóstico da Dieta */}
-      {dietDiagnosis.length > 0 && (
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2">
-            <HeartPulse className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-base font-extrabold text-white">
-              Diagnóstico Nutricional & Recomendações em Tempo Real
-            </h2>
+            {/* Refeição Alvo Onde os Alimentos Selecionados Entram */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
+                  Adicionar Alimentos Em:
+                </label>
+                <button
+                  type="button"
+                  onClick={addMealSection}
+                  className="text-[10px] text-emerald-400 font-bold hover:underline cursor-pointer"
+                >
+                  + Nova
+                </button>
+              </div>
+              <select
+                value={selectedTargetMealIdx}
+                onChange={(e) => setSelectedTargetMealIdx(Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+              >
+                {currentMeals.map((meal, idx) => (
+                  <option key={idx} value={idx}>
+                    {meal.name} ({meal.items.length} {meal.items.length === 1 ? 'item' : 'itens'})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] text-slate-500">
+                Alimentos clicados abaixo serão inseridos nesta refeição.
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {dietDiagnosis.map((diag, idx) => (
-              <div
-                key={idx}
-                className={`p-4 rounded-2xl border flex flex-col justify-between ${
-                  diag.type === 'STRENGTH'
-                    ? 'bg-emerald-950/20 border-emerald-500/30'
-                    : 'bg-amber-950/20 border-amber-500/30'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span
-                      className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                        diag.type === 'STRENGTH'
-                          ? 'bg-emerald-500/20 text-emerald-400'
-                          : 'bg-amber-500/20 text-amber-400'
-                      }`}
-                    >
-                      {diag.importance}
-                    </span>
-                  </div>
-                  <h4 className="font-bold text-sm text-white">{diag.title}</h4>
-                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">{diag.description}</p>
-                </div>
-                {diag.actionRecommendation && (
-                  <div className="mt-3 pt-2.5 border-t border-slate-800 text-xs text-amber-300/90 font-medium">
-                    👉 {diag.actionRecommendation}
-                  </div>
+          {/* Seleção de Tags / Categorias Nutricionais */}
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Filtrar Alimentos por Categoria:</span>
+              </label>
+              <span className="text-[11px] text-emerald-400 font-bold">
+                {filteredFoods.length} {filteredFoods.length === 1 ? 'alimento disponível' : 'alimentos disponíveis'}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {FOOD_CATEGORIES.map((cat) => {
+                const isSelected = selectedCategory === cat.id;
+                return (
+                  <button
+                    type="button"
+                    key={cat.id}
+                    onClick={() => {
+                      triggerHapticFeedback();
+                      setSelectedCategory(cat.id);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+                      isSelected
+                        ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25 ring-1 ring-emerald-400 font-extrabold'
+                        : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <span>{cat.icon}</span>
+                    <span>{cat.label}</span>
+                    {isSelected && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SELEÇÃO DE ALIMENTOS DA TABELA TACO (LOGO ABAIXO NA MESMA CAIXA) */}
+          <div className="space-y-3 pt-3 border-t border-[#243044]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+                  <Utensils className="w-4 h-4 text-emerald-400" />
+                  <span>Selecione os Alimentos da Tabela TACO:</span>
+                </h3>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Clique em "+ Adicionar" para enviar direto para{' '}
+                  <strong className="text-white">
+                    {currentMeals[selectedTargetMealIdx]?.name || 'Refeição'}
+                  </strong>
+                </p>
+              </div>
+
+              <div className="relative w-full sm:w-72">
+                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar na TACO (ex: Frango, Arroz, Ovo...)"
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 )}
               </div>
-            ))}
+            </div>
+
+            {/* Mensagem de Feedback de Adição */}
+            {recentlyAddedFoodMsg && (
+              <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+                <Check className="w-4 h-4 shrink-0" />
+                <span>{recentlyAddedFoodMsg}</span>
+              </div>
+            )}
+
+            {/* Grade de Alimentos para Adicionar */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-72 overflow-y-auto pr-1">
+              {isSearchingFoods ? (
+                <div className="col-span-full py-8 text-center text-xs text-slate-400">
+                  <RefreshCw className="w-5 h-5 animate-spin text-emerald-400 mx-auto mb-2" />
+                  Consultando Tabela TACO...
+                </div>
+              ) : filteredFoods.length > 0 ? (
+                filteredFoods.map((food) => {
+                  const isRecentlyAdded = recentlyAddedFoodId === food.id;
+                  const allergyCheck = checkFoodAllergens(food.name, user?.allergies);
+                  const isAlreadyInTargetMeal = currentMeals[selectedTargetMealIdx]?.items.some(
+                    (it) => it.foodItemId === food.id || it.foodName === food.name
+                  );
+
+                  return (
+                    <button
+                      key={food.id}
+                      type="button"
+                      onClick={() => addFoodToMeal(food)}
+                      className={`w-full text-left p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer select-none active:scale-[0.98] ${
+                        isRecentlyAdded
+                          ? 'bg-emerald-950/40 border-emerald-500/60 ring-2 ring-emerald-500/30'
+                          : allergyCheck.isAllergen
+                          ? 'bg-rose-950/20 border-rose-500/40 hover:border-rose-500'
+                          : isAlreadyInTargetMeal
+                          ? 'bg-slate-950/70 border-emerald-500/30'
+                          : 'bg-slate-950 hover:bg-slate-900 border-slate-800 hover:border-emerald-500/50'
+                      }`}
+                    >
+                      <div className="flex-1 pr-2 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-extrabold text-xs text-white block truncate">
+                            {food.name}
+                          </span>
+                          {allergyCheck.isAllergen && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                              ⚠️ Alérgeno
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-emerald-400 font-semibold block mt-0.5">
+                          {food.caloriesPer100g} kcal &middot; P: {food.proteinPer100g}g &middot; C: {food.carbsPer100g}g &middot; G: {food.fatPer100g}g
+                        </span>
+                      </div>
+
+                      <span
+                        className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                          isRecentlyAdded
+                            ? 'bg-emerald-500 text-slate-950 font-black'
+                            : isAlreadyInTargetMeal
+                            ? 'bg-emerald-500/20 text-emerald-300'
+                            : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black'
+                        }`}
+                      >
+                        {isRecentlyAdded ? (
+                          <>
+                            <Check className="w-3 h-3 stroke-[3]" />
+                            <span>Adicionado!</span>
+                          </>
+                        ) : isAlreadyInTargetMeal ? (
+                          <>
+                            <span>+1 Porção</span>
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-3 h-3 stroke-[3]" />
+                            <span>Adicionar</span>
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="col-span-full py-6 text-center text-xs text-slate-400">
+                  Nenhum alimento encontrado para "{searchQuery}". Tente palavras simples como "arroz", "frango", "ovo", "aveia" ou "banana".
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Refeições do Dia com Drag & Drop e Edição Proporcional */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <span>Refeições de {daysList.find((d) => d.id === selectedDay)?.fullLabel}</span>
-            <span className="text-xs text-slate-400 font-normal">
-              ({currentMeals.reduce((acc, m) => acc + m.items.length, 0)} itens cadastrados)
-            </span>
-          </h2>
+      {/* ========================================================================= */}
+      {/* CAIXA 2: DIETA MONTADA (Apenas o nome do alimento até ser iniciado)       */}
+      {/* ========================================================================= */}
+      <div className="bg-[#151D28] border border-[#243044] rounded-3xl p-5 sm:p-7 shadow-2xl space-y-5">
+        {/* Cabeçalho da Dieta Montada */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#243044]">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold">
+                <Utensils className="w-4 h-4" />
+              </div>
+              <h2 className="text-lg sm:text-xl font-black text-white">
+                Dieta Montada: {daysList.find((d) => d.id === selectedDay)?.fullLabel}
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+                {totalFoodsCount} {totalFoodsCount === 1 ? 'alimento cadastrado' : 'alimentos cadastrados'}
+              </span>
+            </div>
+          </div>
 
-          <button
-            onClick={addMealSection}
-            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-2 transition-all shadow-md shadow-emerald-500/20"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Adicionar Nova Refeição</span>
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setIsFavoritesModalOpen(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-400 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Star className="w-3.5 h-3.5 text-amber-400" />
+              <span>Refeições Favoritas</span>
+            </button>
+
+            {totalFoodsCount > 0 && (
+              <button
+                type="button"
+                onClick={toggleExpandAllFoods}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              >
+                {areAllFoodsExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                <span>{areAllFoodsExpanded ? 'Recolher Todos' : 'Ver Todos Detalhes'}</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-6">
+        {/* Sumário Condensado de Calorias, Macros e Alimentos Consumidos */}
+        <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/90 space-y-3">
+          {/* Linha 1: Calorias */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs flex-wrap gap-2">
+              <span className="font-extrabold text-white flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-emerald-400" />
+                <span>Calorias do Dia:</span>
+                <span className="text-emerald-400 font-black text-sm">{Math.round(dayTotals.calories)} kcal</span>
+              </span>
+              <span className="text-slate-400">
+                Meta:{' '}
+                <strong className="text-white">
+                  {userMetabolism.targetCalories} kcal
+                </strong>{' '}
+                ({userMetabolism.goalLabel})
+              </span>
+            </div>
+            <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+              <div
+                className={`h-full transition-all duration-300 ${
+                  calPercent > 105 ? 'bg-amber-500' : 'bg-emerald-500'
+                }`}
+                style={{ width: `${Math.min(calPercent, 100)}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Linha 2: Mini Pills de Macros */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            <div className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-rose-400">Proteína</span>
+              <span className="text-xs font-black text-white">
+                {Math.round(dayTotals.protein)}g / <span className="text-slate-400 font-semibold">{userMetabolism.targetProteinGrams}g</span>
+              </span>
+            </div>
+            <div className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-blue-400">Carboidratos</span>
+              <span className="text-xs font-black text-white">
+                {Math.round(dayTotals.carbs)}g / <span className="text-slate-400 font-semibold">{userMetabolism.targetCarbsGrams}g</span>
+              </span>
+            </div>
+            <div className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-amber-400">Gorduras</span>
+              <span className="text-xs font-black text-white">
+                {Math.round(dayTotals.fat)}g / <span className="text-slate-400 font-semibold">{userMetabolism.targetFatGrams}g</span>
+              </span>
+            </div>
+            <div className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-purple-400">Fibras</span>
+              <span className="text-xs font-black text-white">
+                {Math.round(dayTotals.fiber)}g / <span className="text-slate-400 font-semibold">28g</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Linha 3: Progresso de Conclusão / Alimentos Consumidos */}
+          {totalFoodsCount > 0 && (
+            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between flex-wrap gap-2 text-xs">
+              <div className="flex items-center gap-3">
+                <span className={`font-bold ${isAllConsumed ? 'text-emerald-400' : 'text-slate-300'}`}>
+                  {completedFoodsCount} de {totalFoodsCount} alimentos consumidos hoje ({consumedPercent}%)
+                </span>
+                <div className="w-24 sm:w-32 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                  <div
+                    className={`h-full transition-all duration-300 ${
+                      isAllConsumed ? 'bg-emerald-400' : 'bg-emerald-500'
+                    }`}
+                    style={{ width: `${consumedPercent}%` }}
+                  />
+                </div>
+                {isAllConsumed && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-black uppercase tracking-wider">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                    Cardápio 100% Consumido
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* LISTA DAS REFEIÇÕES E ALIMENTOS */}
+        <div className="space-y-4">
           {currentMeals.map((meal, mealIdx) => {
             const mealTotals = meal.items.reduce(
               (acc, it) => {
@@ -1743,15 +2151,16 @@ export const DietPlanner: React.FC = () => {
                 key={mealIdx}
                 onDragOver={(e) => handleDragOverMeal(mealIdx, e)}
                 onDrop={(e) => handleDropOnMeal(mealIdx, e)}
-                className={`bg-slate-900/90 border rounded-3xl p-6 shadow-md transition-all space-y-4 ${
+                className={`bg-slate-900/90 border rounded-2xl p-4 sm:p-5 shadow-md transition-all space-y-3 ${
                   dragOverMealIdx === mealIdx
                     ? 'border-emerald-400 bg-emerald-950/20 ring-2 ring-emerald-500/30'
-                    : 'border-slate-800'
+                    : 'border-slate-800/90'
                 }`}
               >
+                {/* Linha do Cabeçalho da Refeição */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-slate-950 text-emerald-400 border border-slate-800">
+                    <div className="p-2 rounded-xl bg-slate-950 text-emerald-400 border border-slate-800 shrink-0">
                       {mealIdx === 0 ? (
                         <Coffee className="w-4 h-4" />
                       ) : mealIdx === 1 ? (
@@ -1763,9 +2172,14 @@ export const DietPlanner: React.FC = () => {
                       )}
                     </div>
                     <div>
-                      <h3 className="font-extrabold text-white text-base">{meal.name}</h3>
-                      <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
-                        <span className="text-emerald-400 font-semibold">{Math.round(mealTotals.calories)} kcal</span>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-black text-white text-base">{meal.name}</h3>
+                        <span className="text-[11px] px-2 py-0.2 rounded-md bg-slate-950 text-slate-400 font-semibold border border-slate-800">
+                          {meal.items.length} {meal.items.length === 1 ? 'item' : 'itens'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5 flex-wrap">
+                        <span className="text-emerald-400 font-bold">{Math.round(mealTotals.calories)} kcal</span>
                         <span>&middot;</span>
                         <span>P: {Math.round(mealTotals.protein)}g</span>
                         <span>&middot;</span>
@@ -1776,10 +2190,11 @@ export const DietPlanner: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <button
+                      type="button"
                       onClick={() => handleSaveMealAsFavorite(mealIdx)}
-                      className="px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-400 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-400 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                       title="Salvar esta refeição nas Favoritas"
                     >
                       <Star className="w-3.5 h-3.5" />
@@ -1787,32 +2202,25 @@ export const DietPlanner: React.FC = () => {
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => {
-                        if (!checkCanAddFood(mealIdx)) return;
-                        setFavoriteTargetMealIdx(mealIdx);
-                        setIsFavoritesModalOpen(true);
+                        setSelectedTargetMealIdx(mealIdx);
+                        setStatusMsg({
+                          type: 'success',
+                          text: `Refeição "${meal.name}" selecionada no montador acima!`,
+                        });
+                        setTimeout(() => setStatusMsg(null), 2500);
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-emerald-400 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="hidden sm:inline">Usar Favorita</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        if (!checkCanAddFood(mealIdx)) return;
-                        setActiveSearchMealIdx(activeSearchMealIdx === mealIdx ? null : mealIdx);
-                        setSearchQuery('');
-                      }}
-                      className="px-3.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/20"
+                      className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 text-xs font-bold flex items-center gap-1 transition-all border border-emerald-500/20 cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Adicionar Alimento</span>
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => removeMealSection(mealIdx)}
-                      className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                      className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
                       title="Remover refeição"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -1820,118 +2228,12 @@ export const DietPlanner: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Painel de Busca de Alimentos Inline */}
-                {activeSearchMealIdx === mealIdx && (
-                  <div className="bg-slate-950 border border-emerald-500/40 rounded-2xl p-4 shadow-xl space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-300">
-                        Clique no alimento para adicionar ao {meal.name}
-                      </span>
-                      <button
-                        onClick={() => setActiveSearchMealIdx(null)}
-                        className="text-slate-500 hover:text-white"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="relative">
-                      <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="text"
-                        autoFocus
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Busque por alimento na Tabela TACO: Frango, Arroz, Ovo, Aveia, Leite, Banana, Whey..."
-                        className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-
-                    {isSearchingFoods ? (
-                      <div className="py-8 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-                        <span>Consultando Tabela TACO...</span>
-                      </div>
-                    ) : foodSearchError ? (
-                      <div className="py-6 text-center space-y-2">
-                        <p className="text-xs text-rose-400">{foodSearchError}</p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsSearchingFoods(true);
-                            setFoodSearchError(null);
-                            foodService
-                              .searchFoods(searchQuery, 30)
-                              .then((res) => setSearchResults(res || []))
-                              .catch(() => setFoodSearchError('Erro ao recarregar.'))
-                              .finally(() => setIsSearchingFoods(false));
-                          }}
-                          className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 rounded-lg border border-slate-700 transition-colors"
-                        >
-                          Tentar novamente
-                        </button>
-                      </div>
-                    ) : searchResults.length === 0 ? (
-                      <div className="py-8 text-center space-y-1">
-                        <p className="text-xs font-semibold text-slate-400">
-                          Nenhum alimento encontrado para "{searchQuery}".
-                        </p>
-                        <p className="text-[11px] text-slate-500">
-                          Tente palavras simples como "arroz", "frango", "ovo", "aveia", "banana" ou "leite".
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        {!searchQuery.trim() && (
-                          <div className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" />
-                            <span>Alimentos Frequentes da Tabela TACO:</span>
-                          </div>
-                        )}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1">
-                          {searchResults.map((food) => {
-                            const allergyCheck = checkFoodAllergens(food.name, user?.allergies);
-
-                            return (
-                              <div
-                                key={food.id}
-                                onClick={() => addFoodToMeal(food)}
-                                className={`p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer group ${
-                                  allergyCheck.isAllergen
-                                    ? 'bg-rose-950/20 border-rose-500/40 hover:border-rose-500'
-                                    : 'bg-slate-900/90 hover:bg-emerald-950/40 border-slate-800/80 hover:border-emerald-500/60'
-                                }`}
-                              >
-                                <div className="flex-1 pr-2">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="font-bold text-xs text-white group-hover:text-emerald-300 block">
-                                      {food.name}
-                                    </span>
-                                    {allergyCheck.isAllergen && (
-                                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                                        ⚠️ Alérgeno ({allergyCheck.matchedAllergens.join(', ')})
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="text-[10px] text-slate-400 block mt-0.5">
-                                    {food.caloriesPer100g} kcal · P: {food.proteinPer100g}g · C: {food.carbsPer100g}g · G: {food.fatPer100g}g (por 100g)
-                                  </span>
-                                </div>
-                                <span className="text-xs text-emerald-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                                  +
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {/* Lista de Alimentos da Refeição */}
+                {/* Lista dos Alimentos da Refeição (Apenas o nome por padrão) */}
                 <div className="space-y-2">
                   {meal.items.map((item, itemIdx) => {
+                    const key = `${mealIdx}_${itemIdx}`;
+                    const isCompleted = Boolean(item.completed);
+                    const isExpanded = Boolean(expandedFoods[key]);
                     const foodUnits = getValidUnitsForFood(item.foodName);
                     const allergyCheck = checkFoodAllergens(item.foodName, user?.allergies);
 
@@ -1940,74 +2242,208 @@ export const DietPlanner: React.FC = () => {
                         key={itemIdx}
                         draggable
                         onDragStart={(e) => handleDragStart(mealIdx, itemIdx, e)}
-                        className={`grid grid-cols-12 gap-2 items-center p-3 rounded-2xl border text-xs transition-colors ${
-                          allergyCheck.isAllergen
-                            ? 'bg-rose-950/20 border-rose-500/40'
-                            : 'bg-slate-950 border-slate-800/80 hover:border-slate-700'
+                        className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                          isCompleted
+                            ? 'bg-emerald-950/20 border-emerald-500/50 shadow-sm shadow-emerald-950/30'
+                            : 'bg-slate-950/90 border-slate-800/80 hover:border-slate-700'
                         }`}
                       >
-                        <div className="col-span-1 flex items-center gap-1 text-slate-500 cursor-grab">
-                          <GripVertical className="w-4 h-4" />
-                        </div>
+                        {/* LINHA DO ALIMENTO: APENAS O NOME DO ALIMENTO */}
+                        <div
+                          onClick={() => toggleExpandFood(mealIdx, itemIdx)}
+                          className="p-3 sm:p-3.5 flex items-center justify-between gap-3 cursor-pointer select-none group"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            {/* Grip / Número ou Check */}
+                            <div className="text-slate-500 hover:text-slate-300 cursor-grab shrink-0">
+                              <GripVertical className="w-3.5 h-3.5" />
+                            </div>
 
-                        <div className="col-span-4 sm:col-span-4">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-extrabold text-white block truncate">{item.foodName}</span>
-                            {allergyCheck.isAllergen && (
-                              <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-rose-500 text-white shadow-sm">
-                                ⚠️ ALÉRGENO
+                            <div
+                              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs transition-all ${
+                                isCompleted
+                                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
+                                  : 'bg-slate-900 text-slate-400 border border-slate-800'
+                              }`}
+                            >
+                              {isCompleted ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <span>{itemIdx + 1}</span>}
+                            </div>
+
+                            {/* APENAS O NOME DO ALIMENTO (VERDE SE CONCLUÍDO) */}
+                            <div className="min-w-0 flex-1 flex items-center gap-2 flex-wrap">
+                              <span
+                                className={`text-xs sm:text-sm font-extrabold truncate ${
+                                  isCompleted ? 'text-emerald-400' : 'text-white'
+                                }`}
+                              >
+                                {item.foodName}
                               </span>
-                            )}
+
+                              {/* Porção compacta ao lado */}
+                              <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800">
+                                {item.quantityValue} {item.unit} ({item.quantityGrams}g)
+                              </span>
+
+                              {isCompleted && (
+                                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                  Consumido
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <span className="text-[10px] text-slate-400 block">
-                            {item.quantityGrams}g no total · {item.caloriesPer100g} kcal/100g
-                          </span>
+
+                          {/* AÇÕES NA DIREITA: INICIAR OU VER DETALHES + EXCLUIR */}
+                          <div className="flex items-center gap-2 shrink-0">
+                            {!isCompleted ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleExpandFood(mealIdx, itemIdx);
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-slate-950 border border-emerald-500/40 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                              >
+                                <Play className="w-3 h-3 fill-current" />
+                                <span>{isExpanded ? 'Ocultar' : 'Ajustar / Consumir'}</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleExpandFood(mealIdx, itemIdx);
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                              >
+                                <span>{isExpanded ? 'Ocultar' : 'Ver Detalhes'}</span>
+                                {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                              </button>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeFoodItem(mealIdx, itemIdx);
+                              }}
+                              className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                              title="Remover alimento"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
 
-                        <div className="col-span-3 sm:col-span-2 flex items-center gap-1">
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            value={item.quantityValue}
-                            onChange={(e) => updateFoodQuantity(mealIdx, itemIdx, e.target.value)}
-                            className="w-16 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold text-center focus:outline-none focus:border-emerald-500"
-                          />
-                          <select
-                            value={item.unit}
-                            onChange={(e) => updateFoodUnit(mealIdx, itemIdx, e.target.value as PortionUnit)}
-                            className="px-1.5 py-1 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 text-[11px] focus:outline-none focus:border-emerald-500"
-                          >
-                            {foodUnits.map((u) => (
-                              <option key={u.id} value={u.id}>
-                                {u.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                        {/* DETALHES EXPANDIDOS (QUANDO O USUÁRIO CLICA PARA AJUSTAR OU CONSUMIR) */}
+                        {isExpanded && (
+                          <div className="p-4 border-t border-slate-800/80 space-y-4 bg-slate-950/60 animate-in fade-in duration-150">
+                            {/* Alerta de Alérgeno */}
+                            {allergyCheck.isAllergen && (
+                              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                                <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+                                <span>
+                                  <strong>Atenção alérgeno detectado:</strong> Contém {allergyCheck.matchedAllergens.join(', ')}.
+                                </span>
+                              </div>
+                            )}
 
-                        <div className="col-span-4 sm:col-span-5 flex items-center justify-end flex-wrap gap-2 text-right text-[11px] pr-2">
-                          <span className="font-extrabold text-white">{Math.round(item.calories)} kcal</span>
-                          <span className="text-[#F43F5E] font-bold">P: {Math.round(item.protein * 10) / 10}g</span>
-                          <span className="text-[#3B82F6] font-bold">C: {Math.round(item.carbs * 10) / 10}g</span>
-                          <span className="text-[#F59E0B] font-bold">G: {Math.round(item.fat * 10) / 10}g</span>
-                        </div>
+                            {/* Configuração de Quantidade e Unidade */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                  Quantidade:
+                                </label>
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  value={item.quantityValue}
+                                  onChange={(e) => updateFoodQuantity(mealIdx, itemIdx, e.target.value)}
+                                  className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-xs focus:outline-none focus:border-emerald-500 text-center"
+                                />
+                              </div>
 
-                        <div className="col-span-1 text-right">
-                          <button
-                            onClick={() => removeFoodItem(mealIdx, itemIdx)}
-                            className="p-1 text-slate-500 hover:text-rose-400 transition-colors"
-                            title="Remover alimento"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                  Unidade:
+                                </label>
+                                <select
+                                  value={item.unit}
+                                  onChange={(e) => updateFoodUnit(mealIdx, itemIdx, e.target.value as PortionUnit)}
+                                  className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 text-xs font-semibold focus:outline-none focus:border-emerald-500"
+                                >
+                                  {foodUnits.map((u) => (
+                                    <option key={u.id} value={u.id}>
+                                      {u.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="flex flex-col justify-end">
+                                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Peso Total:</span>
+                                <span className="text-xs font-extrabold text-white mt-1">
+                                  {item.quantityGrams}g ({item.caloriesPer100g} kcal/100g)
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Breakdown Nutricional da Porção */}
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                              <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                                <span className="text-[9px] uppercase font-bold text-slate-400 block">Calorias</span>
+                                <span className="text-xs font-extrabold text-emerald-400">{Math.round(item.calories)} kcal</span>
+                              </div>
+                              <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                                <span className="text-[9px] uppercase font-bold text-slate-400 block">Proteínas</span>
+                                <span className="text-xs font-extrabold text-rose-400">{Math.round(item.protein * 10) / 10}g</span>
+                              </div>
+                              <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                                <span className="text-[9px] uppercase font-bold text-slate-400 block">Carboidratos</span>
+                                <span className="text-xs font-extrabold text-blue-400">{Math.round(item.carbs * 10) / 10}g</span>
+                              </div>
+                              <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                                <span className="text-[9px] uppercase font-bold text-slate-400 block">Gorduras</span>
+                                <span className="text-xs font-extrabold text-amber-400">{Math.round(item.fat * 10) / 10}g</span>
+                              </div>
+                              <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center col-span-2 sm:col-span-1">
+                                <span className="text-[9px] uppercase font-bold text-slate-400 block">Fibras</span>
+                                <span className="text-xs font-extrabold text-purple-400">{Math.round(item.fiber * 10) / 10}g</span>
+                              </div>
+                            </div>
+
+                            {/* BOTÃO PARA FINALIZAR O ALIMENTO (RECOLHE OS DETALHES E FICA VERDE) */}
+                            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => toggleExpandFood(mealIdx, itemIdx)}
+                                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold transition-all cursor-pointer"
+                              >
+                                Recolher Detalhes
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => toggleFoodCompletion(mealIdx, itemIdx)}
+                                className={`px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 ${
+                                  isCompleted
+                                    ? 'bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30'
+                                    : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/25'
+                                }`}
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span>{isCompleted ? 'Desmarcar Consumo' : '✓ Marcar como Consumido'}</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
 
                   {meal.items.length === 0 && (
                     <div className="py-6 text-center text-xs text-slate-500 border border-dashed border-slate-800 rounded-2xl">
-                      Nenhum alimento nesta refeição. Clique em "+ Adicionar Alimento" acima.
+                      Nenhum alimento nesta refeição ainda. Selecione alimentos acima no Montador.
                     </div>
                   )}
                 </div>
@@ -2015,6 +2451,128 @@ export const DietPlanner: React.FC = () => {
             );
           })}
         </div>
+      </div>
+
+      {/* SEÇÃO SECUNDÁRIA: DIAGNÓSTICO NUTRICIONAL (COLAPSÁVEL) */}
+      {dietDiagnosis.length > 0 && (
+        <div className="bg-[#151D28] border border-[#243044] rounded-3xl p-5 shadow-xl transition-all">
+          <button
+            type="button"
+            onClick={() => {
+              triggerHapticFeedback();
+              setIsDiagnosisOpen(!isDiagnosisOpen);
+            }}
+            className="w-full flex items-center justify-between text-left cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <HeartPulse className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+                  <span>Diagnóstico Nutricional & Recomendações em Tempo Real</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+                    {dietDiagnosis.length} análises
+                  </span>
+                </h3>
+                <p className="text-[11px] text-slate-400">
+                  {isDiagnosisOpen ? 'Clique para recolher o relatório' : 'Clique para ver avaliação clínica de calorias, proteínas e fibras'}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white transition-colors">
+              {isDiagnosisOpen ? <ChevronUp className="w-4 h-4 text-emerald-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            </div>
+          </button>
+
+          {isDiagnosisOpen && (
+            <div className="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-1 md:grid-cols-2 gap-3 animate-in fade-in duration-150">
+              {dietDiagnosis.map((diag, idx) => (
+                <div
+                  key={idx}
+                  className={`p-4 rounded-2xl border flex flex-col justify-between ${
+                    diag.type === 'STRENGTH'
+                      ? 'bg-emerald-950/20 border-emerald-500/30'
+                      : 'bg-amber-950/20 border-amber-500/30'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span
+                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                          diag.type === 'STRENGTH'
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-amber-500/20 text-amber-400'
+                        }`}
+                      >
+                        {diag.importance}
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-sm text-white">{diag.title}</h4>
+                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">{diag.description}</p>
+                  </div>
+                  {diag.actionRecommendation && (
+                    <div className="mt-3 pt-2.5 border-t border-slate-800 text-xs text-amber-300/90 font-medium">
+                      👉 {diag.actionRecommendation}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SEÇÃO SECUNDÁRIA: HIDRATAÇÃO (COLAPSÁVEL) */}
+      <div className="bg-[#151D28] border border-[#243044] rounded-3xl p-5 shadow-xl transition-all">
+        <button
+          type="button"
+          onClick={() => {
+            triggerHapticFeedback();
+            setIsHydrationOpen(!isHydrationOpen);
+          }}
+          className="w-full flex items-center justify-between text-left cursor-pointer group"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-xl">💧</span>
+            <div>
+              <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+                <span>Controle de Hidratação Diária</span>
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                {isHydrationOpen ? 'Clique para recolher o registro de água' : 'Clique para registrar copos de água e conferir sua meta hídrica'}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white transition-colors">
+            {isHydrationOpen ? <ChevronUp className="w-4 h-4 text-emerald-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </div>
+        </button>
+
+        {isHydrationOpen && (
+          <div className="mt-4 pt-4 border-t border-slate-800/80 animate-in fade-in duration-150">
+            <HydrationTrackerCard />
+          </div>
+        )}
+      </div>
+
+      {/* Rodapé discreto com link para nutricionistas */}
+      <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+        <div className="flex items-center gap-2.5">
+          <Utensils className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>
+            Precisa de um plano individualizado com acompanhamento clínico? Conecte-se com nutricionistas credenciados no CRN.
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/professionals?type=NUTRITIONIST')}
+          className="text-emerald-400 hover:text-emerald-300 font-bold underline whitespace-nowrap cursor-pointer"
+        >
+          Consultar Nutricionistas &rarr;
+        </button>
       </div>
 
       {/* Modal de Refeições Favoritas */}
