@@ -14,7 +14,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onSucces
 
   const googleClientId =
     import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-    '428087015919-30avk4qd90l7ump81cbvu25jbdm5s7kt.apps.googleusercontent.com';
+    '663037343222-5uissbggo7s0qkuv9522l5j39hph52tl.apps.googleusercontent.com';
 
   useEffect(() => {
     if (!googleClientId) return;
