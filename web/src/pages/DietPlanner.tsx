@@ -14,6 +14,7 @@ import { gamificationService } from '../services/gamificationService';
 import { idleGameService } from '../services/idleGameService';
 import { foodService } from '../services/foodService';
 import { triggerHapticFeedback } from '../utils/mobile';
+import { HydrationTrackerCard } from '../components/water/HydrationTrackerCard';
 import {
   Utensils,
   Search,
@@ -1650,6 +1651,9 @@ export const DietPlanner: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Seção de Hidratação & Lembretes de Água */}
+      <HydrationTrackerCard />
 
       {/* Diagnóstico da Dieta */}
       {dietDiagnosis.length > 0 && (

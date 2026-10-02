@@ -21,6 +21,7 @@ import { DashboardPetCard } from '../components/pet/DashboardPetCard';
 import { PetProfile } from '../types/gamification';
 import { gamificationService } from '../services/gamificationService';
 import { articleService } from '../services/articleService';
+import { HydrationTrackerCard } from '../components/water/HydrationTrackerCard';
 
 const STORAGE_KEY = 'nutriplan_saved_diet_meals';
 const STORAGE_NAME_KEY = 'nutriplan_saved_diet_name';
@@ -458,6 +459,9 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Hidratação & Lembretes de Água */}
+      <HydrationTrackerCard />
 
       {/* 4. Card do Mascote */}
       {pet && <DashboardPetCard initialPet={pet} userId={user?.id || 'guest'} />}
