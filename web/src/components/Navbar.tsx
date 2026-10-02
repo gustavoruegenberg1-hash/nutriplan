@@ -4,15 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   Utensils,
   Dumbbell,
-  BookOpen,
   LayoutDashboard,
   User,
   LogOut,
   Menu,
   X,
   Flame,
-  Swords,
-  Users,
   MessageCircle,
 } from 'lucide-react';
 
@@ -25,7 +22,6 @@ export const Navbar: React.FC = () => {
     { label: 'Hoje', path: '/', icon: LayoutDashboard },
     { label: 'Dieta', path: '/diet', icon: Utensils },
     { label: 'Treino', path: '/workout', icon: Dumbbell },
-    { label: 'Artigos', path: '/articles', icon: BookOpen },
   ];
 
   const isActive = (path: string) => {

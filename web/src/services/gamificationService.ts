@@ -86,7 +86,7 @@ export const gamificationService = {
 
   async recordAction(
     userId: string,
-    action: 'DRINK_WATER' | 'REMOVE_WATER' | 'MEAL_SAVED' | 'WORKOUT_DONE' | 'ARTICLE_READ' | 'PET_PET',
+    action: 'DRINK_WATER' | 'REMOVE_WATER' | 'MEAL_SAVED' | 'WORKOUT_DONE' | 'PET_PET',
     value?: any
   ): Promise<{ pet: PetProfile; message: string; earnedXp: number; earnedCoins: number; leveledUp: boolean; quests?: DailyQuest[] }> {
     if (action === 'DRINK_WATER') {
@@ -131,11 +131,6 @@ export const gamificationService = {
       earnedXp = 50;
       earnedCoins = 15;
       message = '💪 Treino finalizado! (+50 XP e +15 Moedas)';
-    } else if (action === 'ARTICLE_READ') {
-      pet.vitality.wisdom = Math.min(100, pet.vitality.wisdom + 20);
-      earnedXp = 25;
-      earnedCoins = 5;
-      message = '🧠 Sabedoria aumentada! (+25 XP e +5 Moedas)';
     } else if (action === 'PET_PET') {
       earnedXp = 5;
       message = '❤️ Mascote adorou o carinho! (+5 XP)';

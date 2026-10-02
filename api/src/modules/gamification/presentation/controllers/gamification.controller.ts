@@ -37,7 +37,7 @@ export class GamificationController {
   @ApiOperation({ summary: 'Registra ação saudável do usuário (água, treino, refeição, etc.)' })
   async recordAction(
     @CurrentUser() user: any,
-    @Body() body: { action: 'DRINK_WATER' | 'REMOVE_WATER' | 'MEAL_SAVED' | 'WORKOUT_DONE' | 'ARTICLE_READ' | 'PET_PET'; value?: any }
+    @Body() body: { action: 'DRINK_WATER' | 'REMOVE_WATER' | 'MEAL_SAVED' | 'WORKOUT_DONE' | 'PET_PET'; value?: any }
   ) {
     const result = await this.gamificationService.recordAction(user.id, body.action, body.value);
     const quests = this.gamificationService.getDailyQuests(result.pet);

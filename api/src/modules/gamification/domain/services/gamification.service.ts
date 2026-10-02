@@ -172,7 +172,7 @@ export class GamificationService {
 
   async recordAction(
     userId: string,
-    action: 'DRINK_WATER' | 'REMOVE_WATER' | 'MEAL_SAVED' | 'WORKOUT_DONE' | 'ARTICLE_READ' | 'PET_PET',
+    action: 'DRINK_WATER' | 'REMOVE_WATER' | 'MEAL_SAVED' | 'WORKOUT_DONE' | 'PET_PET',
     _value?: any
   ): Promise<{ pet: PetEntity; message: string; earnedXp: number; earnedCoins: number; leveledUp: boolean }> {
     const pet = await this.getPet(userId);
@@ -215,14 +215,6 @@ export class GamificationService {
         earnedXp = 50;
         earnedCoins = 15;
         message = '💪 Treino finalizado! O mascote ficou mais forte (+50 XP e +15 Moedas)';
-        break;
-      }
-
-      case 'ARTICLE_READ': {
-        pet.setWisdom(Math.min(100, pet.vitality.wisdom + 20));
-        earnedXp = 25;
-        earnedCoins = 5;
-        message = '🧠 Conhecimento absorvido! Sabedoria aumentada (+25 XP e +5 Moedas)';
         break;
       }
 

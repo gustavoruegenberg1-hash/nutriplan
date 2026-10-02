@@ -6,7 +6,6 @@ import { DietPlan, Routine, DayOfWeek } from '../types';
 import { calculateUserMetabolicTargets } from './DietPlanner';
 import {
   Dumbbell,
-  BookOpen,
   Flame,
   ArrowRight,
   Plus,
@@ -16,7 +15,6 @@ import {
   CheckCircle2,
   Calendar,
 } from 'lucide-react';
-import { articleService } from '../services/articleService';
 import { HydrationTrackerCard } from '../components/water/HydrationTrackerCard';
 
 const STORAGE_KEY = 'nutriplan_saved_diet_meals';
@@ -630,24 +628,17 @@ export const Dashboard: React.FC = () => {
 
       </div>
 
-      {/* 5. Pílula Científica Discreta */}
+      {/* 5. Lembrete de Consistência */}
       <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-4 flex-wrap text-xs text-slate-400">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 flex-shrink-0">
-            <BookOpen className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+            <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <strong className="text-slate-200 block">Dica Científica do Dia</strong>
-            <span>Distribuir o consumo proteico em 3 a 5 refeições diárias maximiza o anabolismo muscular.</span>
+            <strong className="text-slate-200 block">Princípio da Consistência</strong>
+            <span>Resultados duradouros em estética e saúde são construídos dia após dia mantendo o foco nas suas metas.</span>
           </div>
         </div>
-
-        <Link
-          to="/articles"
-          className="text-purple-400 hover:text-purple-300 font-bold underline cursor-pointer text-xs flex-shrink-0"
-        >
-          Ler artigos indexados &rarr;
-        </Link>
       </div>
 
     </div>

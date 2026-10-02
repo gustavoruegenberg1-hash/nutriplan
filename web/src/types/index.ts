@@ -183,29 +183,3 @@ export interface WorkoutRoutine {
 }
 
 export type Routine = WorkoutRoutine;
-
-export interface EducationalArticleContent {
-  investigated: string;
-  methodology: string;
-  findings: string;
-  practicalApplication: string;
-  limitations: string;
-  scientificReference: string;
-  aiDisclaimer: string;
-}
-
-export interface Article {
-  id: string;
-  title: string;
-  summary: string;
-  sourceUrl: string;
-  publishedAt: string;
-  tags: string[];
-  authors?: string;
-  year?: number;
-  journal?: string;
-  doi?: string;
-  educationalArticle?: EducationalArticleContent;
-  createdAt?: string;
-  updatedAt?: string;
-}

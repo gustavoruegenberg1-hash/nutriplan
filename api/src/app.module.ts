@@ -4,7 +4,6 @@ import { MailModule } from './shared/mail/mail.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DietModule } from './modules/diet/diet.module';
 import { WorkoutModule } from './modules/workout/workout.module';
-import { EducationModule } from './modules/education/education.module';
 import { GamificationModule } from './modules/gamification/gamification.module';
 import { IdleGameModule } from './modules/idle-game/idle-game.module';
 import { ProfessionalsModule } from './modules/professionals/professionals.module';
@@ -16,7 +15,6 @@ import { ProfessionalsModule } from './modules/professionals/professionals.modul
     AuthModule,
     DietModule,
     WorkoutModule,
-    EducationModule,
     GamificationModule,
     IdleGameModule,
     ProfessionalsModule,

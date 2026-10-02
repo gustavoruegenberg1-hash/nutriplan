@@ -12,8 +12,6 @@ import { Dashboard } from './pages/Dashboard';
 import { DietPlanner } from './pages/DietPlanner';
 import { NutrientInfo } from './pages/NutrientInfo';
 import { WorkoutPlanner } from './pages/WorkoutPlanner';
-import { Articles } from './pages/Articles';
-import { ArticleDetail } from './pages/ArticleDetail';
 import { Profile } from './pages/Profile';
 import { IdleGameScreen } from './pages/IdleGameScreen';
 import { ProfessionalsList } from './pages/ProfessionalsList';
@@ -60,8 +58,6 @@ export function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
-                <Route path="/articles" element={<Articles />} />
-                <Route path="/articles/:id" element={<ArticleDetail />} />
 
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>
@@ -95,7 +91,7 @@ export function App() {
                 NutriPlan &copy; {new Date().getFullYear()} &middot; Aplicativo de Nutrição, Treino e Ciência.
               </p>
               <p className="mt-1 text-slate-600">
-                Tabela TACO (UNICAMP) &middot; Equações de Mifflin-St Jeor &middot; Base de Artigos Indexados (PubMed/DOI)
+                Tabela TACO (UNICAMP) &middot; Equações de Mifflin-St Jeor &middot; Nutrição Baseada em Evidências
               </p>
             </div>
           </footer>

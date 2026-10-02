@@ -1,9 +1,9 @@
-﻿/**
+/**
  * Testes UnitÃ¡rios de LÃ³gica, Fisiologia e SeguranÃ§a do NutriPlan
  */
 import { checkFoodAllergens, getAllergyBannerInfo } from '../../src/utils/allergySafety';
 import { verificarCompatibilidade } from '../../src/utils/workoutSafety';
-import { User, Article } from '../../src/types';
+import { User } from '../../src/types';
 
 declare const process: any;
 
@@ -121,48 +121,7 @@ const compMachine = verificarCompatibilidade(userHomeGym, {
   muscleGroup: 'BACK',
   equipment: 'MACHINES',
 });
-assert(compMachine.level === 'EQUIPMENT_MISSING' && !compMachine.isCompatible, 'Identifica falta de mÃ¡quina para quem sÃ³ tem halteres');
-
-// 3. Teste de RecomendaÃ§Ã£o de Artigos por PontuaÃ§Ã£o de Tags
-console.log('\n--- 3. TESTES DE RECOMENDAÃ‡ÃƒO CIENTÃFICA POR OBJETIVO ---');
-
-const mockArticles: Article[] = [
-  {
-    id: '1',
-    title: 'Estudo sobre IngestÃ£o de ProteÃ­nas na Hipertrofia',
-    summary: 'RevisÃ£o sistemÃ¡tica de sÃ­ntese proteica.',
-    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/1/',
-    publishedAt: '2024-01-01',
-    tags: ['hipertrofia', 'proteÃ­nas', 'ganho de forÃ§a'],
-  },
-  {
-    id: '2',
-    title: 'DÃ©ficit CalÃ³rico e EstratÃ©gias de Emagrecimento',
-    summary: 'Estudo sobre perda de gordura.',
-    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/2/',
-    publishedAt: '2024-01-01',
-    tags: ['dÃ©ficit calÃ³rico', 'emagrecimento', 'fibras'],
-  },
-];
-
-function scoreArticle(article: Article, userGoal: string): number {
-  const goalAffinity: Record<string, string[]> = {
-    gain_weight: ['hipertrofia', 'proteÃ­nas', 'ganho de forÃ§a'],
-    lose_weight: ['dÃ©ficit calÃ³rico', 'emagrecimento', 'fibras'],
-  };
-  const keywords = goalAffinity[userGoal] || [];
-  let score = 0;
-  keywords.forEach((kw) => {
-    if (article.tags.some((t) => t.toLowerCase().includes(kw))) {
-      score += 2;
-    }
-  });
-  return score;
-}
-
-const scoreBulking = scoreArticle(mockArticles[0], 'gain_weight');
-const scoreCutting = scoreArticle(mockArticles[1], 'gain_weight');
-assert(scoreBulking > scoreCutting, 'Artigo de hipertrofia pontua mais alto para usuÃ¡rio com objetivo gain_weight');
+assert(compMachine.level === 'EQUIPMENT_MISSING' && !compMachine.isCompatible, 'Identifica falta de máquina para quem só tem halteres');
 
 console.log('\n====================================================');
 console.log(`ðŸ“Š RESULTADO FINAL: ${passed} PASSOU / ${failed} FALHOU`);
