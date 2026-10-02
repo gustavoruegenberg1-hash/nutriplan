@@ -59,6 +59,7 @@ export const Login: React.FC = () => {
           {/* Login com Google (Gmail) */}
           <div className="mb-6">
             <GoogleSignInButton
+              text="Entrar com o Google"
               onSuccess={() => navigate('/')}
               onError={(msg) => setError(msg)}
             />

@@ -14,11 +14,7 @@ import {
   Plus,
   X,
   Lock,
-  Droplets,
-  Bell,
-  Clock,
 } from 'lucide-react';
-import { waterReminderService, WaterReminderConfig } from '../services/waterReminderService';
 
 const commonAllergiesList = [
   'Leite',
@@ -139,19 +135,12 @@ export const Profile: React.FC = () => {
   const [exercisesToAvoid, setExercisesToAvoid] = useState<string[]>([]);
   const [customAvoidExercise, setCustomAvoidExercise] = useState('');
   const [availableEquipment, setAvailableEquipment] = useState<string[]>(['FULL_GYM']);
-
-  // Configuração de Lembretes de Água
-  const [waterConfig, setWaterConfig] = useState<WaterReminderConfig>(() =>
-    waterReminderService.getConfig(user?.id || '')
-  );
-
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
-      setWaterConfig(waterReminderService.getConfig(user.id));
       setName(user.name || '');
       setWeight(user.weight?.toString() || '');
       setHeight(user.height?.toString() || '');
@@ -1043,130 +1032,6 @@ export const Profile: React.FC = () => {
                   </button>
                 );
               })}
-            </div>
-          </div>
-
-          {/* 💧 LEMBRETES DE HIDRATAÇÃO INTELIGENTES */}
-          <div className="p-5 rounded-2xl bg-canvas border border-cyan-500/30 space-y-4 shadow-lg shadow-cyan-950/20">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
-                  <Droplets className="w-4 h-4 text-cyan-400" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                    Lembretes de Hidratação
-                  </h4>
-                  <p className="text-[11px] text-slate-400">
-                    Notificações e avisos no app para você nunca esquecer de beber água.
-                  </p>
-                </div>
-              </div>
-
-              {/* Toggle Ativar / Desativar */}
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={waterConfig.enabled}
-                  onChange={(e) => {
-                    const updated = { ...waterConfig, enabled: e.target.checked };
-                    setWaterConfig(updated);
-                    waterReminderService.saveConfig(user?.id || '', updated);
-                  }}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
-                <span className="ml-2 text-xs font-bold text-slate-300">
-                  {waterConfig.enabled ? 'Ativado' : 'Desativado'}
-                </span>
-              </label>
-            </div>
-
-            {waterConfig.enabled && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-surface-border animate-in fade-in">
-                {/* Intervalo */}
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                    Intervalo
-                  </label>
-                  <select
-                    value={waterConfig.intervalMinutes}
-                    onChange={(e) => {
-                      const updated = { ...waterConfig, intervalMinutes: parseInt(e.target.value, 10) };
-                      setWaterConfig(updated);
-                      waterReminderService.saveConfig(user?.id || '', updated);
-                    }}
-                    className="w-full px-3 py-2 bg-slate-900 border border-surface-border rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-cyan-500"
-                  >
-                    <option value={30}>A cada 30 minutos</option>
-                    <option value={45}>A cada 45 minutos</option>
-                    <option value={60}>A cada 60 minutos (1 hora)</option>
-                    <option value={90}>A cada 90 minutos (1h30)</option>
-                    <option value={120}>A cada 120 minutos (2 horas)</option>
-                  </select>
-                </div>
-
-                {/* Horário Inicial */}
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-                    Horário Inicial
-                  </label>
-                  <input
-                    type="time"
-                    value={waterConfig.startTime}
-                    onChange={(e) => {
-                      const updated = { ...waterConfig, startTime: e.target.value };
-                      setWaterConfig(updated);
-                      waterReminderService.saveConfig(user?.id || '', updated);
-                    }}
-                    className="w-full px-3 py-2 bg-slate-900 border border-surface-border rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-cyan-500"
-                  />
-                </div>
-
-                {/* Horário Final */}
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-                    Horário Final
-                  </label>
-                  <input
-                    type="time"
-                    value={waterConfig.endTime}
-                    onChange={(e) => {
-                      const updated = { ...waterConfig, endTime: e.target.value };
-                      setWaterConfig(updated);
-                      waterReminderService.saveConfig(user?.id || '', updated);
-                    }}
-                    className="w-full px-3 py-2 bg-slate-900 border border-surface-border rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-cyan-500"
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between text-[11px] text-slate-400 bg-slate-900/60 p-2.5 rounded-xl border border-surface-border flex-wrap gap-2">
-              <span className="flex items-center gap-1.5">
-                <Bell className="w-3.5 h-3.5 text-cyan-400" />
-                Próximo lembrete previsto: <strong className="text-white">{waterReminderService.getNextReminderTime(user?.id || '')}</strong>
-              </span>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  const granted = await waterReminderService.requestNotificationPermission();
-                  waterReminderService.sendNativeNotification(
-                    '💧 Hora da Água - NutriPlan',
-                    'Lembrete de hidratação funcionando perfeitamente!'
-                  );
-                  alert(
-                    granted
-                      ? 'Notificações nativas ativadas! Disparamos um teste no seu navegador.'
-                      : 'Lembretes exibidos via alertas internos do aplicativo.'
-                  );
-                }}
-                className="text-cyan-400 hover:text-cyan-300 font-bold underline cursor-pointer"
-              >
-                Testar Notificação
-              </button>
             </div>
           </div>
 

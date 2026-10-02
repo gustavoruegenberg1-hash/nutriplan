@@ -26,7 +26,7 @@ export class GoogleAuthUseCase {
     let googleData: { email: string; name: string; picture?: string; sub: string } | null = null;
 
     try {
-      // 1. Verificação oficial através da API de TokenInfo do Google
+      // 1. Verificação oficial através da API de TokenInfo do Google (para id_token)
       const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${dto.credential}`);
       if (response.ok) {
         const payload = await response.json();
@@ -37,6 +37,24 @@ export class GoogleAuthUseCase {
             picture: payload.picture,
             sub: payload.sub,
           };
+        }
+      } else {
+        // 2. Se não for um id_token válido, tentar como access_token via UserInfo API
+        const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: {
+            Authorization: `Bearer ${dto.credential}`,
+          },
+        });
+        if (userinfoRes.ok) {
+          const userinfo = await userinfoRes.json();
+          if (userinfo.email) {
+            googleData = {
+              email: userinfo.email,
+              name: userinfo.name || userinfo.email.split('@')[0],
+              picture: userinfo.picture,
+              sub: userinfo.sub,
+            };
+          }
         }
       }
     } catch (err: any) {

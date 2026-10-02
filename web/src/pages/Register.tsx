@@ -69,6 +69,7 @@ export const Register: React.FC = () => {
           {/* Login Direto com Google / Gmail */}
           <div className="mb-6">
             <GoogleSignInButton
+              text="Cadastrar com o Google"
               onSuccess={() => navigate('/profile')}
               onError={(msg) => setError(msg)}
             />
