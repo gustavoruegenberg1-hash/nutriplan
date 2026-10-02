@@ -117,8 +117,6 @@ export const Profile: React.FC = () => {
   // Exercícios e Limitações
   const [experienceLevel, setExperienceLevel] = useState<string>('BEGINNER');
   const [trainingFrequencyDays, setTrainingFrequencyDays] = useState<number>(4);
-  const [weightTrainingExperience, setWeightTrainingExperience] = useState<string>('NEVER');
-  const [weightTrainingTimeMonths, setWeightTrainingTimeMonths] = useState<string>('0');
   const [hasPhysicalDisabilities, setHasPhysicalDisabilities] = useState<string>('NO');
   const [affectedBodyRegions, setAffectedBodyRegions] = useState<string[]>([]);
   const [physicalDisabilityNotes, setPhysicalDisabilityNotes] = useState('');
@@ -160,8 +158,6 @@ export const Profile: React.FC = () => {
 
       setExperienceLevel(user.experienceLevel || 'BEGINNER');
       setTrainingFrequencyDays(user.trainingFrequencyDays || 4);
-      setWeightTrainingExperience(user.weightTrainingExperience || 'NEVER');
-      setWeightTrainingTimeMonths(user.weightTrainingTimeMonths?.toString() || '0');
       setHasPhysicalDisabilities(user.hasPhysicalDisabilities || 'NO');
       setAffectedBodyRegions(user.affectedBodyRegions || []);
       setPhysicalDisabilityNotes(user.physicalDisabilityNotes || '');
@@ -247,8 +243,8 @@ export const Profile: React.FC = () => {
 
         experienceLevel,
         trainingFrequencyDays,
-        weightTrainingExperience,
-        weightTrainingTimeMonths: weightTrainingTimeMonths ? parseInt(weightTrainingTimeMonths, 10) : 0,
+        weightTrainingExperience: experienceLevel === 'RETURNING' ? 'PREVIOUSLY' : (experienceLevel === 'BEGINNER' ? 'NEVER' : 'CURRENTLY'),
+        weightTrainingTimeMonths: experienceLevel === 'ADVANCED' ? 36 : (experienceLevel === 'INTERMEDIATE' ? 12 : 3),
         hasPhysicalDisabilities,
         affectedBodyRegions: hasPhysicalDisabilities === 'YES' ? affectedBodyRegions : [],
         physicalDisabilityNotes,
@@ -705,17 +701,17 @@ export const Profile: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                Nível de Experiência com Exercícios
+                Nível de Experiência com Treinos
               </label>
               <select
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
                 className="w-full px-4 py-3 bg-canvas border border-surface-border rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
               >
-                <option value="BEGINNER">Iniciante (menos de 6 meses de treino)</option>
-                <option value="INTERMEDIATE">Intermediário (6 meses a 2 anos)</option>
+                <option value="BEGINNER">Iniciante (nunca treinou ou menos de 6 meses)</option>
+                <option value="INTERMEDIATE">Intermediário (6 meses a 2 anos de treino)</option>
                 <option value="ADVANCED">Avançado (mais de 2 anos consistentes)</option>
-                <option value="RETURNING">Retornando após um período parado</option>
+                <option value="RETURNING">Retornando (já treinou antes, voltando aos treinos)</option>
               </select>
             </div>
 
@@ -734,34 +730,6 @@ export const Profile: React.FC = () => {
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                Experiência Prévia com Musculação
-              </label>
-              <select
-                value={weightTrainingExperience}
-                onChange={(e) => setWeightTrainingExperience(e.target.value)}
-                className="w-full px-4 py-3 bg-canvas border border-surface-border rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
-              >
-                <option value="NEVER">Nunca pratiquei</option>
-                <option value="CURRENTLY">Sim, pratico atualmente</option>
-                <option value="PREVIOUSLY">Sim, já pratiquei anteriormente</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                Tempo de Prática (Meses)
-              </label>
-              <input
-                type="number"
-                value={weightTrainingTimeMonths}
-                onChange={(e) => setWeightTrainingTimeMonths(e.target.value)}
-                placeholder="Ex: 12"
-                className="w-full px-4 py-3 bg-canvas border border-surface-border rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
-              />
             </div>
           </div>
 
