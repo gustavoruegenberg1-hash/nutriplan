@@ -5,7 +5,13 @@ const getBaseUrl = () => {
     return import.meta.env.VITE_API_URL;
   }
   if (typeof window !== 'undefined' && window.location) {
-    return `${window.location.protocol}//${window.location.hostname}:3000`;
+    const { protocol, hostname } = window.location;
+    // Se estiver hospedado no Render (ex: nutriplan-web...onrender.com)
+    if (hostname.includes('onrender.com')) {
+      const apiHost = hostname.replace('nutriplan-web', 'nutriplan-api');
+      return `${protocol}//${apiHost}`;
+    }
+    return `${protocol}//${hostname}:3000`;
   }
   return 'http://localhost:3000';
 };
