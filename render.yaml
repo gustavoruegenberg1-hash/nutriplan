@@ -14,8 +14,9 @@ services:
         generateValue: true
 
   # Frontend React (Vite)
-  - type: static
+  - type: web
     name: nutriplan-web
+    runtime: static
     rootDir: web
     buildCommand: npm install && npm run build
     staticPublishPath: dist
