@@ -63,6 +63,7 @@ import {
   Fish,
   Candy,
   Carrot,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 export type PortionUnit = 'g' | 'ml' | 'un' | 'scoop' | 'colher' | 'fatia' | 'copo' | 'lata' | 'file';
@@ -147,6 +148,27 @@ export const FOOD_CATEGORIES: FoodCategoryConfig[] = [
   { id: 'Produtos açucarados', label: 'Produtos açucarados', iconComponent: Candy },
   { id: 'Suplementos', label: 'Suplementos', iconComponent: Dumbbell },
   { id: 'Verduras, hortaliças e derivados', label: 'Verduras, hortaliças e derivados', iconComponent: Carrot },
+];
+
+export const MEAT_SUB_TAGS = [
+  { id: 'ALL', label: 'Todas as Carnes' },
+  { id: 'Carne bovina', label: '🥩 Bovina' },
+  { id: 'Carne suína', label: '🥓 Suína' },
+  { id: 'Aves', label: '🍗 Aves / Frango' },
+  { id: 'Embutidos e frios', label: '🌭 Embutidos' },
+  { id: 'Peixes', label: '🐟 Peixes' },
+  { id: 'Frutos do mar', label: '🦐 Frutos do Mar' },
+];
+
+export const NUTRIENT_TAG_FILTERS = [
+  { id: 'ALL', label: 'Todos os Nutrientes' },
+  { id: 'sem-acucar', label: '🚫 Sem Açúcar' },
+  { id: 'alto-proteina', label: '💪 Rico em Proteína' },
+  { id: 'zero-carb', label: '⚡ Zero Carboidrato' },
+  { id: 'zero-gordura', label: '💧 Zero Gordura' },
+  { id: 'rico-fibras', label: '🌾 Rico em Fibras' },
+  { id: 'baixa-caloria', label: '🥗 Baixa Caloria' },
+  { id: 'com-acucar', label: '🍬 Com Açúcar' },
 ];
 
 export interface LocalMealItem {
@@ -797,6 +819,8 @@ export const DietPlanner: React.FC = () => {
   const [selectedTargetMealIdx, setSelectedTargetMealIdx] = useState<number>(0);
   const [expandedFoods, setExpandedFoods] = useState<Record<string, boolean>>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>('ALL');
+  const [selectedNutrientTag, setSelectedNutrientTag] = useState<string>('ALL');
   const [isGroupsExpanded, setIsGroupsExpanded] = useState<boolean>(true);
   const [recentlyAddedFoodId, setRecentlyAddedFoodId] = useState<string | null>(null);
   const [recentlyAddedFoodMsg, setRecentlyAddedFoodMsg] = useState<string | null>(null);
@@ -1057,7 +1081,7 @@ export const DietPlanner: React.FC = () => {
   };
 
   // Adiciona alimento à refeição alvo
-  const addFoodToMeal = (food: FoodItem, specificMealIdx?: number) => {
+  const addFoodToMeal = (food: FoodItem, specificMealIdx?: number, allowDuplicate?: boolean) => {
     if (!checkCanAddFood()) return;
 
     const currentDayMeals = mealsByDay[selectedDay] || [];
@@ -1067,17 +1091,22 @@ export const DietPlanner: React.FC = () => {
     }
     const targetMealName = currentDayMeals[targetIdx]?.name || 'Refeição';
 
-    // Previne inserção duplicada do mesmo alimento na mesma refeição
+    // Se o alimento já estiver na refeição alvo e não tiver autorização explícita, solicita confirmação
     const isAlreadyInMeal = currentDayMeals[targetIdx]?.items.some(
       (it) => it.foodItemId === food.id || it.foodName.toLowerCase().trim() === food.name.toLowerCase().trim()
     );
-    if (isAlreadyInMeal) {
+    if (isAlreadyInMeal && !allowDuplicate) {
       triggerHapticFeedback();
-      setStatusMsg({
-        type: 'error',
-        text: `"${food.name}" já está no ${targetMealName}! Ajuste a quantidade diretamente na lista da refeição abaixo.`,
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Alimento já presente nesta refeição',
+        message: `"${food.name}" já foi adicionado em ${targetMealName}. Deseja adicionar mais uma porção deste alimento?`,
+        variant: 'primary',
+        onConfirm: () => {
+          setConfirmDialog(null);
+          addFoodToMeal(food, targetIdx, true);
+        },
       });
-      setTimeout(() => setStatusMsg(null), 3500);
       return;
     }
 
@@ -1502,22 +1531,44 @@ export const DietPlanner: React.FC = () => {
     return diagnosis;
   }, [currentMeals, dayTotals, user, userMetabolism]);
 
-  // Filtro de alimentos da busca TACO por grupo alimentar selecionado
+  // Filtro de alimentos da busca TACO por grupo alimentar, sub-tags e tags nutricionais
   const filteredFoods = useMemo(() => {
     let source = searchResults;
 
-    // Se uma categoria estiver selecionada e não houver termo de busca digitado,
-    // carrega todos os alimentos daquele grupo da base completa
-    if (!searchQuery.trim() && selectedCategory !== 'ALL') {
+    // Se uma categoria ou filtro nutricional ou sub-tag estiver ativo e não houver termo digitado,
+    // carrega todos os alimentos da base completa para garantir filtragem abrangente
+    if (
+      !searchQuery.trim() &&
+      (selectedCategory !== 'ALL' || selectedNutrientTag !== 'ALL' || selectedSubCategory !== 'ALL')
+    ) {
       source = foodService.getAllFoods();
     }
 
-    if (selectedCategory === 'ALL') {
-      return source;
+    let filtered = source;
+
+    // 1. Filtro de Categoria Principal
+    if (selectedCategory !== 'ALL') {
+      filtered = filtered.filter((f: FoodItem) => f.category === selectedCategory);
     }
 
-    return source.filter((f: FoodItem) => f.category === selectedCategory);
-  }, [searchResults, searchQuery, selectedCategory]);
+    // 2. Filtro de Sub-Tag (ex: Carne bovina, Carne suína, Aves, etc.)
+    if (selectedSubCategory !== 'ALL') {
+      filtered = filtered.filter((f: FoodItem) => {
+        if (!f.subCategory) return false;
+        return f.subCategory.toLowerCase() === selectedSubCategory.toLowerCase();
+      });
+    }
+
+    // 3. Filtro de Tag Nutricional (ex: sem-acucar, alto-proteina, etc.)
+    if (selectedNutrientTag !== 'ALL') {
+      filtered = filtered.filter((f: FoodItem) => {
+        if (!f.tags || !Array.isArray(f.tags)) return false;
+        return f.tags.includes(selectedNutrientTag);
+      });
+    }
+
+    return filtered;
+  }, [searchResults, searchQuery, selectedCategory, selectedSubCategory, selectedNutrientTag]);
 
   // Contadores e métricas para a Caixa 2 (Dieta Montada)
   const totalFoodsCount = useMemo(() => {
@@ -1980,6 +2031,7 @@ export const DietPlanner: React.FC = () => {
                   onClick={() => {
                     triggerHapticFeedback();
                     setSelectedCategory('ALL');
+                    setSelectedSubCategory('ALL');
                   }}
                   className="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/40 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
                 >
@@ -2014,7 +2066,11 @@ export const DietPlanner: React.FC = () => {
                     key={cat.id}
                     onClick={() => {
                       triggerHapticFeedback();
-                      setSelectedCategory(isSelected ? 'ALL' : cat.id);
+                      const next = isSelected ? 'ALL' : cat.id;
+                      setSelectedCategory(next);
+                      if (next !== 'Carnes e derivados') {
+                        setSelectedSubCategory('ALL');
+                      }
                     }}
                     className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center gap-2 min-h-[72px] transition-all cursor-pointer select-none active:scale-[0.97] ${
                       isSelected
@@ -2065,6 +2121,76 @@ export const DietPlanner: React.FC = () => {
             </div>
           </div>
 
+          {/* Sub-tags de Carnes */}
+          {selectedCategory === 'Carnes e derivados' && (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">
+                Tipo:
+              </span>
+              {MEAT_SUB_TAGS.map((sub) => {
+                const isActive = selectedSubCategory === sub.id;
+                return (
+                  <button
+                    key={sub.id}
+                    type="button"
+                    onClick={() => {
+                      triggerHapticFeedback();
+                      setSelectedSubCategory(sub.id);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-500 text-slate-950 font-black shadow-sm'
+                        : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800'
+                    }`}
+                  >
+                    {sub.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Tags Nutricionais (Sem Açúcar, Alto Proteína, Zero Carb, Zero Gordura, Rico em Fibras, Baixa Caloria) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+              <SlidersHorizontal className="w-3 h-3 text-emerald-400" />
+              Nutrição:
+            </span>
+            {NUTRIENT_TAG_FILTERS.map((tag) => {
+              const isActive = selectedNutrientTag === tag.id;
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => {
+                    triggerHapticFeedback();
+                    setSelectedNutrientTag(tag.id);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-emerald-500 text-slate-950 font-black shadow-sm'
+                      : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800'
+                  }`}
+                >
+                  {tag.label}
+                </button>
+              );
+            })}
+            {(selectedNutrientTag !== 'ALL' || selectedSubCategory !== 'ALL') && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHapticFeedback();
+                  setSelectedNutrientTag('ALL');
+                  setSelectedSubCategory('ALL');
+                }}
+                className="px-2 py-1 rounded-lg text-xs font-bold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 shrink-0"
+              >
+                Limpar Filtros
+              </button>
+            )}
+          </div>
+
           {/* Mensagem de Feedback de Adição */}
           {recentlyAddedFoodMsg && (
             <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-in fade-in">
@@ -2108,7 +2234,12 @@ export const DietPlanner: React.FC = () => {
                         <span className="font-extrabold text-xs text-white block truncate">
                           {food.name}
                         </span>
-                        {food.category && (
+                        {food.subCategory && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">
+                            {food.subCategory}
+                          </span>
+                        )}
+                        {food.category && !food.subCategory && (
                           <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800 shrink-0">
                             {food.category}
                           </span>
@@ -2124,30 +2255,25 @@ export const DietPlanner: React.FC = () => {
                       </span>
                     </div>
 
+                    {/* Botão circular apenas com '+' no balão do alimento */}
                     <span
-                      className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                      className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                         isRecentlyAdded
-                          ? 'bg-emerald-500 text-slate-950 font-black'
+                          ? 'bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/30 scale-105'
                           : isAlreadyInTargetMeal
-                          ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black'
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500 hover:text-slate-950'
+                          : 'bg-slate-900 hover:bg-emerald-500 hover:text-slate-950 text-slate-300 border border-slate-800 hover:border-emerald-500'
                       }`}
+                      title={
+                        isAlreadyInTargetMeal
+                          ? 'Já presente nesta refeição (clique para adicionar mais uma porção)'
+                          : 'Adicionar à refeição'
+                      }
                     >
                       {isRecentlyAdded ? (
-                        <>
-                          <Check className="w-3 h-3 stroke-[3]" />
-                          <span>Adicionado!</span>
-                        </>
-                      ) : isAlreadyInTargetMeal ? (
-                        <>
-                          <Check className="w-3 h-3 stroke-[3]" />
-                          <span>Já Adicionado</span>
-                        </>
+                        <Check className="w-4 h-4 stroke-[3]" />
                       ) : (
-                        <>
-                          <Plus className="w-3 h-3 stroke-[3]" />
-                          <span>Adicionar</span>
-                        </>
+                        <Plus className="w-4 h-4 stroke-[2.5]" />
                       )}
                     </span>
                   </button>

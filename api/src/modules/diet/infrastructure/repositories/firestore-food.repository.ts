@@ -54,6 +54,8 @@ export class FirestoreFoodRepository implements IFoodRepository {
       data.source || 'TACO',
       data.micronutrients || null,
       data.legacyId || null,
+      data.subCategory || null,
+      data.tags || null,
     );
   }
 
@@ -86,7 +88,15 @@ export class FirestoreFoodRepository implements IFoodRepository {
       .filter((item) => {
         const normName = normalize(item.name);
         const normCat = item.category ? normalize(item.category) : '';
-        return terms.every((t) => normName.includes(t) || normCat.includes(t));
+        const normSub = item.subCategory ? normalize(item.subCategory) : '';
+        const itemTags = (item.tags || []).map((t) => normalize(t)).join(' ');
+        return terms.every(
+          (t) =>
+            normName.includes(t) ||
+            normCat.includes(t) ||
+            normSub.includes(t) ||
+            itemTags.includes(t),
+        );
       })
       .sort((a, b) => {
         const normA = normalize(a.name);

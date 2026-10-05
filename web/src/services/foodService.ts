@@ -2,8 +2,9 @@ import { api } from '../api/client';
 import { FoodItem } from '../types';
 import { SEED_FOODS } from '../data/seedData';
 
-const FOODS_CACHE_KEY = 'nutriplan_foods_cache_v2';
-const OLD_FOODS_CACHE_KEY = 'nutriplan_foods_cache';
+const FOODS_CACHE_KEY = 'nutriplan_foods_cache_v3';
+const OLD_FOODS_CACHE_KEY = 'nutriplan_foods_cache_v2';
+const LEGACY_CACHE_KEY = 'nutriplan_foods_cache';
 
 const POPULAR_KEYWORDS = [
   'arroz',
@@ -41,7 +42,8 @@ class FoodService {
 
   private initCache() {
     try {
-      // Limpa cache antigo se existir
+      // Limpa caches antigos se existirem
+      localStorage.removeItem(LEGACY_CACHE_KEY);
       localStorage.removeItem(OLD_FOODS_CACHE_KEY);
 
       const saved = localStorage.getItem(FOODS_CACHE_KEY);
@@ -151,7 +153,15 @@ class FoodService {
       .filter((food) => {
         const nameNorm = normalizeText(food.name);
         const catNorm = food.category ? normalizeText(food.category) : '';
-        return terms.every((term) => nameNorm.includes(term) || catNorm.includes(term));
+        const subNorm = food.subCategory ? normalizeText(food.subCategory) : '';
+        const tagsNorm = (food.tags || []).map((t) => normalizeText(t)).join(' ');
+        return terms.every(
+          (term) =>
+            nameNorm.includes(term) ||
+            catNorm.includes(term) ||
+            subNorm.includes(term) ||
+            tagsNorm.includes(term),
+        );
       })
       .sort((a, b) => {
         const normA = normalizeText(a.name);

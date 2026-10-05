@@ -6,6 +6,8 @@ export const SEED_FOODS: FoodItem[] = (ALL_TACO_FOODS as any[]).map((f: any) => 
   name: f.name,
   source: f.source || 'TACO',
   category: f.category,
+  subCategory: f.subCategory || undefined,
+  tags: f.tags || [],
   caloriesPer100g: Number(f.caloriesPer100g) || 0,
   proteinPer100g: Number(f.proteinPer100g) || 0,
   carbsPer100g: Number(f.carbsPer100g) || 0,

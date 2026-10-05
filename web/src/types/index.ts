@@ -105,6 +105,8 @@ export interface FoodItem {
   fatPer100g: number;
   fiberPer100g: number;
   category?: string;
+  subCategory?: string;
+  tags?: string[];
   micronutrients?: any;
   legacyId?: string;
   isVerified?: boolean;

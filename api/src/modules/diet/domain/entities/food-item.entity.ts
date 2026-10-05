@@ -16,6 +16,8 @@ export class FoodItem {
     public readonly source?: string | null,
     public readonly micronutrients?: any,
     public readonly legacyId?: string | null,
+    public readonly subCategory?: string | null,
+    public readonly tags?: string[] | null,
   ) {}
 
   static fromPrisma(prismaFood: any): FoodItem {
@@ -36,6 +38,8 @@ export class FoodItem {
       prismaFood.source || null,
       prismaFood.micronutrients || null,
       prismaFood.legacyId || null,
+      prismaFood.subCategory || null,
+      prismaFood.tags || null,
     );
   }
 }
