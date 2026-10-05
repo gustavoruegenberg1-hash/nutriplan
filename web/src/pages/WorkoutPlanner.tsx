@@ -808,6 +808,7 @@ export const WorkoutPlanner: React.FC = () => {
 
   const navigate = useNavigate();
   const [activeDayIdx, setActiveDayIdx] = useState<number>(0);
+  const [isWorkoutBuilderOpen, setIsWorkoutBuilderOpen] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(true); // Aberto por padrão para montagem direta e ágil
   const [isLimitationModalOpen, setIsLimitationModalOpen] = useState<boolean>(false);
   const [pendingExerciseForAdd, setPendingExerciseForAdd] = useState<Exercise | null>(null);
@@ -1245,21 +1246,26 @@ export const WorkoutPlanner: React.FC = () => {
   };
 
   // Adiciona exercício com 1 clique/toque no card
-  const handleSelectExercise = (ex: Exercise) => {
+  const handleSelectExercise = (ex: Exercise, allowDuplicate?: boolean) => {
     if (!checkCanAddExercise(ex)) return;
     if (activeDayIdx < 0 || activeDayIdx >= workoutDays.length) return;
 
-    // Previne inserção duplicada do mesmo exercício no mesmo dia
+    // Se o exercício já estiver no treino, solicita confirmação
     const isAlreadyInWorkout = workoutDays[activeDayIdx]?.exercises.some(
       (e) => e.exerciseId === ex.id || e.exerciseName.toLowerCase().trim() === ex.name.toLowerCase().trim()
     );
-    if (isAlreadyInWorkout) {
+    if (isAlreadyInWorkout && !allowDuplicate) {
       triggerHapticFeedback();
-      setStatusMsg({
-        type: 'error',
-        text: `"${ex.name}" já está no treino! Ajuste as séries diretamente no treino montado abaixo.`,
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Exercício já presente no treino',
+        message: `"${ex.name}" já foi adicionado em ${workoutDays[activeDayIdx]?.name || 'seu treino'}. Deseja adicionar mais uma variação deste exercício?`,
+        variant: 'primary',
+        onConfirm: () => {
+          setConfirmDialog(null);
+          handleSelectExercise(ex, true);
+        },
       });
-      setTimeout(() => setStatusMsg(null), 3500);
       return;
     }
 
@@ -1685,10 +1691,85 @@ export const WorkoutPlanner: React.FC = () => {
             })}
           </div>
         </div>
+      </div>
 
-        {/* Configuração do Treino Ativo: Nome + Dia da Semana */}
-        {workoutDays[activeDayIdx] && (
-          <div className="space-y-4 pt-2 border-t border-[#243044]">
+      {/* ========================================================================= */}
+      {/* BOTÃO GRANDE MINIMALISTA: ADICIONAR / MONTAR TREINO                       */}
+      {/* ========================================================================= */}
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-slate-900 border border-blue-500/30 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-5 transition-all">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/40 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
+            <Dumbbell className="w-7 h-7" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-lg sm:text-xl font-black text-white">
+              Montar Treino & Exercícios
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
+              Selecione as tags musculares, use combos de 1-toque ou adicione exercícios para <strong className="text-blue-400">{workoutDays[activeDayIdx]?.name || 'seu treino'}</strong> de forma guiada e sem poluir sua tela.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <button
+            type="button"
+            onClick={() => {
+              triggerHapticFeedback();
+              setIsWorkoutBuilderOpen(true);
+            }}
+            className="w-full md:w-auto px-7 py-3.5 rounded-2xl bg-blue-500 hover:bg-blue-400 text-white font-black text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-blue-500/30 transition-all cursor-pointer active:scale-95 group"
+          >
+            <Plus className="w-5 h-5 stroke-[3] group-hover:rotate-90 transition-transform duration-200" />
+            <span>+ Adicionar Exercício ao Treino</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* MODAL GUIADO: MONTADOR DE TREINO (Limpo, guiado e sem sobrecarregar a tela)*/}
+      {/* ========================================================================= */}
+      {isWorkoutBuilderOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#151D28] border border-[#243044] rounded-3xl p-5 sm:p-7 max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl space-y-4 overflow-hidden">
+            {/* Cabeçalho do Modal */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#243044] shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                  <Dumbbell className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-white">
+                    Montador de Treino: {workoutDays[activeDayIdx]?.name || 'Treino'}
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Defina as tags musculares ou combos e escolha os exercícios desejados
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsWorkoutBuilderOpen(false)}
+                  className="px-3.5 py-1.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-black text-xs transition-all cursor-pointer shadow-sm"
+                >
+                  Concluir & Ver Treino
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsWorkoutBuilderOpen(false)}
+                  className="p-1.5 text-slate-400 hover:text-white rounded-xl bg-slate-900 border border-slate-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+              {/* Configuração do Treino Ativo: Nome + Dia da Semana */}
+              {workoutDays[activeDayIdx] && (
+                <div className="space-y-4 pt-2 border-t border-[#243044]">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {/* Nome do Treino */}
               <div className="md:col-span-2 space-y-1.5">
@@ -1902,30 +1983,25 @@ export const WorkoutPlanner: React.FC = () => {
                           </span>
                         </div>
 
+                        {/* Botão circular com '+' ou '✓' no balão do exercício */}
                         <span
-                          className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                          className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                             isRecentlyAdded
-                              ? 'bg-emerald-500 text-slate-950 font-black'
+                              ? 'bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/30 scale-105'
                               : isAlreadyInWorkout
-                              ? 'bg-slate-800 text-blue-400 border border-blue-500/30'
-                              : 'bg-blue-500 hover:bg-blue-400 text-white'
+                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40 hover:bg-blue-500 hover:text-white'
+                              : 'bg-slate-900 hover:bg-blue-500 hover:text-white text-slate-300 border border-slate-800 hover:border-blue-500'
                           }`}
+                          title={
+                            isAlreadyInWorkout
+                              ? 'Já no treino (clique para adicionar mais uma variação)'
+                              : 'Adicionar ao treino'
+                          }
                         >
                           {isRecentlyAdded ? (
-                            <>
-                              <Check className="w-3 h-3 stroke-[3]" />
-                              <span>Adicionado!</span>
-                            </>
-                          ) : isAlreadyInWorkout ? (
-                            <>
-                              <Check className="w-3 h-3 stroke-[3]" />
-                              <span>Já no Treino</span>
-                            </>
+                            <Check className="w-4 h-4 stroke-[3]" />
                           ) : (
-                            <>
-                              <Plus className="w-3 h-3 stroke-[3]" />
-                              <span>Adicionar</span>
-                            </>
+                            <Plus className="w-4 h-4 stroke-[2.5]" />
                           )}
                         </span>
                       </button>
@@ -1940,7 +2016,10 @@ export const WorkoutPlanner: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* CAIXA 2: TREINO MONTADO (Apenas o nome do exercício até ser iniciado)     */}
@@ -1994,6 +2073,18 @@ export const WorkoutPlanner: React.FC = () => {
 
           {/* Botões de Ação Global do Treino Montado */}
           <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                triggerHapticFeedback();
+                setIsWorkoutBuilderOpen(true);
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all cursor-pointer shrink-0 active:scale-95"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>+ Adicionar Exercício</span>
+            </button>
+
             <button
               type="button"
               onClick={handleCompleteWorkout}
@@ -2267,12 +2358,23 @@ export const WorkoutPlanner: React.FC = () => {
           })}
 
           {workoutDays[activeDayIdx]?.exercises.length === 0 && (
-            <div className="p-8 rounded-2xl bg-slate-950/40 border-2 border-dashed border-slate-800/80 text-center space-y-2">
-              <Dumbbell className="w-6 h-6 text-slate-600 mx-auto" />
+            <div className="p-8 rounded-2xl bg-slate-950/40 border-2 border-dashed border-slate-800/80 text-center space-y-3">
+              <Dumbbell className="w-8 h-8 text-slate-600 mx-auto" />
               <p className="text-sm font-bold text-white">Nenhum exercício no treino montado ainda</p>
-              <p className="text-xs text-slate-400">
-                Selecione as tags acima e clique em "+ Adicionar" para montar a lista deste treino.
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
+                Clique no botão abaixo para abrir o catálogo guiado de exercícios e montar a lista deste treino.
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHapticFeedback();
+                  setIsWorkoutBuilderOpen(true);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all cursor-pointer shadow-md shadow-emerald-500/20 active:scale-95"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>+ Adicionar Exercício</span>
+              </button>
             </div>
           )}
         </div>
