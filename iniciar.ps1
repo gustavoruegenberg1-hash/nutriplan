@@ -69,24 +69,25 @@ function Wait-For-Http([string]$url, [int]$timeoutSeconds = 45, [string]$label =
 }
 
 # ------------------------------------------------------------------------------
-# [ETAPA 1/3] Limpeza de processos anteriores
+# [ETAPA 1/4] Limpeza de processos anteriores
 # ------------------------------------------------------------------------------
-Write-Host "[1/3] Garantindo portas livres para evitar falhas de conexão..." -ForegroundColor White
+Write-Host "[1/4] Garantindo portas livres para evitar falhas de conexão..." -ForegroundColor White
 Free-Port 3000 "Backend API"
 Free-Port 5173 "Frontend Web"
+Free-Port 5174 "NutriLife Game"
 Write-Host ""
 
 # ------------------------------------------------------------------------------
-# [ETAPA 2/3] Inicialização do Backend NestJS
+# [ETAPA 2/4] Inicialização do Backend NestJS
 # ------------------------------------------------------------------------------
-Write-Host "[2/3] Inicializando Servidor Backend (NestJS na porta 3000)..." -ForegroundColor White
+Write-Host "[2/4] Inicializando Servidor Backend (NestJS na porta 3000)..." -ForegroundColor White
 $apiPath = Join-Path $baseDir "api"
 
 # Inicia o backend em uma janela CMD independente
 Start-Process cmd.exe -ArgumentList "/k", "title NutriPlan API (Backend) && cd /d `"$apiPath`" && npm run start:dev" -WindowStyle Normal
 
 # Aguarda ativamente até que a API esteja respondendo requisições HTTP
-$apiReady = Wait-For-Http "http://localhost:3000/articles" 45 "Backend NestJS (porta 3000)"
+$apiReady = Wait-For-Http "http://localhost:3000/api" 45 "Backend NestJS (porta 3000)"
 
 if (-not $apiReady) {
     Write-Host "  [ATENÇÃO] O backend pode estar compilando. Aguardando mais alguns segundos..." -ForegroundColor Yellow
@@ -95,9 +96,9 @@ if (-not $apiReady) {
 Write-Host ""
 
 # ------------------------------------------------------------------------------
-# [ETAPA 3/3] Inicialização do Frontend React
+# [ETAPA 3/4] Inicialização do Frontend React
 # ------------------------------------------------------------------------------
-Write-Host "[3/3] Inicializando Servidor Frontend (Vite na porta 5173)..." -ForegroundColor White
+Write-Host "[3/4] Inicializando Servidor Frontend (Vite na porta 5173)..." -ForegroundColor White
 $webPath = Join-Path $baseDir "web"
 
 # Inicia o Vite em uma janela CMD independente
@@ -108,26 +109,38 @@ $webReady = Wait-For-Http "http://localhost:5173" 30 "Frontend Vite (porta 5173)
 Write-Host ""
 
 # ------------------------------------------------------------------------------
+# [ETAPA 4/4] Inicialização do Jogo NutriLife Sim (Ankama 2D Isométrico)
+# ------------------------------------------------------------------------------
+$gamePath = Join-Path $baseDir "game"
+if (Test-Path $gamePath) {
+    Write-Host "[4/4] Inicializando NutriLife Game (Ankama 2D na porta 5174)..." -ForegroundColor White
+    Start-Process cmd.exe -ArgumentList "/k", "title NutriLife Game (Porta 5174) && cd /d `"$gamePath`" && npm run dev" -WindowStyle Normal
+    $gameReady = Wait-For-Http "http://localhost:5174" 30 "NutriLife Game (porta 5174)"
+    Write-Host ""
+}
+
+# ------------------------------------------------------------------------------
 # Finalização e Abertura do Navegador
 # ------------------------------------------------------------------------------
 Write-Host "========================================================" -ForegroundColor Cyan
-Write-Host "   NutriPlan está 100% ATIVO e PRONTO para Uso!" -ForegroundColor Green
+Write-Host "   NutriPlan & NutriLife estão 100% ATIVOS e PRONTOS!" -ForegroundColor Green
 Write-Host "========================================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  * Frontend Web:   http://localhost:5173" -ForegroundColor White
+Write-Host "  * NutriLife Game: http://localhost:5174" -ForegroundColor White
 Write-Host "  * Backend API:    http://localhost:3000" -ForegroundColor White
 Write-Host "  * Swagger API:    http://localhost:3000/api" -ForegroundColor White
 Write-Host ""
 Write-Host "  [Usuário de Teste / Demonstração já configurado]:" -ForegroundColor Yellow
 Write-Host "  * E-mail: demo@nutriplan.com" -ForegroundColor Cyan
 Write-Host "  * Senha:  password123" -ForegroundColor Cyan
-Write-Host "  (Ou você pode clicar em 'Cadastre-se gratuitamente' para criar outra conta)" -ForegroundColor Gray
 Write-Host ""
-Write-Host "Abrindo o aplicativo no seu navegador padrão..." -ForegroundColor Green
+Write-Host "Abrindo os aplicativos no seu navegador padrão..." -ForegroundColor Green
 
 Start-Sleep -Milliseconds 600
 Start-Process "http://localhost:5173"
+Start-Process "http://localhost:5174"
 
-Write-Host "Sucesso! Mantenha as janelas do Backend e Frontend abertas enquanto utilizar o sistema." -ForegroundColor Gray
+Write-Host "Sucesso! Mantenha as janelas abertas enquanto desenvolve ou testa o sistema." -ForegroundColor Gray
 Write-Host ""
 Read-Host "Pressione [ENTER] para fechar esta janela do inicializador..."
