@@ -45,10 +45,14 @@ export interface User {
   gender: Gender | null;
   activityLevel: ActivityLevel | null;
   goal: Goal | null;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'ADMIN' | 'PROFESSIONAL' | string;
   isEmailVerified?: boolean;
   provider?: string;
   avatarUrl?: string | null;
+  isBanned?: boolean;
+  bannedAt?: string | null;
+  banReason?: string | null;
+  createdAt?: string;
   bmr?: number | null;
   tdee?: number | null;
 

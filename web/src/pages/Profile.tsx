@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { User, ActivityLevel, Gender, Goal, PainDetail } from '../types';
 import {
@@ -8,6 +9,7 @@ import {
   Scale,
   Check,
   AlertCircle,
+  Shield,
   ShieldAlert,
   Dumbbell,
   Utensils,
@@ -288,6 +290,35 @@ export const Profile: React.FC = () => {
           Informe seus dados corporais, restrições alimentares e limitações físicas para recomendações precisas e seguras
         </p>
       </div>
+
+      {/* Banner de Administrador */}
+      {user?.role === 'ADMIN' && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-900/30 to-indigo-900/20 border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-white font-bold text-sm flex items-center gap-1.5">
+                Privilégio de Administrador Ativo
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 uppercase">
+                  Admin
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Você tem permissão para gerenciar contas, aplicar suspensões e editar dados de usuários no sistema.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/admin"
+            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs sm:text-sm shadow-md shadow-purple-600/20 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer"
+          >
+            <Shield className="w-4 h-4" />
+            <span>Acessar Painel Admin</span>
+          </Link>
+        </div>
+      )}
 
       {/* Metrics Highlights (TMB / TDEE) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

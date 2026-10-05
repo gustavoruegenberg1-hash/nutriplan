@@ -13,6 +13,7 @@ import { DietPlanner } from './pages/DietPlanner';
 import { NutrientInfo } from './pages/NutrientInfo';
 import { WorkoutPlanner } from './pages/WorkoutPlanner';
 import { Profile } from './pages/Profile';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { IdleGameScreen } from './pages/IdleGameScreen';
 import { ProfessionalsList } from './pages/ProfessionalsList';
 import { ProfessionalDetail } from './pages/ProfessionalDetail';
@@ -74,6 +75,7 @@ export function App() {
                   <Route path="/chat" element={<ChatScreen />} />
                   <Route path="/chat/:conversationId" element={<ChatScreen />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
                 </Route>
 
                 {/* Catch all */}

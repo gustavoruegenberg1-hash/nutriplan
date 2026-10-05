@@ -1,4 +1,4 @@
-import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Inject, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { IUserRepository } from '../ports/user-repository.port';
 import { LoginDto } from '../../presentation/dto/login.dto';
 import * as argon2 from 'argon2';
@@ -26,6 +26,24 @@ export class LoginUseCase {
     } catch (err: any) {
       if (err instanceof UnauthorizedException) throw err;
       throw new UnauthorizedException('Credenciais inválidas. Verifique seu e-mail e senha.');
+    }
+
+    if (user.isBanned) {
+      throw new ForbiddenException(
+        user.banReason
+          ? `Sua conta foi suspensa pela administração. Motivo: ${user.banReason}`
+          : 'Sua conta foi suspensa pela administração.'
+      );
+    }
+
+    // Auto-promoção caso o email esteja configurado em ADMIN_EMAILS
+    const adminEmails = (process.env.ADMIN_EMAILS || '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    if (adminEmails.includes(user.email.toLowerCase()) && user.role !== 'ADMIN') {
+      user.role = 'ADMIN';
+      await this.userRepository.update(user.id, { role: 'ADMIN' });
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };

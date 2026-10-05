@@ -7,6 +7,7 @@ import { WorkoutModule } from './modules/workout/workout.module';
 import { GamificationModule } from './modules/gamification/gamification.module';
 import { IdleGameModule } from './modules/idle-game/idle-game.module';
 import { ProfessionalsModule } from './modules/professionals/professionals.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 import { AppController } from './app.controller';
 
@@ -20,6 +21,7 @@ import { AppController } from './app.controller';
     GamificationModule,
     IdleGameModule,
     ProfessionalsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [],

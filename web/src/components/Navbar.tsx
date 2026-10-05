@@ -11,6 +11,7 @@ import {
   X,
   Flame,
   MessageCircle,
+  Shield,
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -85,6 +86,21 @@ export const Navbar: React.FC = () => {
                 >
                   <MessageCircle className="w-5 h-5" />
                 </Link>
+                {user?.role === 'ADMIN' && (
+                  <Link
+                    to="/admin"
+                    title="Painel Administrativo"
+                    aria-label="Painel Administrativo"
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      location.pathname.startsWith('/admin')
+                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                        : 'text-purple-300 hover:text-white bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20'
+                    }`}
+                  >
+                    <Shield className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Admin</span>
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   className="flex items-center space-x-2.5 px-3 py-1.5 rounded-lg bg-surface-alt/80 hover:bg-surface-alt border border-surface-border/80 text-sm transition-all"
@@ -198,6 +214,22 @@ export const Navbar: React.FC = () => {
                   <span>Mensagens / Chat</span>
                 </Link>
               </div>
+              {user?.role === 'ADMIN' && (
+                <div className="pb-1">
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg text-base font-semibold ${
+                      location.pathname.startsWith('/admin')
+                        ? 'bg-purple-500/20 text-purple-300'
+                        : 'text-purple-300 hover:bg-purple-500/10'
+                    }`}
+                  >
+                    <Shield className="w-5 h-5 text-purple-400" />
+                    <span>Painel Admin</span>
+                  </Link>
+                </div>
+              )}
               <div className="pt-3 border-t border-surface-border flex items-center justify-between px-3">
                 <Link
                   to="/profile"

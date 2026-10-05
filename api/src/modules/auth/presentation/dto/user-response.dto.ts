@@ -14,6 +14,9 @@ export class UserResponseDto {
   isEmailVerified!: boolean;
   provider?: string;
   avatarUrl?: string | null;
+  isBanned?: boolean;
+  bannedAt?: Date | string | null;
+  banReason?: string | null;
   bmr!: number | null;
   tdee!: number | null;
 
@@ -62,6 +65,9 @@ export class UserResponseDto {
     dto.isEmailVerified = entity.isEmailVerified ?? false;
     dto.provider = (entity as any).provider || 'local';
     dto.avatarUrl = (entity as any).avatarUrl || null;
+    dto.isBanned = entity.isBanned ?? false;
+    dto.bannedAt = entity.bannedAt ?? null;
+    dto.banReason = entity.banReason ?? null;
     dto.bmr = entity.calculateBMR();
     dto.tdee = entity.calculateTDEE();
 

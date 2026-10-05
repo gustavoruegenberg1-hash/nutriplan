@@ -82,6 +82,9 @@ export class FirestoreUserRepository implements IUserRepository {
       verificationCodeExpiresAt: data.verificationCodeExpiresAt || null,
       provider: data.provider || 'local',
       avatarUrl: data.avatarUrl || null,
+      isBanned: data.isBanned ?? false,
+      bannedAt: data.bannedAt || null,
+      banReason: data.banReason || null,
       createdAt: data.createdAt ? new Date(data.createdAt._seconds ? data.createdAt._seconds * 1000 : data.createdAt) : new Date(),
       updatedAt: data.updatedAt ? new Date(data.updatedAt._seconds ? data.updatedAt._seconds * 1000 : data.updatedAt) : new Date(),
 
@@ -182,6 +185,9 @@ export class FirestoreUserRepository implements IUserRepository {
       verificationCodeExpiresAt: userData.verificationCodeExpiresAt || null,
       provider: userData.provider || 'local',
       avatarUrl: userData.avatarUrl || null,
+      isBanned: (userData as any).isBanned ?? false,
+      bannedAt: (userData as any).bannedAt || null,
+      banReason: (userData as any).banReason || null,
 
       hasFoodAllergies: userData.hasFoodAllergies ?? null,
       allergies: userData.allergies || [],
@@ -266,5 +272,44 @@ export class FirestoreUserRepository implements IUserRepository {
     this.persistCache();
 
     return this.mapDoc(merged);
+  }
+
+  async findAll(): Promise<UserEntity[]> {
+    try {
+      const snapshot = await this.collection.get();
+      if (!snapshot.empty) {
+        const users: UserEntity[] = [];
+        snapshot.docs.forEach((doc) => {
+          const entity = this.mapDoc(doc);
+          const data = doc.data();
+          this.localUsersMap.set(entity.id, data);
+          if (data.email) this.localUsersMap.set(data.email.toLowerCase(), data);
+          users.push(entity);
+        });
+        this.persistCache();
+        return users;
+      }
+    } catch (err: any) {
+      this.logger.warn(`Firestore indisponível para findAll (${err.message}). Consultando cache local...`);
+    }
+
+    const uniqueUsers = Array.from(new Set(this.localUsersMap.values()));
+    return uniqueUsers.map((u) => this.mapDoc(u));
+  }
+
+  async delete(id: string): Promise<boolean> {
+    try {
+      await this.collection.doc(id).delete();
+    } catch (err: any) {
+      this.logger.warn(`Firestore indisponível ao deletar usuário ${id}: ${err.message}`);
+    }
+
+    const userInCache = this.localUsersMap.get(id);
+    if (userInCache && userInCache.email) {
+      this.localUsersMap.delete(userInCache.email.toLowerCase());
+    }
+    this.localUsersMap.delete(id);
+    this.persistCache();
+    return true;
   }
 }

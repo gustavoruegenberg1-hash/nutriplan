@@ -34,6 +34,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Sessão expirada ou usuário não encontrado.');
     }
 
-    return { id: user.id, email: user.email, role: user.role || 'USER' };
+    if (user.isBanned) {
+      throw new UnauthorizedException(
+        user.banReason
+          ? `Sua conta foi suspensa pela administração. Motivo: ${user.banReason}`
+          : 'Sua conta foi suspensa pela administração.'
+      );
+    }
+
+    const adminEmails = (process.env.ADMIN_EMAILS || '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    let role = user.role || 'USER';
+    if (adminEmails.includes(user.email.toLowerCase()) && role !== 'ADMIN') {
+      role = 'ADMIN';
+      user.role = 'ADMIN';
+      await this.userRepository.update(user.id, { role: 'ADMIN' });
+    }
+
+    return { id: user.id, email: user.email, role };
   }
 }

@@ -11,7 +11,15 @@ export class UpdateProfileUseCase {
   ) {}
 
   async execute(userId: string, dto: UpdateProfileDto): Promise<UserResponseDto> {
-    const updatedUser = await this.userRepository.update(userId, dto as any);
+    const safeData: any = { ...dto };
+    delete safeData.role;
+    delete safeData.isBanned;
+    delete safeData.bannedAt;
+    delete safeData.banReason;
+    delete safeData.isEmailVerified;
+    delete safeData.passwordHash;
+
+    const updatedUser = await this.userRepository.update(userId, safeData);
     return UserResponseDto.fromEntity(updatedUser);
   }
 }

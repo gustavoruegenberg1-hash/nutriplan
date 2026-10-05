@@ -16,6 +16,9 @@ export class UserEntity {
   verificationCodeExpiresAt?: Date | string | null;
   provider?: 'local' | 'google' | string;
   avatarUrl?: string | null;
+  isBanned?: boolean = false;
+  bannedAt?: Date | string | null;
+  banReason?: string | null;
   createdAt: Date;
   updatedAt: Date;
 

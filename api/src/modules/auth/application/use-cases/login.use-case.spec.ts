@@ -20,8 +20,10 @@ describe('LoginUseCase', () => {
     const mockUserRepo: IUserRepository = {
       findByEmail: vi.fn().mockResolvedValue(mockUser),
       findById: vi.fn(),
+      findAll: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
     };
 
     const mockJwtService = {
@@ -48,8 +50,10 @@ describe('LoginUseCase', () => {
     const mockUserRepo: IUserRepository = {
       findByEmail: vi.fn().mockResolvedValue(mockUser),
       findById: vi.fn(),
+      findAll: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
     };
 
     const mockJwtService = {
@@ -61,5 +65,37 @@ describe('LoginUseCase', () => {
     await expect(
       useCase.execute({ email: 'teste@email.com', password: 'senhaIncorreta' }),
     ).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('should throw ForbiddenException if user is banned', async () => {
+    const hashedPassword = await argon2.hash('senha123');
+    const mockBannedUser = new UserEntity({
+      id: 'user-banned',
+      email: 'banido@email.com',
+      passwordHash: hashedPassword,
+      name: 'Usuário Banido',
+      role: 'USER',
+      isBanned: true,
+      banReason: 'Violação dos termos de uso',
+    });
+
+    const mockUserRepo: IUserRepository = {
+      findByEmail: vi.fn().mockResolvedValue(mockBannedUser),
+      findById: vi.fn(),
+      findAll: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    };
+
+    const mockJwtService = {
+      signAsync: vi.fn(),
+    } as unknown as JwtService;
+
+    const useCase = new LoginUseCase(mockUserRepo, mockJwtService);
+
+    await expect(
+      useCase.execute({ email: 'banido@email.com', password: 'senha123' }),
+    ).rejects.toThrow('Sua conta foi suspensa pela administração.');
   });
 });
