@@ -8,6 +8,8 @@ import { GamificationModule } from './modules/gamification/gamification.module';
 import { IdleGameModule } from './modules/idle-game/idle-game.module';
 import { ProfessionalsModule } from './modules/professionals/professionals.module';
 
+import { AppController } from './app.controller';
+
 @Module({
   imports: [
     FirebaseModule,
@@ -19,7 +21,7 @@ import { ProfessionalsModule } from './modules/professionals/professionals.modul
     IdleGameModule,
     ProfessionalsModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}

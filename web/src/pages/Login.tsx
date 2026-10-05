@@ -1,34 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Flame, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { Flame, Lock, Mail, ArrowRight, AlertCircle, RotateCw } from 'lucide-react';
 import { GoogleSignInButton } from '../components/GoogleSignInButton';
+import { pingServer } from '../api/client';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isServerWarming, setIsServerWarming] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Acorda o servidor em segundo plano assim que a tela abre
+  useEffect(() => {
+    pingServer();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    setIsServerWarming(false);
+
+    // Se demorar mais de 3.5s, avisa o usuário que o servidor está acordando
+    const warmTimer = setTimeout(() => {
+      setIsServerWarming(true);
+    }, 3500);
 
     try {
       await login(email, password);
       navigate('/');
     } catch (err: any) {
-      if (err.message === 'Network Error' || !err.response) {
-        setError('Serviço temporariamente indisponível. Tente novamente em alguns instantes.');
+      if (err.message === 'Network Error' || !err.response || err.code === 'ECONNABORTED') {
+        setError(
+          'O servidor seguro estava em repouso e acabou de inicializar. Por favor, clique novamente em "Entrar na Plataforma".'
+        );
       } else {
         setError(
           err.response?.data?.message || 'E-mail ou senha incorretos. Verifique e tente novamente.'
         );
       }
     } finally {
+      clearTimeout(warmTimer);
+      setIsServerWarming(false);
       setLoading(false);
     }
   };
@@ -50,9 +67,21 @@ export const Login: React.FC = () => {
         {/* Card */}
         <div className="bg-slate-900/90 border border-slate-800 p-8 rounded-2xl shadow-2xl backdrop-blur-xl">
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-start space-x-3 text-rose-400 text-sm">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <span>{error}</span>
+            <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex flex-col gap-2 text-rose-400 text-sm">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <span className="flex-1">{error}</span>
+              </div>
+              {error.includes('repouso') && (
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="self-start text-xs font-bold text-emerald-400 hover:text-emerald-300 underline flex items-center gap-1.5 cursor-pointer pl-8"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                  <span>Tentar entrar agora</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -112,12 +141,19 @@ export const Login: React.FC = () => {
               </div>
             </div>
 
+            {isServerWarming && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center gap-2 animate-pulse">
+                <RotateCw className="w-4 h-4 animate-spin shrink-0" />
+                <span>Conectando ao servidor seguro... Isso pode levar alguns segundos se o servidor estiver saindo do repouso.</span>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
               className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
             >
-              <span>{loading ? 'Entrando...' : 'Entrar na Plataforma'}</span>
+              <span>{loading ? (isServerWarming ? 'Conectando...' : 'Entrando...') : 'Entrar na Plataforma'}</span>
               {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />}
             </button>
           </form>
