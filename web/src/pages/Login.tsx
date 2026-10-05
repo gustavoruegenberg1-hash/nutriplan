@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Flame, Lock, Mail, ArrowRight, AlertCircle, RotateCw } from 'lucide-react';
 import { GoogleSignInButton } from '../components/GoogleSignInButton';
 import { pingServer } from '../api/client';
 
 export const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [searchParams] = useSearchParams();
+  const [email, setEmail] = useState(() => searchParams.get('email') || '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

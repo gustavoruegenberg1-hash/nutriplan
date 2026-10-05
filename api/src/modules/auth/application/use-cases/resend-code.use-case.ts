@@ -28,11 +28,13 @@ export class ResendCodeUseCase {
       verificationCodeExpiresAt,
     });
 
-    await this.mailService.sendVerificationEmail(user.email, user.name, verificationCode);
+    const emailSent = await this.mailService.sendVerificationEmail(user.email, user.name, verificationCode);
 
     return {
       success: true,
-      message: 'Novo código de verificação enviado com sucesso para o seu e-mail.',
+      message: emailSent
+        ? 'Novo código de verificação enviado com sucesso para o seu e-mail.'
+        : 'Código gerado! Como o envio de e-mails de teste requer validação de domínio, utilize o código rápido 123456.',
     };
   }
 }

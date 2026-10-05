@@ -70,7 +70,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string) => {
     const { data } = await api.post('/auth/register', { name, email, password });
-    return { requiresVerification: data.requiresVerification ?? true };
+    if (data.accessToken) {
+      localStorage.setItem('nutriplan_token', data.accessToken);
+      setToken(data.accessToken);
+      if (data.user) {
+        setUser(data.user);
+        localStorage.setItem('nutriplan_user', JSON.stringify(data.user));
+      } else {
+        await refreshProfile();
+      }
+    }
+    return { requiresVerification: data.requiresVerification ?? false };
   };
 
   const verifyEmail = async (email: string, code: string) => {

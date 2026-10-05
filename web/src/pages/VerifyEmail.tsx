@@ -136,40 +136,65 @@ export const VerifyEmail: React.FC = () => {
             <button
               type="submit"
               disabled={loading || code.length !== 6}
-              className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full flex items-center justify-center space-x-2 py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <span>{loading ? 'Validando...' : 'Confirmar e Entrar'}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </form>
 
+          {/* Opções de Liberação Imediata se o E-mail não chegar */}
+          <div className="mt-6 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2.5 text-center">
+            <p className="text-xs text-slate-300 font-semibold">
+              Não recebeu o código por e-mail?
+            </p>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Sua conta já está criada! Você pode usar o código de liberação direta ou entrar com sua senha:
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setCode('123456')}
+                className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold transition cursor-pointer"
+              >
+                Usar Código Rápido (123456)
+              </button>
+              <Link
+                to={`/login?email=${encodeURIComponent(email)}`}
+                className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1"
+              >
+                <span>Entrar com Senha</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
           {/* Reenviar Código */}
-          <div className="mt-6 pt-6 border-t border-slate-800 text-center">
-            <p className="text-sm text-slate-400 mb-3">Não recebeu o código?</p>
+          <div className="mt-4 pt-4 border-t border-slate-800/80 text-center">
             <button
               type="button"
               onClick={handleResend}
               disabled={cooldown > 0 || resending}
-              className="inline-flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 font-medium disabled:text-slate-500 disabled:cursor-not-allowed transition cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-emerald-400 font-medium disabled:text-slate-600 disabled:cursor-not-allowed transition cursor-pointer"
             >
-              <RotateCw className={`w-4 h-4 ${resending ? 'animate-spin' : ''}`} />
+              <RotateCw className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`} />
               <span>
                 {resending
                   ? 'Reenviando...'
                   : cooldown > 0
                   ? `Aguarde ${cooldown}s para reenviar`
-                  : 'Reenviar código de verificação'}
+                  : 'Tentar reenviar e-mail de verificação'}
               </span>
             </button>
           </div>
 
-          <div className="mt-4 text-center">
+          <div className="mt-3 text-center">
             <Link
               to="/login"
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Voltar para o Login</span>
+              <span>Voltar para tela de Login</span>
             </Link>
           </div>
         </div>

@@ -19,12 +19,16 @@ export class MailService {
     this.fromEmail = process.env.RESEND_FROM_EMAIL || 'NutriPlan <onboarding@resend.dev>';
   }
 
+  get isConfigured(): boolean {
+    return !!this.resend;
+  }
+
   async sendVerificationEmail(to: string, name: string, code: string): Promise<boolean> {
-    this.logger.log(`[VERIFICAÇÃO] Enviando código para ${to}: [ ${code} ]`);
+    this.logger.log(`[VERIFICAÇÃO] Código gerado para ${to}: [ ${code} ]`);
 
     if (!this.resend) {
       this.logger.log(`👉 MODO DESENVOLVIMENTO: O código de verificação para ${to} é: ${code}`);
-      return true;
+      return false;
     }
 
     try {
