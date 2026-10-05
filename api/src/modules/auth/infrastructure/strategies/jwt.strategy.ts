@@ -42,10 +42,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
     }
 
-    const adminEmails = (process.env.ADMIN_EMAILS || '')
-      .split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
+    const adminEmails = [
+      'gustavoruegenberg1@gmail.com',
+      ...(process.env.ADMIN_EMAILS || '')
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean),
+    ];
     let role = user.role || 'USER';
     if (adminEmails.includes(user.email.toLowerCase()) && role !== 'ADMIN') {
       role = 'ADMIN';

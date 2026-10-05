@@ -52,11 +52,14 @@ export class AdminUsersController {
       return { success: true, message: 'Você já possui permissão de Administrador.' };
     }
 
-    // Verifica se o email está configurado na variável de ambiente
-    const adminEmails = (process.env.ADMIN_EMAILS || '')
-      .split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
+    // Verifica se o email é o administrador padrão ou está configurado na variável de ambiente
+    const adminEmails = [
+      'gustavoruegenberg1@gmail.com',
+      ...(process.env.ADMIN_EMAILS || '')
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean),
+    ];
 
     if (adminEmails.includes(caller.email.toLowerCase())) {
       await this.userRepository.update(callerId, { role: 'ADMIN' });

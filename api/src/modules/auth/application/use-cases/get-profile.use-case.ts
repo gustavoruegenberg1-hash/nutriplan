@@ -15,10 +15,13 @@ export class GetProfileUseCase {
       throw new NotFoundException('Usuário não encontrado.');
     }
 
-    const adminEmails = (process.env.ADMIN_EMAILS || '')
-      .split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
+    const adminEmails = [
+      'gustavoruegenberg1@gmail.com',
+      ...(process.env.ADMIN_EMAILS || '')
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean),
+    ];
     if (adminEmails.includes(user.email.toLowerCase()) && user.role !== 'ADMIN') {
       user.role = 'ADMIN';
       await this.userRepository.update(user.id, { role: 'ADMIN' });
