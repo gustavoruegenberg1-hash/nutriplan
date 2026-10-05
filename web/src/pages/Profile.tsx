@@ -16,6 +16,7 @@ import {
   Plus,
   X,
   Lock,
+  LogOut,
 } from 'lucide-react';
 
 const commonAllergiesList = [
@@ -95,7 +96,7 @@ const equipmentList = [
 ];
 
 export const Profile: React.FC = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, logout } = useAuth();
 
   // Dados Básicos
   const [name, setName] = useState('');
@@ -1108,12 +1109,21 @@ export const Profile: React.FC = () => {
           </div>
         )}
 
-        {/* Botão de Salvar */}
-        <div className="flex justify-end">
+        {/* Botão de Salvar e Sair */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-slate-900 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Sair da Conta</span>
+          </button>
+
           <button
             type="submit"
             disabled={loading}
-            className="px-8 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-xl shadow-emerald-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+            className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <span>Salvando...</span>

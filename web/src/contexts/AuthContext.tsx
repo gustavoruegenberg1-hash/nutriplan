@@ -127,6 +127,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setToken(null);
     setUser(null);
+
+    // Redireciona de forma limpa para a tela de login, resetando completamente a página sem necessidade de F5
+    if (typeof window !== 'undefined') {
+      window.location.replace('/login');
+    }
   };
 
   useEffect(() => {
