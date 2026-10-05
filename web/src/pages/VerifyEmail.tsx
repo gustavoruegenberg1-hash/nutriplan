@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, CheckCircle, ArrowRight, RotateCw, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Mail, CheckCircle, ArrowRight, RotateCw, AlertCircle, ArrowLeft, Zap } from 'lucide-react';
+import { pingServer } from '../api/client';
 
 export const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -18,6 +19,11 @@ export const VerifyEmail: React.FC = () => {
   const { verifyEmail, resendCode } = useAuth();
   const navigate = useNavigate();
 
+  // Acorda o servidor em segundo plano ao abrir a tela de verificação
+  useEffect(() => {
+    pingServer();
+  }, []);
+
   useEffect(() => {
     if (cooldown > 0) {
       const timer = setTimeout(() => setCooldown((prev) => prev - 1), 1000);
@@ -25,8 +31,8 @@ export const VerifyEmail: React.FC = () => {
     }
   }, [cooldown]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setError(null);
     setSuccessMsg(null);
 
@@ -44,9 +50,52 @@ export const VerifyEmail: React.FC = () => {
         navigate('/profile');
       }, 1000);
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || 'Código de verificação inválido ou expirado. Tente novamente.'
-      );
+      if (
+        err.message === 'Network Error' ||
+        !err.response ||
+        err.code === 'ECONNABORTED' ||
+        [502, 503, 504].includes(err.response?.status)
+      ) {
+        setError(
+          'O servidor seguro estava em repouso e acabou de inicializar. Por favor, clique novamente no botão para confirmar.'
+        );
+      } else {
+        setError(
+          err.response?.data?.message || 'Código de verificação inválido ou expirado. Tente novamente.'
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickVerify = async () => {
+    setError(null);
+    setSuccessMsg(null);
+    setCode('123456');
+    setLoading(true);
+
+    try {
+      await verifyEmail(email, '123456');
+      setSuccessMsg('Conta liberada com sucesso com o código rápido! Entrando na plataforma...');
+      setTimeout(() => {
+        navigate('/profile');
+      }, 1000);
+    } catch (err: any) {
+      if (
+        err.message === 'Network Error' ||
+        !err.response ||
+        err.code === 'ECONNABORTED' ||
+        [502, 503, 504].includes(err.response?.status)
+      ) {
+        setError(
+          'O servidor seguro estava em repouso e acabou de inicializar. Por favor, clique novamente em "Liberar Conta Agora".'
+        );
+      } else {
+        setError(
+          err.response?.data?.message || 'Não foi possível verificar. Tente novamente em instantes.'
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -64,7 +113,16 @@ export const VerifyEmail: React.FC = () => {
       setSuccessMsg(res.message || 'Novo código enviado com sucesso para seu e-mail!');
       setCooldown(60);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Falha ao reenviar código. Tente novamente.');
+      if (
+        err.message === 'Network Error' ||
+        !err.response ||
+        err.code === 'ECONNABORTED' ||
+        [502, 503, 504].includes(err.response?.status)
+      ) {
+        setError('O servidor estava em repouso. Aguarde alguns segundos e tente novamente.');
+      } else {
+        setError(err.response?.data?.message || 'Falha ao reenviar código. Você pode utilizar o código rápido 123456.');
+      }
     } finally {
       setResending(false);
     }
@@ -87,9 +145,21 @@ export const VerifyEmail: React.FC = () => {
         {/* Card */}
         <div className="bg-slate-900/90 border border-slate-800 p-8 rounded-2xl shadow-2xl backdrop-blur-xl">
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-start space-x-3 text-rose-400 text-sm">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <span>{error}</span>
+            <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex flex-col gap-2 text-rose-400 text-sm">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <span className="flex-1">{error}</span>
+              </div>
+              {error.includes('repouso') && (
+                <button
+                  type="button"
+                  onClick={() => handleSubmit()}
+                  className="self-start text-xs font-bold text-emerald-400 hover:text-emerald-300 underline flex items-center gap-1.5 cursor-pointer pl-8"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                  <span>Tentar novamente agora</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -99,6 +169,16 @@ export const VerifyEmail: React.FC = () => {
               <span>{successMsg}</span>
             </div>
           )}
+
+          {/* Dica de Liberação Imediata */}
+          <div className="mb-6 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-start space-x-3 text-emerald-300 text-xs">
+            <Zap className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-400" />
+            <div className="flex-1 leading-relaxed">
+              <span>Se você não recebeu o e-mail na sua caixa ou spam, clique no botão </span>
+              <strong className="text-emerald-200">Liberar Acesso Agora</strong>
+              <span> para validar imediatamente com o código reserva.</span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -143,25 +223,28 @@ export const VerifyEmail: React.FC = () => {
             </button>
           </form>
 
-          {/* Opções de Liberação Imediata se o E-mail não chegar */}
-          <div className="mt-6 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2.5 text-center">
-            <p className="text-xs text-slate-300 font-semibold">
-              Não recebeu o código por e-mail?
+          {/* Opções de Liberação Imediata com 1 Clique */}
+          <div className="mt-6 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3 text-center">
+            <p className="text-xs text-slate-300 font-semibold flex items-center justify-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <span>Acesso Rápido sem E-mail</span>
             </p>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Sua conta já está criada! Você pode usar o código de liberação direta ou entrar com sua senha:
+              Não quer esperar o e-mail? Libere seu cadastro em um único clique ou faça login com sua senha:
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
               <button
                 type="button"
-                onClick={() => setCode('123456')}
-                className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold transition cursor-pointer"
+                onClick={handleQuickVerify}
+                disabled={loading || !email}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 hover:text-emerald-200 text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
               >
-                Usar Código Rápido (123456)
+                <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Liberar Acesso Agora (123456)</span>
               </button>
               <Link
                 to={`/login?email=${encodeURIComponent(email)}`}
-                className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1"
+                className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1"
               >
                 <span>Entrar com Senha</span>
                 <ArrowRight className="w-3.5 h-3.5" />

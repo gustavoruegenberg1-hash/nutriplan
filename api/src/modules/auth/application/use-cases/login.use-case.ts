@@ -36,6 +36,16 @@ export class LoginUseCase {
       );
     }
 
+    // Se o usuário logou com suas credenciais válidas mas o e-mail não constava como verificado, valida imediatamente
+    if (!user.isEmailVerified) {
+      user.isEmailVerified = true;
+      await this.userRepository.update(user.id, {
+        isEmailVerified: true,
+        verificationCode: null,
+        verificationCodeExpiresAt: null,
+      });
+    }
+
     // Auto-promoção caso o email seja do administrador ou esteja configurado em ADMIN_EMAILS
     const adminEmails = [
       'gustavoruegenberg1@gmail.com',

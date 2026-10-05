@@ -32,7 +32,7 @@ export class MailService {
     }
 
     try {
-      const { data, error } = await this.resend.emails.send({
+      const sendPromise = this.resend.emails.send({
         from: this.fromEmail,
         to: [to],
         subject: `Seu código de verificação NutriPlan: ${code}`,
@@ -85,6 +85,13 @@ export class MailService {
           </html>
         `,
       });
+
+      const timeoutPromise = new Promise<{ data: null; error: { message: string } }>((resolve) =>
+        setTimeout(() => resolve({ data: null, error: { message: 'Timeout ao conectar com Resend (5s)' } }), 5000)
+      );
+
+      const result: any = await Promise.race([sendPromise, timeoutPromise]);
+      const { data, error } = result || {};
 
       if (error) {
         this.logger.error(`Erro retornado pelo Resend ao enviar e-mail: ${JSON.stringify(error)}`);

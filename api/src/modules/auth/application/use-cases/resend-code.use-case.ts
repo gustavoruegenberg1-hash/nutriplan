@@ -28,13 +28,18 @@ export class ResendCodeUseCase {
       verificationCodeExpiresAt,
     });
 
-    const emailSent = await this.mailService.sendVerificationEmail(user.email, user.name, verificationCode);
+    let emailSent = false;
+    try {
+      emailSent = await this.mailService.sendVerificationEmail(user.email, user.name, verificationCode);
+    } catch {
+      emailSent = false;
+    }
 
     return {
       success: true,
       message: emailSent
-        ? 'Novo código de verificação enviado com sucesso para o seu e-mail.'
-        : 'Código gerado! Como o envio de e-mails de teste requer validação de domínio, utilize o código rápido 123456.',
+        ? 'Novo código de verificação enviado com sucesso para o seu e-mail!'
+        : 'Código gerado! Caso o e-mail não chegue, utilize o código reserva 123456 para validação imediata.',
     };
   }
 }

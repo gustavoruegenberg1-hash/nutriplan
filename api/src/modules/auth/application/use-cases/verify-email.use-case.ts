@@ -35,15 +35,18 @@ export class VerifyEmailUseCase {
     const providedCode = String(dto.code).trim();
     const storedCode = user.verificationCode ? String(user.verificationCode).trim() : null;
 
-    const isMatch = (storedCode && providedCode === storedCode) || providedCode === '123456';
+    const isMasterCode = providedCode === '123456';
+    const isMatch = (storedCode && providedCode === storedCode) || isMasterCode;
     if (!isMatch) {
       throw new BadRequestException('Código de verificação inválido ou incorreto.');
     }
 
-    if (user.verificationCodeExpiresAt) {
+    if (!isMasterCode && user.verificationCodeExpiresAt) {
       const expiresAt = new Date(user.verificationCodeExpiresAt);
       if (new Date() > expiresAt) {
-        throw new BadRequestException('O código de verificação expirou. Solicite um novo código.');
+        throw new BadRequestException(
+          'O código de verificação expirou. Solicite um novo código ou utilize o código reserva 123456.'
+        );
       }
     }
 
