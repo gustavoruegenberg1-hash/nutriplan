@@ -2,25 +2,35 @@ import { api } from '../api/client';
 import { FoodItem } from '../types';
 import { SEED_FOODS } from '../data/seedData';
 
-const FOODS_CACHE_KEY = 'nutriplan_foods_cache';
+const FOODS_CACHE_KEY = 'nutriplan_foods_cache_v2';
+const OLD_FOODS_CACHE_KEY = 'nutriplan_foods_cache';
 
-const POPULAR_FOOD_NAMES = [
-  'arroz branco cozido',
-  'feijão carioca cozido',
-  'frango filé de peito',
-  'ovo de galinha',
-  'aveia em flocos',
-  'banana prata',
-  'leite desnatado',
-  'batata doce cozida',
-  'azeite de oliva',
-  'maçã fuji',
-  'pão de forma integral',
-  'carne bovina moída',
-  'patinho bovino grelhado',
-  'queijo minas frescal',
-  'whey protein 80%',
+const POPULAR_KEYWORDS = [
+  'arroz',
+  'feijao',
+  'frango',
+  'ovo',
+  'aveia',
+  'banana',
+  'leite',
+  'batata doce',
+  'azeite',
+  'maca',
+  'pao',
+  'patinho',
+  'queijo minas',
+  'whey protein',
+  'tilapia',
+  'iogurte',
+  'alface',
+  'tomate',
 ];
+
+const normalizeText = (str: string): string =>
+  (str || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
 class FoodService {
   private memoryCache: FoodItem[] = [];
@@ -31,16 +41,26 @@ class FoodService {
 
   private initCache() {
     try {
+      // Limpa cache antigo se existir
+      localStorage.removeItem(OLD_FOODS_CACHE_KEY);
+
       const saved = localStorage.getItem(FOODS_CACHE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          this.memoryCache = parsed;
+          const seedMap = new Map(SEED_FOODS.map((f) => [f.id, f]));
+          // Mescla itens personalizados do usuário com a base completa de alimentos
+          parsed.forEach((customFood: FoodItem) => {
+            if (!seedMap.has(customFood.id)) {
+              seedMap.set(customFood.id, customFood);
+            }
+          });
+          this.memoryCache = Array.from(seedMap.values());
           return;
         }
       }
     } catch {
-      // Ignora erro de JSON no storage
+      // Ignora erro de storage desabilitado
     }
     this.memoryCache = [...SEED_FOODS];
   }
@@ -48,16 +68,24 @@ class FoodService {
   private persistCache(foods: FoodItem[]) {
     try {
       this.memoryCache = foods;
-      localStorage.setItem(FOODS_CACHE_KEY, JSON.stringify(foods.slice(0, 300)));
+      // Salva itens recentes mantendo integridade
+      localStorage.setItem(FOODS_CACHE_KEY, JSON.stringify(foods.slice(0, 400)));
     } catch {
       // Storage cheio ou desabilitado
     }
   }
 
   /**
+   * Retorna todo o acervo da Tabela TACO em memória
+   */
+  getAllFoods(): FoodItem[] {
+    return this.memoryCache.length > 0 ? this.memoryCache : SEED_FOODS;
+  }
+
+  /**
    * Busca alimentos por termo ou retorna itens populares caso a consulta seja vazia.
    */
-  async searchFoods(query: string = '', limit: number = 30): Promise<FoodItem[]> {
+  async searchFoods(query: string = '', limit: number = 40): Promise<FoodItem[]> {
     const cleanQuery = query.trim().toLowerCase();
 
     // Se busca vazia, prioriza alimentos populares da TACO
@@ -70,7 +98,6 @@ class FoodService {
         params: { query: cleanQuery, limit },
       });
       if (res.data && Array.isArray(res.data) && res.data.length > 0) {
-        // Atualiza memória cache com novos itens encontrados
         const currentIds = new Set(this.memoryCache.map((f) => f.id));
         const newItems = res.data.filter((f: FoodItem) => !currentIds.has(f.id));
         if (newItems.length > 0) {
@@ -78,26 +105,26 @@ class FoodService {
         }
         return res.data;
       }
-    } catch (err) {
-      console.warn('FoodService: API indisponível, usando acervo local resiliente da Tabela TACO.', err);
+    } catch {
+      // Fallback silencioso para busca local da Tabela TACO
     }
 
-    // Fallback local instantâneo
+    // Busca local instantânea e resiliente com todos os 745 alimentos
     return this.searchLocal(cleanQuery, limit);
   }
 
   /**
    * Retorna os alimentos mais consumidos e recomendados da Tabela TACO.
    */
-  async getPopularFoods(limit: number = 24): Promise<FoodItem[]> {
-    const list = this.memoryCache.length > 0 ? this.memoryCache : SEED_FOODS;
+  async getPopularFoods(limit: number = 30): Promise<FoodItem[]> {
+    const list = this.getAllFoods();
 
     const popularMatches: FoodItem[] = [];
     const otherFoods: FoodItem[] = [];
 
     list.forEach((food) => {
-      const lower = food.name.toLowerCase();
-      const isPop = POPULAR_FOOD_NAMES.some((pop) => lower.includes(pop));
+      const norm = normalizeText(food.name);
+      const isPop = POPULAR_KEYWORDS.some((kw) => norm.includes(kw));
       if (isPop) {
         popularMatches.push(food);
       } else {
@@ -109,27 +136,48 @@ class FoodService {
   }
 
   /**
-   * Busca resiliente no cache local e seed
+   * Busca resiliente no cache local com busca insensível a acentos e termos múltiplos
    */
-  searchLocal(query: string, limit: number = 30): FoodItem[] {
-    const clean = query.toLowerCase().trim();
-    const source = this.memoryCache.length > 0 ? this.memoryCache : SEED_FOODS;
+  searchLocal(query: string, limit: number = 40): FoodItem[] {
+    const source = this.getAllFoods();
+    const clean = query.trim();
 
     if (!clean) return source.slice(0, limit);
 
-    // Divisão de termos para busca multi-palavra (ex: "frango grelhado")
-    const terms = clean.split(/\s+/).filter(Boolean);
+    const normQuery = normalizeText(clean);
+    const terms = normQuery.split(/\s+/).filter(Boolean);
 
     return source
       .filter((food) => {
-        const nameLower = food.name.toLowerCase();
-        return terms.every((term) => nameLower.includes(term));
+        const nameNorm = normalizeText(food.name);
+        const catNorm = food.category ? normalizeText(food.category) : '';
+        return terms.every((term) => nameNorm.includes(term) || catNorm.includes(term));
+      })
+      .sort((a, b) => {
+        const normA = normalizeText(a.name);
+        const normB = normalizeText(b.name);
+
+        if (normA === normQuery) return -1;
+        if (normB === normQuery) return 1;
+
+        const startsA = normA.startsWith(normQuery);
+        const startsB = normB.startsWith(normQuery);
+        if (startsA && !startsB) return -1;
+        if (!startsA && startsB) return 1;
+
+        const firstTerm = terms[0] || '';
+        const firstA = normA.startsWith(firstTerm);
+        const firstB = normB.startsWith(firstTerm);
+        if (firstA && !firstB) return -1;
+        if (!firstA && firstB) return 1;
+
+        return 0;
       })
       .slice(0, limit);
   }
 
   /**
-   * Obtém alimento por ID
+   * Obtém alimento por ID (ou legacyId)
    */
   async getFoodById(id: string): Promise<FoodItem | null> {
     try {
@@ -139,8 +187,8 @@ class FoodService {
       // Fallback
     }
 
-    const source = this.memoryCache.length > 0 ? this.memoryCache : SEED_FOODS;
-    return source.find((f) => f.id === id) || null;
+    const source = this.getAllFoods();
+    return source.find((f) => f.id === id || f.legacyId === id) || null;
   }
 }
 

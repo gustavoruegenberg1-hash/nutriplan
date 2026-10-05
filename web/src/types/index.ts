@@ -104,6 +104,10 @@ export interface FoodItem {
   carbsPer100g: number;
   fatPer100g: number;
   fiberPer100g: number;
+  category?: string;
+  micronutrients?: any;
+  legacyId?: string;
+  isVerified?: boolean;
 }
 
 export interface MealItem {

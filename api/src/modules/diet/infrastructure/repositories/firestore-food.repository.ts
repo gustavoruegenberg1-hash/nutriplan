@@ -50,11 +50,15 @@ export class FirestoreFoodRepository implements IFoodRepository {
       data.createdById || null,
       data.createdAt ? new Date(data.createdAt._seconds ? data.createdAt._seconds * 1000 : data.createdAt) : new Date(),
       data.updatedAt ? new Date(data.updatedAt._seconds ? data.updatedAt._seconds * 1000 : data.updatedAt) : new Date(),
+      data.category || null,
+      data.source || 'TACO',
+      data.micronutrients || null,
+      data.legacyId || null,
     );
   }
 
   async search(query: string, limit: number): Promise<FoodItem[]> {
-    const cleanQuery = query.toLowerCase().trim();
+    const cleanQuery = (query || '').trim().toLowerCase();
     if (this.memoryCache.length === 0) {
       try {
         const snapshot = await this.collection.get();
@@ -66,8 +70,45 @@ export class FirestoreFoodRepository implements IFoodRepository {
       }
     }
 
+    const normalize = (str: string) =>
+      (str || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    const terms = normalize(cleanQuery).split(/\s+/).filter(Boolean);
+
+    if (terms.length === 0) {
+      return this.memoryCache.slice(0, limit);
+    }
+
     return this.memoryCache
-      .filter((item) => !cleanQuery || item.name.toLowerCase().includes(cleanQuery))
+      .filter((item) => {
+        const normName = normalize(item.name);
+        const normCat = item.category ? normalize(item.category) : '';
+        return terms.every((t) => normName.includes(t) || normCat.includes(t));
+      })
+      .sort((a, b) => {
+        const normA = normalize(a.name);
+        const normB = normalize(b.name);
+        const qNorm = normalize(cleanQuery);
+
+        if (normA === qNorm) return -1;
+        if (normB === qNorm) return 1;
+
+        const startsA = normA.startsWith(qNorm);
+        const startsB = normB.startsWith(qNorm);
+        if (startsA && !startsB) return -1;
+        if (!startsA && startsB) return 1;
+
+        const firstTerm = terms[0];
+        const firstStartsA = normA.startsWith(firstTerm);
+        const firstStartsB = normB.startsWith(firstTerm);
+        if (firstStartsA && !firstStartsB) return -1;
+        if (!firstStartsA && firstStartsB) return 1;
+
+        return 0;
+      })
       .slice(0, limit);
   }
 
@@ -78,7 +119,11 @@ export class FirestoreFoodRepository implements IFoodRepository {
     } catch (err: any) {
       this.logger.warn(`Fallback de alimento por ID: ${err.message}`);
     }
-    return this.memoryCache.find((f) => f.id === id) || null;
+    return (
+      this.memoryCache.find(
+        (f) => f.id === id || (f as any).legacyId === id,
+      ) || null
+    );
   }
 
   async findByIds(ids: string[]): Promise<FoodItem[]> {
@@ -92,7 +137,9 @@ export class FirestoreFoodRepository implements IFoodRepository {
       this.logger.warn(`Fallback de alimentos por IDs: ${err.message}`);
     }
     const idSet = new Set(ids);
-    return this.memoryCache.filter((d) => idSet.has(d.id));
+    return this.memoryCache.filter(
+      (d) => idSet.has(d.id) || ((d as any).legacyId && idSet.has((d as any).legacyId)),
+    );
   }
 
   async create(data: any): Promise<FoodItem> {

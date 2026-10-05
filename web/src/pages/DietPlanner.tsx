@@ -928,7 +928,7 @@ export const DietPlanner: React.FC = () => {
 
     const timer = setTimeout(async () => {
       try {
-        const data = await foodService.searchFoods(searchQuery, 40);
+        const data = await foodService.searchFoods(searchQuery, 60);
         if (isMounted) {
           setSearchResults(data || []);
         }
@@ -1481,9 +1481,15 @@ export const DietPlanner: React.FC = () => {
       const g = Number(f.fatPer100g) || 0;
       const fib = Number(f.fiberPer100g) || 0;
 
+      const cat = f.category?.toLowerCase() || '';
+
       switch (selectedCategory) {
         case 'PROTEIN':
           return (
+            cat.includes('carnes') ||
+            cat.includes('pescados') ||
+            cat.includes('ovos') ||
+            cat.includes('suplementos') ||
             p >= 12 ||
             lower.includes('frango') ||
             lower.includes('carne') ||
@@ -1504,6 +1510,8 @@ export const DietPlanner: React.FC = () => {
           );
         case 'CARBS':
           return (
+            cat.includes('cereais') ||
+            cat.includes('produtos açucarados') ||
             c >= 18 ||
             lower.includes('arroz') ||
             lower.includes('batata') ||
@@ -1520,6 +1528,8 @@ export const DietPlanner: React.FC = () => {
           );
         case 'FATS':
           return (
+            cat.includes('gorduras') ||
+            cat.includes('nozes e sementes') ||
             g >= 12 ||
             lower.includes('azeite') ||
             lower.includes('óleo') ||
@@ -1534,6 +1544,8 @@ export const DietPlanner: React.FC = () => {
           );
         case 'FIBERS':
           return (
+            cat.includes('verduras') ||
+            cat.includes('leguminosas') ||
             fib >= 2.5 ||
             lower.includes('brócolis') ||
             lower.includes('brocolis') ||
@@ -1551,6 +1563,7 @@ export const DietPlanner: React.FC = () => {
           );
         case 'FRUITS':
           return (
+            cat.includes('frutas') ||
             lower.includes('banana') ||
             lower.includes('maçã') ||
             lower.includes('maca') ||
@@ -2131,6 +2144,11 @@ export const DietPlanner: React.FC = () => {
                         <span className="font-extrabold text-xs text-white block truncate">
                           {food.name}
                         </span>
+                        {food.category && (
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800 shrink-0">
+                            {food.category}
+                          </span>
+                        )}
                         {allergyCheck.isAllergen && (
                           <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
                             ⚠️ Alérgeno

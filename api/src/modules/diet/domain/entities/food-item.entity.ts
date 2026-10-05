@@ -12,6 +12,10 @@ export class FoodItem {
     public readonly createdById: string | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly category?: string | null,
+    public readonly source?: string | null,
+    public readonly micronutrients?: any,
+    public readonly legacyId?: string | null,
   ) {}
 
   static fromPrisma(prismaFood: any): FoodItem {
@@ -28,6 +32,10 @@ export class FoodItem {
       prismaFood.createdById,
       prismaFood.createdAt,
       prismaFood.updatedAt,
+      prismaFood.category || null,
+      prismaFood.source || null,
+      prismaFood.micronutrients || null,
+      prismaFood.legacyId || null,
     );
   }
 }
