@@ -19,10 +19,13 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
+
   const navItems = [
     { label: 'Hoje', path: '/', icon: LayoutDashboard },
     { label: 'Dieta', path: '/diet', icon: Utensils },
     { label: 'Treino', path: '/workout', icon: Dumbbell },
+    ...(isAdmin ? [{ label: 'Gerenciamento', path: '/admin', icon: Shield, isSpecial: true }] : []),
   ];
 
   const isActive = (path: string) => {
@@ -56,13 +59,18 @@ export const Navbar: React.FC = () => {
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
+                const isSpecial = (item as any).isSpecial;
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
                     className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
                       active
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        ? isSpecial
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm font-bold'
+                          : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        : isSpecial
+                        ? 'text-purple-300 hover:text-white bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 font-semibold'
                         : 'text-slate-300 hover:text-white hover:bg-surface-alt/60'
                     }`}
                   >
@@ -86,19 +94,19 @@ export const Navbar: React.FC = () => {
                 >
                   <MessageCircle className="w-5 h-5" />
                 </Link>
-                {user?.role === 'ADMIN' && (
+                {isAdmin && (
                   <Link
                     to="/admin"
-                    title="Painel Administrativo"
-                    aria-label="Painel Administrativo"
-                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    title="Área de Gerenciamento"
+                    aria-label="Área de Gerenciamento"
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${
                       location.pathname.startsWith('/admin')
-                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                        : 'text-purple-300 hover:text-white bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20'
+                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 border border-purple-400/40'
+                        : 'text-purple-200 hover:text-white bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40'
                     }`}
                   >
-                    <Shield className="w-3.5 h-3.5 text-purple-400" />
-                    <span>Admin</span>
+                    <Shield className="w-3.5 h-3.5 text-purple-300" />
+                    <span>Área de Gerenciamento</span>
                   </Link>
                 )}
                 <Link
@@ -109,7 +117,7 @@ export const Navbar: React.FC = () => {
                     {user?.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <span className="text-slate-200 font-medium">{user?.name?.split(' ')[0]}</span>
-                  {user?.role === 'ADMIN' && (
+                  {isAdmin && (
                     <span className="bg-purple-500/20 text-purple-300 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase">
                       Admin
                     </span>
@@ -143,9 +151,20 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile menu button / Profile (when authenticated) */}
-          <div className="flex md:hidden items-center">
+          <div className="flex md:hidden items-center space-x-2">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-2">
+              <>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    title="Área de Gerenciamento"
+                    aria-label="Área de Gerenciamento"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-200 text-xs font-bold transition-all shadow-sm"
+                  >
+                    <Shield className="w-3.5 h-3.5 text-purple-300" />
+                    <span>Gerenciar</span>
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   aria-label="Ir para perfil"
@@ -154,14 +173,14 @@ export const Navbar: React.FC = () => {
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </Link>
                 <button
-                  onClick={logout}
-                  aria-label="Sair da conta"
-                  title="Sair da conta"
-                  className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  aria-label="Menu de navegação"
+                  aria-expanded={mobileMenuOpen}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-surface-alt transition-colors"
                 >
-                  <LogOut className="w-5 h-5" />
+                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
-              </div>
+              </>
             ) : (
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -214,7 +233,7 @@ export const Navbar: React.FC = () => {
                   <span>Mensagens / Chat</span>
                 </Link>
               </div>
-              {user?.role === 'ADMIN' && (
+              {isAdmin && (
                 <div className="pb-1">
                   <Link
                     to="/admin"
@@ -226,7 +245,7 @@ export const Navbar: React.FC = () => {
                     }`}
                   >
                     <Shield className="w-5 h-5 text-purple-400" />
-                    <span>Painel Admin</span>
+                    <span>Área de Gerenciamento</span>
                   </Link>
                 </div>
               )}

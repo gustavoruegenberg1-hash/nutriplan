@@ -1,21 +1,24 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Swords, Utensils, Dumbbell, BookOpen, User } from 'lucide-react';
+import { LayoutDashboard, Swords, Utensils, Dumbbell, BookOpen, User, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { triggerHapticFeedback } from '../utils/mobile';
 
 export const BottomNav: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
     return null;
   }
 
+  const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
+
   const tabs = [
     { label: 'Hoje', path: '/', icon: LayoutDashboard },
     { label: 'Dieta', path: '/diet', icon: Utensils },
     { label: 'Treino', path: '/workout', icon: Dumbbell },
+    ...(isAdmin ? [{ label: 'Admin', path: '/admin', icon: Shield, isSpecial: true }] : []),
     { label: 'Perfil', path: '/profile', icon: User },
   ];
 
@@ -31,6 +34,7 @@ export const BottomNav: React.FC = () => {
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = isTabActive(tab.path);
+          const isSpecial = (tab as any).isSpecial;
 
           return (
             <NavLink
@@ -40,18 +44,30 @@ export const BottomNav: React.FC = () => {
               onClick={() => triggerHapticFeedback()}
               className={`flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition-all duration-200 active:scale-95 select-none ${
                 active
-                  ? 'text-emerald-400 font-semibold'
+                  ? isSpecial
+                    ? 'text-purple-300 font-bold'
+                    : 'text-emerald-400 font-semibold'
+                  : isSpecial
+                  ? 'text-purple-400 hover:text-purple-300 font-medium'
                   : 'text-slate-400 hover:text-slate-200 font-medium'
               }`}
             >
               <div
                 className={`relative p-1.5 rounded-xl transition-all ${
-                  active ? 'bg-emerald-500/15 shadow-sm shadow-emerald-500/20' : ''
+                  active
+                    ? isSpecial
+                      ? 'bg-purple-500/25 shadow-sm shadow-purple-500/30'
+                      : 'bg-emerald-500/15 shadow-sm shadow-emerald-500/20'
+                    : ''
                 }`}
               >
                 <Icon className={`w-5 h-5 transition-transform ${active ? 'scale-110' : ''}`} />
                 {active && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-emerald-400 rounded-full" />
+                  <span
+                    className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${
+                      isSpecial ? 'bg-purple-400' : 'bg-emerald-400'
+                    }`}
+                  />
                 )}
               </div>
               <span className="text-[11px] tracking-tight mt-0.5">{tab.label}</span>

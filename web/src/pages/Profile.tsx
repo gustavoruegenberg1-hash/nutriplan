@@ -293,30 +293,30 @@ export const Profile: React.FC = () => {
       </div>
 
       {/* Banner de Administrador */}
-      {user?.role === 'ADMIN' && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-900/30 to-indigo-900/20 border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
-              <Shield className="w-5 h-5" />
+      {user?.role?.toUpperCase() === 'ADMIN' && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-950/40 via-purple-900/30 to-indigo-950/40 border border-purple-500/40 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3.5">
+            <div className="p-3 rounded-2xl bg-purple-500/20 text-purple-300 border border-purple-500/30 shadow-inner">
+              <Shield className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-white font-bold text-sm flex items-center gap-1.5">
-                Privilégio de Administrador Ativo
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 uppercase">
+              <div className="text-white font-bold text-base flex items-center gap-2">
+                <span>Área de Gerenciamento do Sistema</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-300 border border-purple-500/50 uppercase font-black">
                   Admin
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                Você tem permissão para gerenciar contas, aplicar suspensões e editar dados de usuários no sistema.
+              <p className="text-xs text-slate-300 mt-0.5">
+                Você possui permissões de Administrador para gerenciar usuários, suspensões e permissões da plataforma.
               </p>
             </div>
           </div>
           <Link
             to="/admin"
-            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs sm:text-sm shadow-md shadow-purple-600/20 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer"
+            className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-600/30 transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
           >
             <Shield className="w-4 h-4" />
-            <span>Acessar Painel Admin</span>
+            <span>Abrir Área de Gerenciamento</span>
           </Link>
         </div>
       )}
