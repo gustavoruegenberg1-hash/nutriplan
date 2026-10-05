@@ -1,8 +1,8 @@
 [
   {
     "id": "taco-1",
-    "legacyId": "1f081c1e-3b87-481b-8048-77c1da6c01f3",
-    "name": "Arroz, integral, cozido",
+    "legacyId": "taco-1",
+    "name": "Arroz integral cozido",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 124,
@@ -23,7 +23,8 @@
   },
   {
     "id": "taco-2",
-    "name": "Arroz, integral, cru",
+    "legacyId": "taco-2",
+    "name": "Arroz integral cru",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 360,
@@ -44,7 +45,8 @@
   },
   {
     "id": "taco-3",
-    "name": "Arroz, tipo 1, cozido",
+    "legacyId": "taco-3",
+    "name": "Arroz tipo 1 cozido",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 128,
@@ -65,7 +67,8 @@
   },
   {
     "id": "taco-4",
-    "name": "Arroz, tipo 1, cru",
+    "legacyId": "taco-4",
+    "name": "Arroz tipo 1 cru",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 358,
@@ -86,7 +89,8 @@
   },
   {
     "id": "taco-5",
-    "name": "Arroz, tipo 2, cozido",
+    "legacyId": "taco-5",
+    "name": "Arroz tipo 2 cozido",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 130,
@@ -107,7 +111,8 @@
   },
   {
     "id": "taco-6",
-    "name": "Arroz, tipo 2, cru",
+    "legacyId": "taco-6",
+    "name": "Arroz tipo 2 cru",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 358,
@@ -128,7 +133,8 @@
   },
   {
     "id": "taco-7",
-    "name": "Aveia, flocos, crua",
+    "legacyId": "taco-7",
+    "name": "Aveia flocos crua",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 394,
@@ -149,7 +155,8 @@
   },
   {
     "id": "taco-8",
-    "name": "Biscoito, doce, maisena",
+    "legacyId": "taco-8",
+    "name": "Biscoito doce maisena",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 443,
@@ -170,7 +177,8 @@
   },
   {
     "id": "taco-9",
-    "name": "Biscoito, doce, recheado com chocolate",
+    "legacyId": "taco-9",
+    "name": "Biscoito doce recheado com chocolate",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 472,
@@ -191,7 +199,8 @@
   },
   {
     "id": "taco-10",
-    "name": "Biscoito, doce, recheado com morango",
+    "legacyId": "taco-10",
+    "name": "Biscoito doce recheado com morango",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 471,
@@ -212,7 +221,8 @@
   },
   {
     "id": "taco-11",
-    "name": "Biscoito, doce, wafer, recheado de chocolate",
+    "legacyId": "taco-11",
+    "name": "Biscoito doce wafer recheado de chocolate",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 502,
@@ -233,7 +243,8 @@
   },
   {
     "id": "taco-12",
-    "name": "Biscoito, doce, wafer, recheado de morango",
+    "legacyId": "taco-12",
+    "name": "Biscoito doce wafer recheado de morango",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 513,
@@ -254,7 +265,8 @@
   },
   {
     "id": "taco-13",
-    "name": "Biscoito, salgado, cream cracker",
+    "legacyId": "taco-13",
+    "name": "Biscoito salgado cream cracker",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 432,
@@ -275,7 +287,8 @@
   },
   {
     "id": "taco-14",
-    "name": "Bolo, mistura para",
+    "legacyId": "taco-14",
+    "name": "Mistura para bolo",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 419,
@@ -296,7 +309,8 @@
   },
   {
     "id": "taco-15",
-    "name": "Bolo, pronto, aipim",
+    "legacyId": "taco-15",
+    "name": "Bolo pronto aipim",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 324,
@@ -317,7 +331,8 @@
   },
   {
     "id": "taco-16",
-    "name": "Bolo, pronto, chocolate",
+    "legacyId": "taco-16",
+    "name": "Bolo pronto chocolate",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 410,
@@ -338,7 +353,8 @@
   },
   {
     "id": "taco-17",
-    "name": "Bolo, pronto, coco",
+    "legacyId": "taco-17",
+    "name": "Bolo pronto coco",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 333,
@@ -359,7 +375,8 @@
   },
   {
     "id": "taco-18",
-    "name": "Bolo, pronto, milho",
+    "legacyId": "taco-18",
+    "name": "Bolo pronto milho",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 311,
@@ -380,7 +397,8 @@
   },
   {
     "id": "taco-19",
-    "name": "Canjica, branca, crua",
+    "legacyId": "taco-19",
+    "name": "Canjica branca crua",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 358,
@@ -401,7 +419,8 @@
   },
   {
     "id": "taco-20",
-    "name": "Canjica, com leite integral",
+    "legacyId": "taco-20",
+    "name": "Canjica com leite integral",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 112,
@@ -422,7 +441,8 @@
   },
   {
     "id": "taco-21",
-    "name": "Cereais, milho, flocos, com sal",
+    "legacyId": "taco-21",
+    "name": "Cereais milho flocos com sal",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 370,
@@ -443,7 +463,8 @@
   },
   {
     "id": "taco-22",
-    "name": "Cereais, milho, flocos, sem sal",
+    "legacyId": "taco-22",
+    "name": "Cereais milho flocos sem sal",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 363,
@@ -464,7 +485,8 @@
   },
   {
     "id": "taco-23",
-    "name": "Cereais, mingau, milho, infantil",
+    "legacyId": "taco-23",
+    "name": "Cereais mingau milho infantil",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 394,
@@ -485,7 +507,8 @@
   },
   {
     "id": "taco-24",
-    "name": "Cereais, mistura para vitamina, trigo, cevada e aveia",
+    "legacyId": "taco-24",
+    "name": "Cereais mistura para vitamina trigo cevada e aveia",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 381,
@@ -506,7 +529,8 @@
   },
   {
     "id": "taco-25",
-    "name": "Cereal matinal, milho",
+    "legacyId": "taco-25",
+    "name": "Cereal matinal milho",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 365,
@@ -527,7 +551,8 @@
   },
   {
     "id": "taco-26",
-    "name": "Cereal matinal, milho, açúcar",
+    "legacyId": "taco-26",
+    "name": "Cereal matinal milho açúcar",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 377,
@@ -548,7 +573,8 @@
   },
   {
     "id": "taco-27",
-    "name": "Creme de arroz, pó",
+    "legacyId": "taco-27",
+    "name": "Creme de arroz em pó",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 386,
@@ -569,7 +595,8 @@
   },
   {
     "id": "taco-28",
-    "name": "Creme de milho, pó",
+    "legacyId": "taco-28",
+    "name": "Creme de milho em pó",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 333,
@@ -590,7 +617,8 @@
   },
   {
     "id": "taco-29",
-    "name": "Curau, milho verde",
+    "legacyId": "taco-29",
+    "name": "Curau milho verde",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 78,
@@ -611,7 +639,8 @@
   },
   {
     "id": "taco-30",
-    "name": "Curau, milho verde, mistura para",
+    "legacyId": "taco-30",
+    "name": "Mistura para curau de milho verde",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 402,
@@ -632,7 +661,8 @@
   },
   {
     "id": "taco-31",
-    "name": "Farinha, de arroz, enriquecida",
+    "legacyId": "taco-31",
+    "name": "Farinha de arroz enriquecida",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 363,
@@ -653,7 +683,8 @@
   },
   {
     "id": "taco-32",
-    "name": "Farinha, de centeio, integral",
+    "legacyId": "taco-32",
+    "name": "Farinha de centeio integral",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 336,
@@ -674,7 +705,8 @@
   },
   {
     "id": "taco-33",
-    "name": "Farinha, de milho, amarela",
+    "legacyId": "taco-33",
+    "name": "Farinha de milho amarela",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 351,
@@ -695,7 +727,8 @@
   },
   {
     "id": "taco-34",
-    "name": "Farinha, de rosca",
+    "legacyId": "taco-34",
+    "name": "Farinha de rosca",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 371,
@@ -716,7 +749,8 @@
   },
   {
     "id": "taco-35",
-    "name": "Farinha, de trigo",
+    "legacyId": "taco-35",
+    "name": "Farinha de trigo",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 360,
@@ -737,7 +771,8 @@
   },
   {
     "id": "taco-36",
-    "name": "Farinha, láctea, de cereais",
+    "legacyId": "taco-36",
+    "name": "Farinha láctea de cereais",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 415,
@@ -758,7 +793,8 @@
   },
   {
     "id": "taco-37",
-    "name": "Lasanha, massa fresca, cozida",
+    "legacyId": "taco-37",
+    "name": "Lasanha massa fresca cozida",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 164,
@@ -779,7 +815,8 @@
   },
   {
     "id": "taco-38",
-    "name": "Lasanha, massa fresca, crua",
+    "legacyId": "taco-38",
+    "name": "Lasanha massa fresca crua",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 220,
@@ -800,7 +837,8 @@
   },
   {
     "id": "taco-39",
-    "name": "Macarrão, instantâneo",
+    "legacyId": "taco-39",
+    "name": "Macarrão instantâneo",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 436,
@@ -821,7 +859,8 @@
   },
   {
     "id": "taco-40",
-    "name": "Macarrão, trigo, cru",
+    "legacyId": "taco-40",
+    "name": "Macarrão trigo cru",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 371,
@@ -842,7 +881,8 @@
   },
   {
     "id": "taco-41",
-    "name": "Macarrão, trigo, cru, com ovos",
+    "legacyId": "taco-41",
+    "name": "Macarrão trigo cru com ovos",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 371,
@@ -863,7 +903,8 @@
   },
   {
     "id": "taco-42",
-    "name": "Milho, amido, cru",
+    "legacyId": "taco-42",
+    "name": "Milho amido cru",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 361,
@@ -884,7 +925,8 @@
   },
   {
     "id": "taco-43",
-    "name": "Milho, fubá, cru",
+    "legacyId": "taco-43",
+    "name": "Milho fubá cru",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 353,
@@ -905,7 +947,8 @@
   },
   {
     "id": "taco-44",
-    "name": "Milho, verde, cru",
+    "legacyId": "taco-44",
+    "name": "Milho verde cru",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 138,
@@ -926,7 +969,8 @@
   },
   {
     "id": "taco-45",
-    "name": "Milho, verde, enlatado, drenado",
+    "legacyId": "taco-45",
+    "name": "Milho verde enlatado drenado",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 98,
@@ -947,7 +991,8 @@
   },
   {
     "id": "taco-46",
-    "name": "Mingau tradicional, pó",
+    "legacyId": "taco-46",
+    "name": "Mingau tradicional em pó",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 373,
@@ -968,7 +1013,8 @@
   },
   {
     "id": "taco-47",
-    "name": "Pamonha, barra para cozimento, pré-cozida",
+    "legacyId": "taco-47",
+    "name": "Pamonha barra para cozimento pré-cozida",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 171,
@@ -989,7 +1035,8 @@
   },
   {
     "id": "taco-48",
-    "name": "Pão, aveia, forma",
+    "legacyId": "taco-48",
+    "name": "Pão aveia forma",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 343,
@@ -1010,7 +1057,8 @@
   },
   {
     "id": "taco-49",
-    "name": "Pão, de soja",
+    "legacyId": "taco-49",
+    "name": "Pão de soja",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 309,
@@ -1031,7 +1079,8 @@
   },
   {
     "id": "taco-50",
-    "name": "Pão, glúten, forma",
+    "legacyId": "taco-50",
+    "name": "Pão glúten forma",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 253,
@@ -1052,7 +1101,8 @@
   },
   {
     "id": "taco-51",
-    "name": "Pão, milho, forma",
+    "legacyId": "taco-51",
+    "name": "Pão milho forma",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 292,
@@ -1073,7 +1123,8 @@
   },
   {
     "id": "taco-52",
-    "name": "Pão, trigo, forma, integral",
+    "legacyId": "taco-52",
+    "name": "Pão trigo forma integral",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 253,
@@ -1094,7 +1145,8 @@
   },
   {
     "id": "taco-53",
-    "name": "Pão, trigo, francês",
+    "legacyId": "taco-53",
+    "name": "Pão trigo francês",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 300,
@@ -1115,7 +1167,8 @@
   },
   {
     "id": "taco-54",
-    "name": "Pão, trigo, sovado",
+    "legacyId": "taco-54",
+    "name": "Pão trigo sovado",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 311,
@@ -1136,7 +1189,8 @@
   },
   {
     "id": "taco-55",
-    "name": "Pastel, de carne, cru",
+    "legacyId": "taco-55",
+    "name": "Pastel de carne cru",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 289,
@@ -1157,7 +1211,8 @@
   },
   {
     "id": "taco-56",
-    "name": "Pastel, de carne, frito",
+    "legacyId": "taco-56",
+    "name": "Pastel de carne frito",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 388,
@@ -1178,7 +1233,8 @@
   },
   {
     "id": "taco-57",
-    "name": "Pastel, de queijo, cru",
+    "legacyId": "taco-57",
+    "name": "Pastel de queijo cru",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 308,
@@ -1199,7 +1255,8 @@
   },
   {
     "id": "taco-58",
-    "name": "Pastel, de queijo, frito",
+    "legacyId": "taco-58",
+    "name": "Pastel de queijo frito",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 422,
@@ -1220,7 +1277,8 @@
   },
   {
     "id": "taco-59",
-    "name": "Pastel, massa, crua",
+    "legacyId": "taco-59",
+    "name": "Pastel massa crua",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 310,
@@ -1241,7 +1299,8 @@
   },
   {
     "id": "taco-60",
-    "name": "Pastel, massa, frita",
+    "legacyId": "taco-60",
+    "name": "Pastel massa frita",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 570,
@@ -1262,7 +1321,8 @@
   },
   {
     "id": "taco-61",
-    "name": "Pipoca, com óleo de soja, sem sal",
+    "legacyId": "taco-61",
+    "name": "Pipoca com óleo de soja sem sal",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 448,
@@ -1283,7 +1343,8 @@
   },
   {
     "id": "taco-62",
-    "name": "Polenta, pré-cozida",
+    "legacyId": "taco-62",
+    "name": "Polenta pré-cozida",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 103,
@@ -1304,7 +1365,8 @@
   },
   {
     "id": "taco-63",
-    "name": "Torrada, pão francês",
+    "legacyId": "taco-63",
+    "name": "Torrada pão francês",
     "category": "Cereais e derivados",
     "source": "TACO",
     "caloriesPer100g": 377,
@@ -1325,7 +1387,8 @@
   },
   {
     "id": "taco-64",
-    "name": "Abóbora, cabotian, cozida",
+    "legacyId": "taco-64",
+    "name": "Abóbora cabotian cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 48,
@@ -1346,7 +1409,8 @@
   },
   {
     "id": "taco-65",
-    "name": "Abóbora, cabotian, crua",
+    "legacyId": "taco-65",
+    "name": "Abóbora cabotian crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 39,
@@ -1367,7 +1431,8 @@
   },
   {
     "id": "taco-66",
-    "name": "Abóbora, menina brasileira, crua",
+    "legacyId": "taco-66",
+    "name": "Abóbora menina brasileira crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 14,
@@ -1388,7 +1453,8 @@
   },
   {
     "id": "taco-67",
-    "name": "Abóbora, moranga, crua",
+    "legacyId": "taco-67",
+    "name": "Abóbora moranga crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 12,
@@ -1409,7 +1475,8 @@
   },
   {
     "id": "taco-68",
-    "name": "Abóbora, moranga, refogada",
+    "legacyId": "taco-68",
+    "name": "Abóbora moranga refogada",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 29,
@@ -1430,7 +1497,8 @@
   },
   {
     "id": "taco-69",
-    "name": "Abóbora, pescoço, crua",
+    "legacyId": "taco-69",
+    "name": "Abóbora pescoço crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 24,
@@ -1451,8 +1519,8 @@
   },
   {
     "id": "taco-70",
-    "legacyId": "f38a2b99-078f-4472-b43c-b1f4b3a1827c",
-    "name": "Abobrinha, italiana, cozida",
+    "legacyId": "taco-70",
+    "name": "Abobrinha italiana cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 15,
@@ -1473,7 +1541,8 @@
   },
   {
     "id": "taco-71",
-    "name": "Abobrinha, italiana, crua",
+    "legacyId": "taco-71",
+    "name": "Abobrinha italiana crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 19,
@@ -1494,7 +1563,8 @@
   },
   {
     "id": "taco-72",
-    "name": "Abobrinha, italiana, refogada",
+    "legacyId": "taco-72",
+    "name": "Abobrinha italiana refogada",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 24,
@@ -1515,7 +1585,8 @@
   },
   {
     "id": "taco-73",
-    "name": "Abobrinha, paulista, crua",
+    "legacyId": "taco-73",
+    "name": "Abobrinha paulista crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 31,
@@ -1536,7 +1607,8 @@
   },
   {
     "id": "taco-74",
-    "name": "Acelga, crua",
+    "legacyId": "taco-74",
+    "name": "Acelga crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 21,
@@ -1557,7 +1629,8 @@
   },
   {
     "id": "taco-75",
-    "name": "Agrião, cru",
+    "legacyId": "taco-75",
+    "name": "Agrião cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 17,
@@ -1578,7 +1651,8 @@
   },
   {
     "id": "taco-76",
-    "name": "Aipo, cru",
+    "legacyId": "taco-76",
+    "name": "Aipo cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 19,
@@ -1599,7 +1673,8 @@
   },
   {
     "id": "taco-77",
-    "name": "Alface, americana, crua",
+    "legacyId": "taco-77",
+    "name": "Alface americana crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 9,
@@ -1620,7 +1695,8 @@
   },
   {
     "id": "taco-78",
-    "name": "Alface, crespa, crua",
+    "legacyId": "taco-78",
+    "name": "Alface crespa crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 11,
@@ -1641,7 +1717,8 @@
   },
   {
     "id": "taco-79",
-    "name": "Alface, lisa, crua",
+    "legacyId": "taco-79",
+    "name": "Alface lisa crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 14,
@@ -1662,7 +1739,8 @@
   },
   {
     "id": "taco-80",
-    "name": "Alface, roxa, crua",
+    "legacyId": "taco-80",
+    "name": "Alface roxa crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 13,
@@ -1683,7 +1761,8 @@
   },
   {
     "id": "taco-81",
-    "name": "Alfavaca, crua",
+    "legacyId": "taco-81",
+    "name": "Alfavaca crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 29,
@@ -1704,7 +1783,8 @@
   },
   {
     "id": "taco-82",
-    "name": "Alho, cru",
+    "legacyId": "taco-82",
+    "name": "Alho cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 113,
@@ -1725,7 +1805,8 @@
   },
   {
     "id": "taco-83",
-    "name": "Alho-poró, cru",
+    "legacyId": "taco-83",
+    "name": "Alho-poró cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 32,
@@ -1746,7 +1827,8 @@
   },
   {
     "id": "taco-84",
-    "name": "Almeirão, cru",
+    "legacyId": "taco-84",
+    "name": "Almeirão cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 18,
@@ -1767,7 +1849,8 @@
   },
   {
     "id": "taco-85",
-    "name": "Almeirão, refogado",
+    "legacyId": "taco-85",
+    "name": "Almeirão refogado",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 65,
@@ -1788,7 +1871,8 @@
   },
   {
     "id": "taco-86",
-    "name": "Batata, baroa, cozida",
+    "legacyId": "taco-86",
+    "name": "Batata baroa cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 80,
@@ -1809,7 +1893,8 @@
   },
   {
     "id": "taco-87",
-    "name": "Batata, baroa, crua",
+    "legacyId": "taco-87",
+    "name": "Batata baroa crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 101,
@@ -1830,8 +1915,8 @@
   },
   {
     "id": "taco-88",
-    "legacyId": "b9d043f8-31fa-4bda-a0ab-a200ef6f351c",
-    "name": "Batata, doce, cozida",
+    "legacyId": "taco-88",
+    "name": "Batata doce cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 77,
@@ -1852,7 +1937,8 @@
   },
   {
     "id": "taco-89",
-    "name": "Batata, doce, crua",
+    "legacyId": "taco-89",
+    "name": "Batata doce crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 118,
@@ -1873,7 +1959,8 @@
   },
   {
     "id": "taco-90",
-    "name": "Batata, frita, tipo chips, industrializada",
+    "legacyId": "taco-90",
+    "name": "Batata frita tipo chips industrializada",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 543,
@@ -1894,8 +1981,8 @@
   },
   {
     "id": "taco-91",
-    "legacyId": "64285700-8f96-46ac-9d2a-16394b5ac122",
-    "name": "Batata, inglesa, cozida",
+    "legacyId": "taco-91",
+    "name": "Batata inglesa cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 52,
@@ -1916,7 +2003,8 @@
   },
   {
     "id": "taco-92",
-    "name": "Batata, inglesa, crua",
+    "legacyId": "taco-92",
+    "name": "Batata inglesa crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 64,
@@ -1937,7 +2025,8 @@
   },
   {
     "id": "taco-93",
-    "name": "Batata, inglesa, frita",
+    "legacyId": "taco-93",
+    "name": "Batata inglesa frita",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 267,
@@ -1958,7 +2047,8 @@
   },
   {
     "id": "taco-94",
-    "name": "Batata, inglesa, sauté",
+    "legacyId": "taco-94",
+    "name": "Batata inglesa sauté",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 68,
@@ -1979,8 +2069,8 @@
   },
   {
     "id": "taco-95",
-    "legacyId": "50ea59fd-b3b9-4df2-b618-40e596011bf3",
-    "name": "Berinjela, cozida",
+    "legacyId": "taco-95",
+    "name": "Berinjela cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 19,
@@ -2001,7 +2091,8 @@
   },
   {
     "id": "taco-96",
-    "name": "Berinjela, crua",
+    "legacyId": "taco-96",
+    "name": "Berinjela crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 20,
@@ -2022,8 +2113,8 @@
   },
   {
     "id": "taco-97",
-    "legacyId": "823ae3ad-ff53-4a22-8e8f-aa4d921cfee2",
-    "name": "Beterraba, cozida",
+    "legacyId": "taco-97",
+    "name": "Beterraba cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 32,
@@ -2044,7 +2135,8 @@
   },
   {
     "id": "taco-98",
-    "name": "Beterraba, crua",
+    "legacyId": "taco-98",
+    "name": "Beterraba crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 49,
@@ -2065,7 +2157,8 @@
   },
   {
     "id": "taco-99",
-    "name": "Biscoito, polvilho doce",
+    "legacyId": "taco-99",
+    "name": "Biscoito polvilho doce",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 438,
@@ -2086,7 +2179,8 @@
   },
   {
     "id": "taco-100",
-    "name": "Brócolis, cozido",
+    "legacyId": "taco-100",
+    "name": "Brócolis cozido",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 25,
@@ -2107,7 +2201,8 @@
   },
   {
     "id": "taco-101",
-    "name": "Brócolis, cru",
+    "legacyId": "taco-101",
+    "name": "Brócolis cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 25,
@@ -2128,7 +2223,8 @@
   },
   {
     "id": "taco-102",
-    "name": "Cará, cozido",
+    "legacyId": "taco-102",
+    "name": "Cará cozido",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 78,
@@ -2149,7 +2245,8 @@
   },
   {
     "id": "taco-103",
-    "name": "Cará, cru",
+    "legacyId": "taco-103",
+    "name": "Cará cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 96,
@@ -2170,7 +2267,8 @@
   },
   {
     "id": "taco-104",
-    "name": "Caruru, cru",
+    "legacyId": "taco-104",
+    "name": "Caruru cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 34,
@@ -2191,7 +2289,8 @@
   },
   {
     "id": "taco-105",
-    "name": "Catalonha, crua",
+    "legacyId": "taco-105",
+    "name": "Catalonha crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 24,
@@ -2212,7 +2311,8 @@
   },
   {
     "id": "taco-106",
-    "name": "Catalonha, refogada",
+    "legacyId": "taco-106",
+    "name": "Catalonha refogada",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 63,
@@ -2233,7 +2333,8 @@
   },
   {
     "id": "taco-107",
-    "name": "Cebola, crua",
+    "legacyId": "taco-107",
+    "name": "Cebola crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 39,
@@ -2254,7 +2355,8 @@
   },
   {
     "id": "taco-108",
-    "name": "Cebolinha, crua",
+    "legacyId": "taco-108",
+    "name": "Cebolinha crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 20,
@@ -2275,8 +2377,8 @@
   },
   {
     "id": "taco-109",
-    "legacyId": "289de3df-5d47-4aab-b327-d257f418fb4d",
-    "name": "Cenoura, cozida",
+    "legacyId": "taco-109",
+    "name": "Cenoura cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 30,
@@ -2297,7 +2399,8 @@
   },
   {
     "id": "taco-110",
-    "name": "Cenoura, crua",
+    "legacyId": "taco-110",
+    "name": "Cenoura crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 34,
@@ -2318,7 +2421,8 @@
   },
   {
     "id": "taco-111",
-    "name": "Chicória, crua",
+    "legacyId": "taco-111",
+    "name": "Chicória crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 14,
@@ -2339,8 +2443,8 @@
   },
   {
     "id": "taco-112",
-    "legacyId": "1b3eebe9-4119-4892-8003-83ae3c4cdf54",
-    "name": "Chuchu, cozido",
+    "legacyId": "taco-112",
+    "name": "Chuchu cozido",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 19,
@@ -2361,7 +2465,8 @@
   },
   {
     "id": "taco-113",
-    "name": "Chuchu, cru",
+    "legacyId": "taco-113",
+    "name": "Chuchu cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 17,
@@ -2382,7 +2487,8 @@
   },
   {
     "id": "taco-114",
-    "name": "Coentro, folhas desidratadas",
+    "legacyId": "taco-114",
+    "name": "Coentro folhas desidratadas",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 309,
@@ -2403,7 +2509,8 @@
   },
   {
     "id": "taco-115",
-    "name": "Couve, manteiga, crua",
+    "legacyId": "taco-115",
+    "name": "Couve manteiga crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 27,
@@ -2424,8 +2531,8 @@
   },
   {
     "id": "taco-116",
-    "legacyId": "bf792959-262d-48a5-ada6-e5a77ca37d2c",
-    "name": "Couve, manteiga, refogada",
+    "legacyId": "taco-116",
+    "name": "Couve manteiga refogada",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 90,
@@ -2446,7 +2553,8 @@
   },
   {
     "id": "taco-117",
-    "name": "Couve-flor, crua",
+    "legacyId": "taco-117",
+    "name": "Couve-flor crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 23,
@@ -2467,8 +2575,8 @@
   },
   {
     "id": "taco-118",
-    "legacyId": "ddd05232-4cbc-499e-9c16-efd6172d95e5",
-    "name": "Couve-flor, cozida",
+    "legacyId": "taco-118",
+    "name": "Couve-flor cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 19,
@@ -2489,7 +2597,8 @@
   },
   {
     "id": "taco-119",
-    "name": "Espinafre, Nova Zelândia, cru",
+    "legacyId": "taco-119",
+    "name": "Espinafre Nova Zelândia cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 16,
@@ -2510,7 +2619,8 @@
   },
   {
     "id": "taco-120",
-    "name": "Espinafre, Nova Zelândia, refogado",
+    "legacyId": "taco-120",
+    "name": "Espinafre Nova Zelândia refogado",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 67,
@@ -2531,7 +2641,8 @@
   },
   {
     "id": "taco-121",
-    "name": "Farinha, de mandioca, crua",
+    "legacyId": "taco-121",
+    "name": "Farinha de mandioca crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 361,
@@ -2552,8 +2663,8 @@
   },
   {
     "id": "taco-122",
-    "legacyId": "043cfa99-ec70-4967-802c-af78af1b134c",
-    "name": "Farinha, de mandioca, torrada",
+    "legacyId": "taco-122",
+    "name": "Farinha de mandioca torrada",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 365,
@@ -2574,7 +2685,8 @@
   },
   {
     "id": "taco-123",
-    "name": "Farinha, de puba",
+    "legacyId": "taco-123",
+    "name": "Farinha de puba",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 360,
@@ -2595,7 +2707,8 @@
   },
   {
     "id": "taco-124",
-    "name": "Fécula, de mandioca",
+    "legacyId": "taco-124",
+    "name": "Fécula de mandioca",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 331,
@@ -2616,7 +2729,8 @@
   },
   {
     "id": "taco-125",
-    "name": "Feijão, broto, cru",
+    "legacyId": "taco-125",
+    "name": "Feijão broto cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 39,
@@ -2637,7 +2751,8 @@
   },
   {
     "id": "taco-126",
-    "name": "Inhame, cru",
+    "legacyId": "taco-126",
+    "name": "Inhame cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 97,
@@ -2658,7 +2773,8 @@
   },
   {
     "id": "taco-127",
-    "name": "Jiló, cru",
+    "legacyId": "taco-127",
+    "name": "Jiló cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 27,
@@ -2679,7 +2795,8 @@
   },
   {
     "id": "taco-128",
-    "name": "Jurubeba, crua",
+    "legacyId": "taco-128",
+    "name": "Jurubeba crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 126,
@@ -2700,7 +2817,8 @@
   },
   {
     "id": "taco-129",
-    "name": "Mandioca, cozida",
+    "legacyId": "taco-129",
+    "name": "Mandioca cozida",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 125,
@@ -2721,7 +2839,8 @@
   },
   {
     "id": "taco-130",
-    "name": "Mandioca, crua",
+    "legacyId": "taco-130",
+    "name": "Mandioca crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 151,
@@ -2742,7 +2861,8 @@
   },
   {
     "id": "taco-131",
-    "name": "Mandioca, farofa, temperada",
+    "legacyId": "taco-131",
+    "name": "Mandioca farofa temperada",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 406,
@@ -2763,7 +2883,8 @@
   },
   {
     "id": "taco-132",
-    "name": "Mandioca, frita",
+    "legacyId": "taco-132",
+    "name": "Mandioca frita",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 300,
@@ -2784,7 +2905,8 @@
   },
   {
     "id": "taco-133",
-    "name": "Manjericão, cru",
+    "legacyId": "taco-133",
+    "name": "Manjericão cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 21,
@@ -2805,7 +2927,8 @@
   },
   {
     "id": "taco-134",
-    "name": "Maxixe, cru",
+    "legacyId": "taco-134",
+    "name": "Maxixe cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 14,
@@ -2826,7 +2949,8 @@
   },
   {
     "id": "taco-135",
-    "name": "Mostarda, folha, crua",
+    "legacyId": "taco-135",
+    "name": "Mostarda folha crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 18,
@@ -2847,7 +2971,8 @@
   },
   {
     "id": "taco-136",
-    "name": "Nhoque, batata, cozido",
+    "legacyId": "taco-136",
+    "name": "Nhoque batata cozido",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 181,
@@ -2868,7 +2993,8 @@
   },
   {
     "id": "taco-137",
-    "name": "Nabo, cru",
+    "legacyId": "taco-137",
+    "name": "Nabo cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 18,
@@ -2889,7 +3015,8 @@
   },
   {
     "id": "taco-138",
-    "name": "Palmito, Juçara, em conserva",
+    "legacyId": "taco-138",
+    "name": "Palmito Juçara em conserva",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 23,
@@ -2910,7 +3037,8 @@
   },
   {
     "id": "taco-139",
-    "name": "Palmito, pupunha, em conserva",
+    "legacyId": "taco-139",
+    "name": "Palmito pupunha em conserva",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 29,
@@ -2931,7 +3059,8 @@
   },
   {
     "id": "taco-140",
-    "name": "Pão, de queijo, assado",
+    "legacyId": "taco-140",
+    "name": "Pão de queijo assado",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 363,
@@ -2952,7 +3081,8 @@
   },
   {
     "id": "taco-141",
-    "name": "Pão, de queijo, cru",
+    "legacyId": "taco-141",
+    "name": "Pão de queijo cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 295,
@@ -2973,7 +3103,8 @@
   },
   {
     "id": "taco-142",
-    "name": "Pepino, cru",
+    "legacyId": "taco-142",
+    "name": "Pepino cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 10,
@@ -2994,7 +3125,8 @@
   },
   {
     "id": "taco-143",
-    "name": "Pimentão, amarelo, cru",
+    "legacyId": "taco-143",
+    "name": "Pimentão amarelo cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 28,
@@ -3015,7 +3147,8 @@
   },
   {
     "id": "taco-144",
-    "name": "Pimentão, verde, cru",
+    "legacyId": "taco-144",
+    "name": "Pimentão verde cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 21,
@@ -3036,7 +3169,8 @@
   },
   {
     "id": "taco-145",
-    "name": "Pimentão, vermelho, cru",
+    "legacyId": "taco-145",
+    "name": "Pimentão vermelho cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 23,
@@ -3057,7 +3191,8 @@
   },
   {
     "id": "taco-146",
-    "name": "Polvilho, doce",
+    "legacyId": "taco-146",
+    "name": "Polvilho doce",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 351,
@@ -3078,7 +3213,8 @@
   },
   {
     "id": "taco-147",
-    "name": "Quiabo, cru",
+    "legacyId": "taco-147",
+    "name": "Quiabo cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 30,
@@ -3099,7 +3235,8 @@
   },
   {
     "id": "taco-148",
-    "name": "Rabanete, cru",
+    "legacyId": "taco-148",
+    "name": "Rabanete cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 14,
@@ -3120,7 +3257,8 @@
   },
   {
     "id": "taco-149",
-    "name": "Repolho, branco, cru",
+    "legacyId": "taco-149",
+    "name": "Repolho branco cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 17,
@@ -3141,7 +3279,8 @@
   },
   {
     "id": "taco-150",
-    "name": "Repolho, roxo, cru",
+    "legacyId": "taco-150",
+    "name": "Repolho roxo cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 31,
@@ -3162,7 +3301,8 @@
   },
   {
     "id": "taco-151",
-    "name": "Repolho, roxo, refogado",
+    "legacyId": "taco-151",
+    "name": "Repolho roxo refogado",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 42,
@@ -3183,8 +3323,8 @@
   },
   {
     "id": "taco-152",
-    "legacyId": "c5ed6a12-b079-4559-b107-cea49809f7e8",
-    "name": "Rúcula, crua",
+    "legacyId": "taco-152",
+    "name": "Rúcula crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 13,
@@ -3205,7 +3345,8 @@
   },
   {
     "id": "taco-153",
-    "name": "Salsa, crua",
+    "legacyId": "taco-153",
+    "name": "Salsa crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 33,
@@ -3226,7 +3367,8 @@
   },
   {
     "id": "taco-154",
-    "name": "Seleta de legumes, enlatada",
+    "legacyId": "taco-154",
+    "name": "Seleta de legumes enlatada",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 57,
@@ -3247,7 +3389,8 @@
   },
   {
     "id": "taco-155",
-    "name": "Serralha, crua",
+    "legacyId": "taco-155",
+    "name": "Serralha crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 30,
@@ -3268,7 +3411,8 @@
   },
   {
     "id": "taco-156",
-    "name": "Taioba, crua",
+    "legacyId": "taco-156",
+    "name": "Taioba crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 34,
@@ -3289,7 +3433,8 @@
   },
   {
     "id": "taco-157",
-    "name": "Tomate, com semente, cru",
+    "legacyId": "taco-157",
+    "name": "Tomate com semente cru",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 15,
@@ -3310,7 +3455,8 @@
   },
   {
     "id": "taco-158",
-    "name": "Tomate, extrato",
+    "legacyId": "taco-158",
+    "name": "Tomate extrato",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 61,
@@ -3331,7 +3477,8 @@
   },
   {
     "id": "taco-159",
-    "name": "Tomate, molho industrializado",
+    "legacyId": "taco-159",
+    "name": "Tomate molho industrializado",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 38,
@@ -3352,7 +3499,8 @@
   },
   {
     "id": "taco-160",
-    "name": "Tomate, purê",
+    "legacyId": "taco-160",
+    "name": "Tomate purê",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 28,
@@ -3373,7 +3521,8 @@
   },
   {
     "id": "taco-161",
-    "name": "Tomate, salada",
+    "legacyId": "taco-161",
+    "name": "Tomate salada",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 21,
@@ -3394,7 +3543,8 @@
   },
   {
     "id": "taco-162",
-    "name": "Vagem, crua",
+    "legacyId": "taco-162",
+    "name": "Vagem crua",
     "category": "Verduras, hortaliças e derivados",
     "source": "TACO",
     "caloriesPer100g": 25,
@@ -3415,7 +3565,8 @@
   },
   {
     "id": "taco-163",
-    "name": "Abacate, cru",
+    "legacyId": "taco-163",
+    "name": "Abacate cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 96,
@@ -3436,7 +3587,8 @@
   },
   {
     "id": "taco-164",
-    "name": "Abacaxi, cru",
+    "legacyId": "taco-164",
+    "name": "Abacaxi cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 48,
@@ -3457,7 +3609,8 @@
   },
   {
     "id": "taco-165",
-    "name": "Abacaxi, polpa, congelada",
+    "legacyId": "taco-165",
+    "name": "Abacaxi polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 31,
@@ -3478,7 +3631,8 @@
   },
   {
     "id": "taco-166",
-    "name": "Abiu, cru",
+    "legacyId": "taco-166",
+    "name": "Abiu cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 62,
@@ -3499,7 +3653,8 @@
   },
   {
     "id": "taco-167",
-    "name": "Açaí, polpa, com xarope de guaraná e glucose",
+    "legacyId": "taco-167",
+    "name": "Açaí polpa com xarope de guaraná e glucose",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 110,
@@ -3520,7 +3675,8 @@
   },
   {
     "id": "taco-168",
-    "name": "Açaí, polpa, congelada",
+    "legacyId": "taco-168",
+    "name": "Açaí polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 58,
@@ -3541,7 +3697,8 @@
   },
   {
     "id": "taco-169",
-    "name": "Acerola, crua",
+    "legacyId": "taco-169",
+    "name": "Acerola crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 33,
@@ -3562,7 +3719,8 @@
   },
   {
     "id": "taco-170",
-    "name": "Acerola, polpa, congelada",
+    "legacyId": "taco-170",
+    "name": "Acerola polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 22,
@@ -3583,7 +3741,8 @@
   },
   {
     "id": "taco-171",
-    "name": "Ameixa, calda, enlatada",
+    "legacyId": "taco-171",
+    "name": "Ameixa calda enlatada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 183,
@@ -3604,7 +3763,8 @@
   },
   {
     "id": "taco-172",
-    "name": "Ameixa, crua",
+    "legacyId": "taco-172",
+    "name": "Ameixa crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 53,
@@ -3625,7 +3785,8 @@
   },
   {
     "id": "taco-173",
-    "name": "Ameixa, em calda, enlatada, drenada",
+    "legacyId": "taco-173",
+    "name": "Ameixa em calda enlatada drenada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 177,
@@ -3646,7 +3807,8 @@
   },
   {
     "id": "taco-174",
-    "name": "Atemóia, crua",
+    "legacyId": "taco-174",
+    "name": "Atemóia crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 97,
@@ -3667,7 +3829,8 @@
   },
   {
     "id": "taco-175",
-    "name": "Banana, da terra, crua",
+    "legacyId": "taco-175",
+    "name": "Banana da terra crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 128,
@@ -3688,7 +3851,8 @@
   },
   {
     "id": "taco-176",
-    "name": "Banana, doce em barra",
+    "legacyId": "taco-176",
+    "name": "Banana doce em barra",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 280,
@@ -3709,7 +3873,8 @@
   },
   {
     "id": "taco-177",
-    "name": "Banana, figo, crua",
+    "legacyId": "taco-177",
+    "name": "Banana figo crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 105,
@@ -3730,7 +3895,8 @@
   },
   {
     "id": "taco-178",
-    "name": "Banana, maçã, crua",
+    "legacyId": "taco-178",
+    "name": "Banana maçã crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 87,
@@ -3751,7 +3917,8 @@
   },
   {
     "id": "taco-179",
-    "name": "Banana, nanica, crua",
+    "legacyId": "taco-179",
+    "name": "Banana nanica crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 92,
@@ -3772,7 +3939,8 @@
   },
   {
     "id": "taco-180",
-    "name": "Banana, ouro, crua",
+    "legacyId": "taco-180",
+    "name": "Banana ouro crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 112,
@@ -3793,7 +3961,8 @@
   },
   {
     "id": "taco-181",
-    "name": "Banana, pacova, crua",
+    "legacyId": "taco-181",
+    "name": "Banana pacova crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 78,
@@ -3814,7 +3983,8 @@
   },
   {
     "id": "taco-182",
-    "name": "Banana, prata, crua",
+    "legacyId": "taco-182",
+    "name": "Banana prata crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 98,
@@ -3835,7 +4005,8 @@
   },
   {
     "id": "taco-183",
-    "name": "Cacau, cru",
+    "legacyId": "taco-183",
+    "name": "Cacau cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 74,
@@ -3856,7 +4027,8 @@
   },
   {
     "id": "taco-184",
-    "name": "Cajá-Manga, cru",
+    "legacyId": "taco-184",
+    "name": "Cajá-Manga cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 46,
@@ -3877,7 +4049,8 @@
   },
   {
     "id": "taco-185",
-    "name": "Cajá, polpa, congelada",
+    "legacyId": "taco-185",
+    "name": "Cajá polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 26,
@@ -3898,7 +4071,8 @@
   },
   {
     "id": "taco-186",
-    "name": "Caju, cru",
+    "legacyId": "taco-186",
+    "name": "Caju cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 43,
@@ -3919,7 +4093,8 @@
   },
   {
     "id": "taco-187",
-    "name": "Caju, polpa, congelada",
+    "legacyId": "taco-187",
+    "name": "Caju polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 37,
@@ -3940,7 +4115,8 @@
   },
   {
     "id": "taco-188",
-    "name": "Caju, suco concentrado, envasado",
+    "legacyId": "taco-188",
+    "name": "Caju suco concentrado envasado",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 45,
@@ -3961,7 +4137,8 @@
   },
   {
     "id": "taco-189",
-    "name": "Caqui, chocolate, cru",
+    "legacyId": "taco-189",
+    "name": "Caqui chocolate cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 71,
@@ -3982,7 +4159,8 @@
   },
   {
     "id": "taco-190",
-    "name": "Carambola, crua",
+    "legacyId": "taco-190",
+    "name": "Carambola crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 46,
@@ -4003,7 +4181,8 @@
   },
   {
     "id": "taco-191",
-    "name": "Ciriguela, crua",
+    "legacyId": "taco-191",
+    "name": "Ciriguela crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 76,
@@ -4024,7 +4203,8 @@
   },
   {
     "id": "taco-192",
-    "name": "Cupuaçu, cru",
+    "legacyId": "taco-192",
+    "name": "Cupuaçu cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 49,
@@ -4045,7 +4225,8 @@
   },
   {
     "id": "taco-193",
-    "name": "Cupuaçu, polpa, congelada",
+    "legacyId": "taco-193",
+    "name": "Cupuaçu polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 49,
@@ -4066,7 +4247,8 @@
   },
   {
     "id": "taco-194",
-    "name": "Figo, cru",
+    "legacyId": "taco-194",
+    "name": "Figo cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 41,
@@ -4087,7 +4269,8 @@
   },
   {
     "id": "taco-195",
-    "name": "Figo, enlatado, em calda",
+    "legacyId": "taco-195",
+    "name": "Figo enlatado em calda",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 184,
@@ -4108,7 +4291,8 @@
   },
   {
     "id": "taco-196",
-    "name": "Fruta-pão, crua",
+    "legacyId": "taco-196",
+    "name": "Fruta-pão crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 67,
@@ -4129,7 +4313,8 @@
   },
   {
     "id": "taco-197",
-    "name": "Goiaba, branca, com casca, crua",
+    "legacyId": "taco-197",
+    "name": "Goiaba branca com casca crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 52,
@@ -4150,7 +4335,8 @@
   },
   {
     "id": "taco-198",
-    "name": "Goiaba, doce em pasta",
+    "legacyId": "taco-198",
+    "name": "Goiaba doce em pasta",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 269,
@@ -4171,7 +4357,8 @@
   },
   {
     "id": "taco-199",
-    "name": "Goiaba, doce, cascão",
+    "legacyId": "taco-199",
+    "name": "Goiaba doce cascão",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 286,
@@ -4192,7 +4379,8 @@
   },
   {
     "id": "taco-200",
-    "name": "Goiaba, vermelha, com casca, crua",
+    "legacyId": "taco-200",
+    "name": "Goiaba vermelha com casca crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 54,
@@ -4213,7 +4401,8 @@
   },
   {
     "id": "taco-201",
-    "name": "Graviola, crua",
+    "legacyId": "taco-201",
+    "name": "Graviola crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 62,
@@ -4234,7 +4423,8 @@
   },
   {
     "id": "taco-202",
-    "name": "Graviola, polpa, congelada",
+    "legacyId": "taco-202",
+    "name": "Graviola polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 38,
@@ -4255,7 +4445,8 @@
   },
   {
     "id": "taco-203",
-    "name": "Jabuticaba, crua",
+    "legacyId": "taco-203",
+    "name": "Jabuticaba crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 58,
@@ -4276,7 +4467,8 @@
   },
   {
     "id": "taco-204",
-    "name": "Jaca, crua",
+    "legacyId": "taco-204",
+    "name": "Jaca crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 88,
@@ -4297,7 +4489,8 @@
   },
   {
     "id": "taco-205",
-    "name": "Jambo, cru",
+    "legacyId": "taco-205",
+    "name": "Jambo cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 27,
@@ -4318,7 +4511,8 @@
   },
   {
     "id": "taco-206",
-    "name": "Jamelão, cru",
+    "legacyId": "taco-206",
+    "name": "Jamelão cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 41,
@@ -4339,7 +4533,8 @@
   },
   {
     "id": "taco-207",
-    "name": "Kiwi, cru",
+    "legacyId": "taco-207",
+    "name": "Kiwi cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 51,
@@ -4360,7 +4555,8 @@
   },
   {
     "id": "taco-208",
-    "name": "Laranja, baía, crua",
+    "legacyId": "taco-208",
+    "name": "Laranja baía crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 45,
@@ -4381,7 +4577,8 @@
   },
   {
     "id": "taco-209",
-    "name": "Laranja, baía, suco",
+    "legacyId": "taco-209",
+    "name": "Laranja baía suco",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 37,
@@ -4402,7 +4599,8 @@
   },
   {
     "id": "taco-210",
-    "name": "Laranja, da terra, crua",
+    "legacyId": "taco-210",
+    "name": "Laranja da terra crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 51,
@@ -4423,7 +4621,8 @@
   },
   {
     "id": "taco-211",
-    "name": "Laranja, da terra, suco",
+    "legacyId": "taco-211",
+    "name": "Laranja da terra suco",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 41,
@@ -4444,7 +4643,8 @@
   },
   {
     "id": "taco-212",
-    "name": "Laranja, lima, crua",
+    "legacyId": "taco-212",
+    "name": "Laranja lima crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 46,
@@ -4465,7 +4665,8 @@
   },
   {
     "id": "taco-213",
-    "name": "Laranja, lima, suco",
+    "legacyId": "taco-213",
+    "name": "Laranja lima suco",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 39,
@@ -4486,7 +4687,8 @@
   },
   {
     "id": "taco-214",
-    "name": "Laranja, pêra, crua",
+    "legacyId": "taco-214",
+    "name": "Laranja pêra crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 37,
@@ -4507,7 +4709,8 @@
   },
   {
     "id": "taco-215",
-    "name": "Laranja, pêra, suco",
+    "legacyId": "taco-215",
+    "name": "Laranja pêra suco",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 33,
@@ -4528,7 +4731,8 @@
   },
   {
     "id": "taco-216",
-    "name": "Laranja, valência, crua",
+    "legacyId": "taco-216",
+    "name": "Laranja valência crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 46,
@@ -4549,7 +4753,8 @@
   },
   {
     "id": "taco-217",
-    "name": "Laranja, valência, suco",
+    "legacyId": "taco-217",
+    "name": "Laranja valência suco",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 36,
@@ -4570,7 +4775,8 @@
   },
   {
     "id": "taco-218",
-    "name": "Limão, cravo, suco",
+    "legacyId": "taco-218",
+    "name": "Limão cravo suco",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 14,
@@ -4591,7 +4797,8 @@
   },
   {
     "id": "taco-219",
-    "name": "Limão, galego, suco",
+    "legacyId": "taco-219",
+    "name": "Limão galego suco",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 22,
@@ -4612,7 +4819,8 @@
   },
   {
     "id": "taco-220",
-    "name": "Limão, tahiti, cru",
+    "legacyId": "taco-220",
+    "name": "Limão tahiti cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 32,
@@ -4633,7 +4841,8 @@
   },
   {
     "id": "taco-221",
-    "name": "Maçã, Argentina, com casca, crua",
+    "legacyId": "taco-221",
+    "name": "Maçã Argentina com casca crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 63,
@@ -4654,7 +4863,8 @@
   },
   {
     "id": "taco-222",
-    "name": "Maçã, Fuji, com casca, crua",
+    "legacyId": "taco-222",
+    "name": "Maçã Fuji com casca crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 56,
@@ -4675,7 +4885,8 @@
   },
   {
     "id": "taco-223",
-    "name": "Macaúba, crua",
+    "legacyId": "taco-223",
+    "name": "Macaúba crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 404,
@@ -4696,7 +4907,8 @@
   },
   {
     "id": "taco-224",
-    "name": "Mamão, doce em calda, drenado",
+    "legacyId": "taco-224",
+    "name": "Mamão doce em calda drenado",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 196,
@@ -4717,7 +4929,8 @@
   },
   {
     "id": "taco-225",
-    "name": "Mamão, Formosa, cru",
+    "legacyId": "taco-225",
+    "name": "Mamão Formosa cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 45,
@@ -4738,7 +4951,8 @@
   },
   {
     "id": "taco-226",
-    "name": "Mamão, Papaia, cru",
+    "legacyId": "taco-226",
+    "name": "Mamão Papaia cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 40,
@@ -4759,7 +4973,8 @@
   },
   {
     "id": "taco-227",
-    "name": "Mamão verde, doce em calda, drenado",
+    "legacyId": "taco-227",
+    "name": "Mamão verde doce em calda drenado",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 209,
@@ -4780,7 +4995,8 @@
   },
   {
     "id": "taco-228",
-    "name": "Manga, Haden, crua",
+    "legacyId": "taco-228",
+    "name": "Manga Haden crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 64,
@@ -4801,7 +5017,8 @@
   },
   {
     "id": "taco-229",
-    "name": "Manga, Palmer, crua",
+    "legacyId": "taco-229",
+    "name": "Manga Palmer crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 72,
@@ -4822,7 +5039,8 @@
   },
   {
     "id": "taco-230",
-    "name": "Manga, polpa, congelada",
+    "legacyId": "taco-230",
+    "name": "Manga polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 48,
@@ -4843,7 +5061,8 @@
   },
   {
     "id": "taco-231",
-    "name": "Manga, Tommy Atkins, crua",
+    "legacyId": "taco-231",
+    "name": "Manga Tommy Atkins crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 51,
@@ -4864,7 +5083,8 @@
   },
   {
     "id": "taco-232",
-    "name": "Maracujá, cru",
+    "legacyId": "taco-232",
+    "name": "Maracujá cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 68,
@@ -4885,7 +5105,8 @@
   },
   {
     "id": "taco-233",
-    "name": "Maracujá, polpa, congelada",
+    "legacyId": "taco-233",
+    "name": "Maracujá polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 39,
@@ -4906,7 +5127,8 @@
   },
   {
     "id": "taco-234",
-    "name": "Maracujá, suco concentrado, envasado",
+    "legacyId": "taco-234",
+    "name": "Maracujá suco concentrado envasado",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 42,
@@ -4927,7 +5149,8 @@
   },
   {
     "id": "taco-235",
-    "name": "Melancia, crua",
+    "legacyId": "taco-235",
+    "name": "Melancia crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 33,
@@ -4948,7 +5171,8 @@
   },
   {
     "id": "taco-236",
-    "name": "Melão, cru",
+    "legacyId": "taco-236",
+    "name": "Melão cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 29,
@@ -4969,7 +5193,8 @@
   },
   {
     "id": "taco-237",
-    "name": "Mexerica, Murcote, crua",
+    "legacyId": "taco-237",
+    "name": "Mexerica Murcote crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 58,
@@ -4990,7 +5215,8 @@
   },
   {
     "id": "taco-238",
-    "name": "Mexerica, Rio, crua",
+    "legacyId": "taco-238",
+    "name": "Mexerica Rio crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 37,
@@ -5011,7 +5237,8 @@
   },
   {
     "id": "taco-239",
-    "name": "Morango, cru",
+    "legacyId": "taco-239",
+    "name": "Morango cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 30,
@@ -5032,7 +5259,8 @@
   },
   {
     "id": "taco-240",
-    "name": "Nêspera, crua",
+    "legacyId": "taco-240",
+    "name": "Nêspera crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 43,
@@ -5053,7 +5281,8 @@
   },
   {
     "id": "taco-241",
-    "name": "Pequi, cru",
+    "legacyId": "taco-241",
+    "name": "Pequi cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 205,
@@ -5074,7 +5303,8 @@
   },
   {
     "id": "taco-242",
-    "name": "Pêra, Park, crua",
+    "legacyId": "taco-242",
+    "name": "Pêra Park crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 61,
@@ -5095,7 +5325,8 @@
   },
   {
     "id": "taco-243",
-    "name": "Pêra, Williams, crua",
+    "legacyId": "taco-243",
+    "name": "Pêra Williams crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 53,
@@ -5116,7 +5347,8 @@
   },
   {
     "id": "taco-244",
-    "name": "Pêssego, Aurora, cru",
+    "legacyId": "taco-244",
+    "name": "Pêssego Aurora cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 36,
@@ -5137,7 +5369,8 @@
   },
   {
     "id": "taco-245",
-    "name": "Pêssego, enlatado, em calda",
+    "legacyId": "taco-245",
+    "name": "Pêssego enlatado em calda",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 63,
@@ -5158,7 +5391,8 @@
   },
   {
     "id": "taco-246",
-    "name": "Pinha, crua",
+    "legacyId": "taco-246",
+    "name": "Pinha crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 88,
@@ -5179,7 +5413,8 @@
   },
   {
     "id": "taco-247",
-    "name": "Pitanga, crua",
+    "legacyId": "taco-247",
+    "name": "Pitanga crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 41,
@@ -5200,7 +5435,8 @@
   },
   {
     "id": "taco-248",
-    "name": "Pitanga, polpa, congelada",
+    "legacyId": "taco-248",
+    "name": "Pitanga polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 19,
@@ -5221,7 +5457,8 @@
   },
   {
     "id": "taco-249",
-    "name": "Romã, crua",
+    "legacyId": "taco-249",
+    "name": "Romã crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 56,
@@ -5242,7 +5479,8 @@
   },
   {
     "id": "taco-250",
-    "name": "Tamarindo, cru",
+    "legacyId": "taco-250",
+    "name": "Tamarindo cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 276,
@@ -5263,7 +5501,8 @@
   },
   {
     "id": "taco-251",
-    "name": "Tangerina, Poncã, crua",
+    "legacyId": "taco-251",
+    "name": "Tangerina Poncã crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 38,
@@ -5284,7 +5523,8 @@
   },
   {
     "id": "taco-252",
-    "name": "Tangerina, Poncã, suco",
+    "legacyId": "taco-252",
+    "name": "Tangerina Poncã suco",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 36,
@@ -5305,7 +5545,8 @@
   },
   {
     "id": "taco-253",
-    "name": "Tucumã, cru",
+    "legacyId": "taco-253",
+    "name": "Tucumã cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 262,
@@ -5326,7 +5567,8 @@
   },
   {
     "id": "taco-254",
-    "name": "Umbu, cru",
+    "legacyId": "taco-254",
+    "name": "Umbu cru",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 37,
@@ -5347,7 +5589,8 @@
   },
   {
     "id": "taco-255",
-    "name": "Umbu, polpa, congelada",
+    "legacyId": "taco-255",
+    "name": "Umbu polpa congelada",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 34,
@@ -5368,7 +5611,8 @@
   },
   {
     "id": "taco-256",
-    "name": "Uva, Itália, crua",
+    "legacyId": "taco-256",
+    "name": "Uva Itália crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 53,
@@ -5389,7 +5633,8 @@
   },
   {
     "id": "taco-257",
-    "name": "Uva, Rubi, crua",
+    "legacyId": "taco-257",
+    "name": "Uva Rubi crua",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 49,
@@ -5410,7 +5655,8 @@
   },
   {
     "id": "taco-258",
-    "name": "Uva, suco concentrado, envasado",
+    "legacyId": "taco-258",
+    "name": "Uva suco concentrado envasado",
     "category": "Frutas e derivados",
     "source": "TACO",
     "caloriesPer100g": 58,
@@ -5431,7 +5677,8 @@
   },
   {
     "id": "taco-259",
-    "name": "Azeite, de dendê",
+    "legacyId": "taco-259",
+    "name": "Azeite de dendê",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 884,
@@ -5452,7 +5699,8 @@
   },
   {
     "id": "taco-260",
-    "name": "Azeite, de oliva, extra virgem",
+    "legacyId": "taco-260",
+    "name": "Azeite de oliva extra virgem",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 884,
@@ -5473,7 +5721,8 @@
   },
   {
     "id": "taco-261",
-    "name": "Manteiga, com sal",
+    "legacyId": "taco-261",
+    "name": "Manteiga com sal",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 726,
@@ -5494,7 +5743,8 @@
   },
   {
     "id": "taco-262",
-    "name": "Manteiga, sem sal",
+    "legacyId": "taco-262",
+    "name": "Manteiga sem sal",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 758,
@@ -5515,7 +5765,8 @@
   },
   {
     "id": "taco-263",
-    "name": "Margarina, com óleo hidrogenado, com sal (65% de lipídeos)",
+    "legacyId": "taco-263",
+    "name": "Margarina com óleo hidrogenado com sal (65% de lipídeos)",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 596,
@@ -5536,7 +5787,8 @@
   },
   {
     "id": "taco-264",
-    "name": "Margarina, com óleo hidrogenado, sem sal (80% de lipídeos)",
+    "legacyId": "taco-264",
+    "name": "Margarina com óleo hidrogenado sem sal (80% de lipídeos)",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 723,
@@ -5557,7 +5809,8 @@
   },
   {
     "id": "taco-265",
-    "name": "Margarina, com óleo interesterificado, com sal (65%de lipídeos)",
+    "legacyId": "taco-265",
+    "name": "Margarina com óleo interesterificado com sal (65%de lipídeos)",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 594,
@@ -5578,7 +5831,8 @@
   },
   {
     "id": "taco-266",
-    "name": "Margarina, com óleo interesterificado, sem sal (65% de lipídeos)",
+    "legacyId": "taco-266",
+    "name": "Margarina com óleo interesterificado sem sal (65% de lipídeos)",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 593,
@@ -5599,7 +5853,8 @@
   },
   {
     "id": "taco-267",
-    "name": "Óleo, de babaçu",
+    "legacyId": "taco-267",
+    "name": "Óleo de babaçu",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 884,
@@ -5620,7 +5875,8 @@
   },
   {
     "id": "taco-268",
-    "name": "Óleo, de canola",
+    "legacyId": "taco-268",
+    "name": "Óleo de canola",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 884,
@@ -5641,7 +5897,8 @@
   },
   {
     "id": "taco-269",
-    "name": "Óleo, de girassol",
+    "legacyId": "taco-269",
+    "name": "Óleo de girassol",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 884,
@@ -5662,7 +5919,8 @@
   },
   {
     "id": "taco-270",
-    "name": "Óleo, de milho",
+    "legacyId": "taco-270",
+    "name": "Óleo de milho",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 884,
@@ -5683,7 +5941,8 @@
   },
   {
     "id": "taco-271",
-    "name": "Óleo, de pequi",
+    "legacyId": "taco-271",
+    "name": "Óleo de pequi",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 884,
@@ -5704,7 +5963,8 @@
   },
   {
     "id": "taco-272",
-    "name": "Óleo, de soja",
+    "legacyId": "taco-272",
+    "name": "Óleo de soja",
     "category": "Gorduras e óleos",
     "source": "TACO",
     "caloriesPer100g": 884,
@@ -5725,7 +5985,8 @@
   },
   {
     "id": "taco-273",
-    "name": "Abadejo, filé, congelado, assado",
+    "legacyId": "taco-273",
+    "name": "Abadejo filé congelado assado",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 112,
@@ -5746,7 +6007,8 @@
   },
   {
     "id": "taco-274",
-    "name": "Abadejo, filé, congelado,cozido",
+    "legacyId": "taco-274",
+    "name": "Abadejo filé congelado cozido",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 91,
@@ -5767,7 +6029,8 @@
   },
   {
     "id": "taco-275",
-    "name": "Abadejo, filé, congelado, cru",
+    "legacyId": "taco-275",
+    "name": "Abadejo filé congelado cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 59,
@@ -5788,7 +6051,8 @@
   },
   {
     "id": "taco-276",
-    "name": "Abadejo, filé, congelado, grelhado",
+    "legacyId": "taco-276",
+    "name": "Abadejo filé congelado grelhado",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 130,
@@ -5809,7 +6073,8 @@
   },
   {
     "id": "taco-277",
-    "name": "Atum, conserva em óleo",
+    "legacyId": "taco-277",
+    "name": "Atum em conserva em óleo",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 166,
@@ -5830,7 +6095,8 @@
   },
   {
     "id": "taco-278",
-    "name": "Atum, fresco, cru",
+    "legacyId": "taco-278",
+    "name": "Atum fresco cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 118,
@@ -5851,7 +6117,8 @@
   },
   {
     "id": "taco-279",
-    "name": "Bacalhau, salgado, cru",
+    "legacyId": "taco-279",
+    "name": "Bacalhau salgado cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 136,
@@ -5872,7 +6139,8 @@
   },
   {
     "id": "taco-280",
-    "name": "Bacalhau, salgado, refogado",
+    "legacyId": "taco-280",
+    "name": "Bacalhau salgado refogado",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 140,
@@ -5893,7 +6161,8 @@
   },
   {
     "id": "taco-281",
-    "name": "Cação, posta, com farinha de trigo, frita",
+    "legacyId": "taco-281",
+    "name": "Cação posta com farinha de trigo frita",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 208,
@@ -5914,7 +6183,8 @@
   },
   {
     "id": "taco-282",
-    "name": "Cação, posta, cozida",
+    "legacyId": "taco-282",
+    "name": "Cação posta cozida",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 116,
@@ -5935,7 +6205,8 @@
   },
   {
     "id": "taco-283",
-    "name": "Cação, posta, crua",
+    "legacyId": "taco-283",
+    "name": "Cação posta crua",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 83,
@@ -5956,7 +6227,8 @@
   },
   {
     "id": "taco-284",
-    "name": "Camarão, Rio Grande, grande, cozido",
+    "legacyId": "taco-284",
+    "name": "Camarão Rio Grande grande cozido",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 90,
@@ -5977,7 +6249,8 @@
   },
   {
     "id": "taco-285",
-    "name": "Camarão, Rio Grande, grande, cru",
+    "legacyId": "taco-285",
+    "name": "Camarão Rio Grande grande cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 47,
@@ -5998,7 +6271,8 @@
   },
   {
     "id": "taco-286",
-    "name": "Camarão, Sete Barbas, sem cabeça, com casca, frito",
+    "legacyId": "taco-286",
+    "name": "Camarão Sete Barbas sem cabeça com casca frito",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 231,
@@ -6019,7 +6293,8 @@
   },
   {
     "id": "taco-287",
-    "name": "Caranguejo, cozido",
+    "legacyId": "taco-287",
+    "name": "Caranguejo cozido",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 83,
@@ -6040,7 +6315,8 @@
   },
   {
     "id": "taco-288",
-    "name": "Corimba, cru",
+    "legacyId": "taco-288",
+    "name": "Corimba cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 128,
@@ -6061,7 +6337,8 @@
   },
   {
     "id": "taco-289",
-    "name": "Corimbatá, assado",
+    "legacyId": "taco-289",
+    "name": "Corimbatá assado",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 261,
@@ -6082,7 +6359,8 @@
   },
   {
     "id": "taco-290",
-    "name": "Corimbatá, cozido",
+    "legacyId": "taco-290",
+    "name": "Corimbatá cozido",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 239,
@@ -6103,7 +6381,8 @@
   },
   {
     "id": "taco-291",
-    "name": "Corvina de água doce, crua",
+    "legacyId": "taco-291",
+    "name": "Corvina de água doce crua",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 101,
@@ -6124,7 +6403,8 @@
   },
   {
     "id": "taco-292",
-    "name": "Corvina do mar, crua",
+    "legacyId": "taco-292",
+    "name": "Corvina do mar crua",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 94,
@@ -6145,7 +6425,8 @@
   },
   {
     "id": "taco-293",
-    "name": "Corvina grande, assada",
+    "legacyId": "taco-293",
+    "name": "Corvina grande assada",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 147,
@@ -6166,7 +6447,8 @@
   },
   {
     "id": "taco-294",
-    "name": "Corvina grande, cozida",
+    "legacyId": "taco-294",
+    "name": "Corvina grande cozida",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 100,
@@ -6187,7 +6469,8 @@
   },
   {
     "id": "taco-295",
-    "name": "Dourada de água doce, fresca",
+    "legacyId": "taco-295",
+    "name": "Dourada de água doce fresca",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 131,
@@ -6208,7 +6491,8 @@
   },
   {
     "id": "taco-296",
-    "name": "Lambari, congelado, cru",
+    "legacyId": "taco-296",
+    "name": "Lambari congelado cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 131,
@@ -6229,7 +6513,8 @@
   },
   {
     "id": "taco-297",
-    "name": "Lambari, congelado, frito",
+    "legacyId": "taco-297",
+    "name": "Lambari congelado frito",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 327,
@@ -6250,7 +6535,8 @@
   },
   {
     "id": "taco-298",
-    "name": "Lambari, fresco,cru",
+    "legacyId": "taco-298",
+    "name": "Lambari fresco cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 152,
@@ -6271,7 +6557,8 @@
   },
   {
     "id": "taco-299",
-    "name": "Manjuba, com farinha de trigo, frita",
+    "legacyId": "taco-299",
+    "name": "Manjuba com farinha de trigo frita",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 344,
@@ -6292,7 +6579,8 @@
   },
   {
     "id": "taco-300",
-    "name": "Manjuba, frita",
+    "legacyId": "taco-300",
+    "name": "Manjuba frita",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 349,
@@ -6313,7 +6601,8 @@
   },
   {
     "id": "taco-301",
-    "name": "Merluza, filé, assado",
+    "legacyId": "taco-301",
+    "name": "Merluza filé assado",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 122,
@@ -6334,7 +6623,8 @@
   },
   {
     "id": "taco-302",
-    "name": "Merluza, filé, cru",
+    "legacyId": "taco-302",
+    "name": "Merluza filé cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 89,
@@ -6355,7 +6645,8 @@
   },
   {
     "id": "taco-303",
-    "name": "Merluza, filé, frito",
+    "legacyId": "taco-303",
+    "name": "Merluza filé frito",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 192,
@@ -6376,7 +6667,8 @@
   },
   {
     "id": "taco-304",
-    "name": "Pescada, branca, crua",
+    "legacyId": "taco-304",
+    "name": "Pescada branca crua",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 111,
@@ -6397,7 +6689,8 @@
   },
   {
     "id": "taco-305",
-    "name": "Pescada, branca, frita",
+    "legacyId": "taco-305",
+    "name": "Pescada branca frita",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 223,
@@ -6418,7 +6711,8 @@
   },
   {
     "id": "taco-306",
-    "name": "Pescada, filé, com farinha de trigo, frito",
+    "legacyId": "taco-306",
+    "name": "Pescada filé com farinha de trigo frito",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 283,
@@ -6439,7 +6733,8 @@
   },
   {
     "id": "taco-307",
-    "name": "Pescada, filé, cru",
+    "legacyId": "taco-307",
+    "name": "Pescada filé cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 107,
@@ -6460,7 +6755,8 @@
   },
   {
     "id": "taco-308",
-    "name": "Pescada, filé, frito",
+    "legacyId": "taco-308",
+    "name": "Pescada filé frito",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 154,
@@ -6481,7 +6777,8 @@
   },
   {
     "id": "taco-309",
-    "name": "Pescada, filé, molho escabeche",
+    "legacyId": "taco-309",
+    "name": "Pescada filé molho escabeche",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 142,
@@ -6502,7 +6799,8 @@
   },
   {
     "id": "taco-310",
-    "name": "Pescadinha, crua",
+    "legacyId": "taco-310",
+    "name": "Pescadinha crua",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 76,
@@ -6523,7 +6821,8 @@
   },
   {
     "id": "taco-311",
-    "name": "Pintado, assado",
+    "legacyId": "taco-311",
+    "name": "Pintado assado",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 192,
@@ -6544,7 +6843,8 @@
   },
   {
     "id": "taco-312",
-    "name": "Pintado, cru",
+    "legacyId": "taco-312",
+    "name": "Pintado cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 91,
@@ -6565,7 +6865,8 @@
   },
   {
     "id": "taco-313",
-    "name": "Pintado, grelhado",
+    "legacyId": "taco-313",
+    "name": "Pintado grelhado",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 152,
@@ -6586,7 +6887,8 @@
   },
   {
     "id": "taco-314",
-    "name": "Porquinho, cru",
+    "legacyId": "taco-314",
+    "name": "Porquinho cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 93,
@@ -6607,7 +6909,8 @@
   },
   {
     "id": "taco-315",
-    "name": "Salmão, filé, com pele, fresco,  grelhado",
+    "legacyId": "taco-315",
+    "name": "Salmão filé com pele fresco grelhado",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 229,
@@ -6628,7 +6931,8 @@
   },
   {
     "id": "taco-316",
-    "name": "Salmão, sem pele, fresco, cru",
+    "legacyId": "taco-316",
+    "name": "Salmão sem pele fresco cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 170,
@@ -6649,7 +6953,8 @@
   },
   {
     "id": "taco-317",
-    "name": "Salmão, sem pele, fresco, grelhado",
+    "legacyId": "taco-317",
+    "name": "Salmão sem pele fresco grelhado",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 243,
@@ -6670,7 +6975,8 @@
   },
   {
     "id": "taco-318",
-    "name": "Sardinha, assada",
+    "legacyId": "taco-318",
+    "name": "Sardinha assada",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 164,
@@ -6691,7 +6997,8 @@
   },
   {
     "id": "taco-319",
-    "name": "Sardinha, conserva em óleo",
+    "legacyId": "taco-319",
+    "name": "Sardinha em conserva em óleo",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 285,
@@ -6712,7 +7019,8 @@
   },
   {
     "id": "taco-320",
-    "name": "Sardinha, frita",
+    "legacyId": "taco-320",
+    "name": "Sardinha frita",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 257,
@@ -6733,7 +7041,8 @@
   },
   {
     "id": "taco-321",
-    "name": "Sardinha, inteira, crua",
+    "legacyId": "taco-321",
+    "name": "Sardinha inteira crua",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 114,
@@ -6754,7 +7063,8 @@
   },
   {
     "id": "taco-322",
-    "name": "Tucunaré, filé, congelado, cru",
+    "legacyId": "taco-322",
+    "name": "Tucunaré filé congelado cru",
     "category": "Pescados e frutos do mar",
     "source": "TACO",
     "caloriesPer100g": 88,
@@ -6775,6 +7085,7 @@
   },
   {
     "id": "taco-323",
+    "legacyId": "taco-323",
     "name": "Apresuntado",
     "category": "Carnes e derivados",
     "source": "TACO",
@@ -6796,7 +7107,8 @@
   },
   {
     "id": "taco-324",
-    "name": "Caldo de carne, tablete",
+    "legacyId": "taco-324",
+    "name": "Caldo de carne tablete",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 241,
@@ -6817,7 +7129,8 @@
   },
   {
     "id": "taco-325",
-    "name": "Caldo de galinha, tablete",
+    "legacyId": "taco-325",
+    "name": "Caldo de galinha tablete",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 251,
@@ -6838,7 +7151,8 @@
   },
   {
     "id": "taco-326",
-    "name": "Carne, bovina, acém, moído, cozido",
+    "legacyId": "taco-326",
+    "name": "Carne bovina acém moído cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 212,
@@ -6859,7 +7173,8 @@
   },
   {
     "id": "taco-327",
-    "name": "Carne, bovina, acém, moído, cru",
+    "legacyId": "taco-327",
+    "name": "Carne bovina acém moído cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 137,
@@ -6880,7 +7195,8 @@
   },
   {
     "id": "taco-328",
-    "name": "Carne, bovina, acém, sem gordura, cozido",
+    "legacyId": "taco-328",
+    "name": "Carne bovina acém sem gordura cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 215,
@@ -6901,7 +7217,8 @@
   },
   {
     "id": "taco-329",
-    "name": "Carne, bovina, acém, sem gordura, cru",
+    "legacyId": "taco-329",
+    "name": "Carne bovina acém sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 144,
@@ -6922,7 +7239,8 @@
   },
   {
     "id": "taco-330",
-    "name": "Carne, bovina, almôndegas, cruas",
+    "legacyId": "taco-330",
+    "name": "Carne bovina almôndegas cruas",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 189,
@@ -6943,7 +7261,8 @@
   },
   {
     "id": "taco-331",
-    "name": "Carne, bovina, almôndegas, fritas",
+    "legacyId": "taco-331",
+    "name": "Carne bovina almôndegas fritas",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 272,
@@ -6964,7 +7283,8 @@
   },
   {
     "id": "taco-332",
-    "name": "Carne, bovina, bucho, cozido",
+    "legacyId": "taco-332",
+    "name": "Carne bovina bucho cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 133,
@@ -6985,7 +7305,8 @@
   },
   {
     "id": "taco-333",
-    "name": "Carne, bovina, bucho, cru",
+    "legacyId": "taco-333",
+    "name": "Carne bovina bucho cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 137,
@@ -7006,7 +7327,8 @@
   },
   {
     "id": "taco-334",
-    "name": "Carne, bovina, capa de contra-filé, com gordura, crua",
+    "legacyId": "taco-334",
+    "name": "Carne bovina capa de contra-filé com gordura crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 217,
@@ -7027,7 +7349,8 @@
   },
   {
     "id": "taco-335",
-    "name": "Carne, bovina, capa de contra-filé, com gordura, grelhada",
+    "legacyId": "taco-335",
+    "name": "Carne bovina capa de contra-filé com gordura grelhada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 312,
@@ -7048,7 +7371,8 @@
   },
   {
     "id": "taco-336",
-    "name": "Carne, bovina, capa de contra-filé, sem gordura, crua",
+    "legacyId": "taco-336",
+    "name": "Carne bovina capa de contra-filé sem gordura crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 131,
@@ -7069,7 +7393,8 @@
   },
   {
     "id": "taco-337",
-    "name": "Carne, bovina, capa de contra-filé, sem gordura, grelhada",
+    "legacyId": "taco-337",
+    "name": "Carne bovina capa de contra-filé sem gordura grelhada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 239,
@@ -7090,7 +7415,8 @@
   },
   {
     "id": "taco-338",
-    "name": "Carne, bovina, charque, cozido",
+    "legacyId": "taco-338",
+    "name": "Carne bovina charque cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 263,
@@ -7111,7 +7437,8 @@
   },
   {
     "id": "taco-339",
-    "name": "Carne, bovina, charque, cru",
+    "legacyId": "taco-339",
+    "name": "Carne bovina charque cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 249,
@@ -7132,7 +7459,8 @@
   },
   {
     "id": "taco-340",
-    "name": "Carne, bovina, contra-filé, à milanesa",
+    "legacyId": "taco-340",
+    "name": "Carne bovina contra-filé à milanesa",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 352,
@@ -7153,7 +7481,8 @@
   },
   {
     "id": "taco-341",
-    "name": "Carne, bovina, contra-filé de costela, cru",
+    "legacyId": "taco-341",
+    "name": "Carne bovina contra-filé de costela cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 202,
@@ -7174,7 +7503,8 @@
   },
   {
     "id": "taco-342",
-    "name": "Carne, bovina, contra-filé de costela, grelhado",
+    "legacyId": "taco-342",
+    "name": "Carne bovina contra-filé de costela grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 275,
@@ -7195,7 +7525,8 @@
   },
   {
     "id": "taco-343",
-    "name": "Carne, bovina, contra-filé, com gordura, cru",
+    "legacyId": "taco-343",
+    "name": "Carne bovina contra-filé com gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 206,
@@ -7216,7 +7547,8 @@
   },
   {
     "id": "taco-344",
-    "name": "Carne, bovina, contra-filé, com gordura, grelhado",
+    "legacyId": "taco-344",
+    "name": "Carne bovina contra-filé com gordura grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 278,
@@ -7237,7 +7569,8 @@
   },
   {
     "id": "taco-345",
-    "name": "Carne, bovina, contra-filé, sem gordura, cru",
+    "legacyId": "taco-345",
+    "name": "Carne bovina contra-filé sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 157,
@@ -7258,7 +7591,8 @@
   },
   {
     "id": "taco-346",
-    "name": "Carne, bovina, contra-filé, sem gordura, grelhado",
+    "legacyId": "taco-346",
+    "name": "Carne bovina contra-filé sem gordura grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 194,
@@ -7279,7 +7613,8 @@
   },
   {
     "id": "taco-347",
-    "name": "Carne, bovina, costela, assada",
+    "legacyId": "taco-347",
+    "name": "Carne bovina costela assada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 373,
@@ -7300,7 +7635,8 @@
   },
   {
     "id": "taco-348",
-    "name": "Carne, bovina, costela, crua",
+    "legacyId": "taco-348",
+    "name": "Carne bovina costela crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 358,
@@ -7321,7 +7657,8 @@
   },
   {
     "id": "taco-349",
-    "name": "Carne, bovina, coxão duro, sem gordura, cozido",
+    "legacyId": "taco-349",
+    "name": "Carne bovina coxão duro sem gordura cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 217,
@@ -7342,7 +7679,8 @@
   },
   {
     "id": "taco-350",
-    "name": "Carne, bovina, coxão duro, sem gordura, cru",
+    "legacyId": "taco-350",
+    "name": "Carne bovina coxão duro sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 148,
@@ -7363,7 +7701,8 @@
   },
   {
     "id": "taco-351",
-    "name": "Carne, bovina, coxão mole, sem gordura, cozido",
+    "legacyId": "taco-351",
+    "name": "Carne bovina coxão mole sem gordura cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 219,
@@ -7384,7 +7723,8 @@
   },
   {
     "id": "taco-352",
-    "name": "Carne, bovina, coxão mole, sem gordura, cru",
+    "legacyId": "taco-352",
+    "name": "Carne bovina coxão mole sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 169,
@@ -7405,7 +7745,8 @@
   },
   {
     "id": "taco-353",
-    "name": "Carne, bovina, cupim, assado",
+    "legacyId": "taco-353",
+    "name": "Carne bovina cupim assado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 330,
@@ -7426,7 +7767,8 @@
   },
   {
     "id": "taco-354",
-    "name": "Carne, bovina, cupim, cru",
+    "legacyId": "taco-354",
+    "name": "Carne bovina cupim cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 221,
@@ -7447,7 +7789,8 @@
   },
   {
     "id": "taco-355",
-    "name": "Carne, bovina, fígado, cru",
+    "legacyId": "taco-355",
+    "name": "Carne bovina fígado cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 141,
@@ -7468,7 +7811,8 @@
   },
   {
     "id": "taco-356",
-    "name": "Carne, bovina, fígado, grelhado",
+    "legacyId": "taco-356",
+    "name": "Carne bovina fígado grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 225,
@@ -7489,7 +7833,8 @@
   },
   {
     "id": "taco-357",
-    "name": "Carne, bovina, filé mingnon, sem gordura, cru",
+    "legacyId": "taco-357",
+    "name": "Carne bovina filé mingnon sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 143,
@@ -7510,7 +7855,8 @@
   },
   {
     "id": "taco-358",
-    "name": "Carne, bovina, filé mingnon, sem gordura, grelhado",
+    "legacyId": "taco-358",
+    "name": "Carne bovina filé mingnon sem gordura grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 220,
@@ -7531,7 +7877,8 @@
   },
   {
     "id": "taco-359",
-    "name": "Carne, bovina, flanco, sem gordura, cozido",
+    "legacyId": "taco-359",
+    "name": "Carne bovina flanco sem gordura cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 196,
@@ -7552,7 +7899,8 @@
   },
   {
     "id": "taco-360",
-    "name": "Carne, bovina, flanco, sem gordura, cru",
+    "legacyId": "taco-360",
+    "name": "Carne bovina flanco sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 141,
@@ -7573,7 +7921,8 @@
   },
   {
     "id": "taco-361",
-    "name": "Carne, bovina, fraldinha, com gordura, cozida",
+    "legacyId": "taco-361",
+    "name": "Carne bovina fraldinha com gordura cozida",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 338,
@@ -7594,7 +7943,8 @@
   },
   {
     "id": "taco-362",
-    "name": "Carne, bovina, fraldinha, com gordura, crua",
+    "legacyId": "taco-362",
+    "name": "Carne bovina fraldinha com gordura crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 221,
@@ -7615,8 +7965,8 @@
   },
   {
     "id": "taco-363",
-    "legacyId": "822bf66f-5f17-4fd5-ad70-cc233ec05ab8",
-    "name": "Carne, bovina, lagarto, cozido",
+    "legacyId": "taco-363",
+    "name": "Carne bovina lagarto cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 222,
@@ -7637,7 +7987,8 @@
   },
   {
     "id": "taco-364",
-    "name": "Carne, bovina, lagarto, cru",
+    "legacyId": "taco-364",
+    "name": "Carne bovina lagarto cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 135,
@@ -7658,7 +8009,8 @@
   },
   {
     "id": "taco-365",
-    "name": "Carne, bovina, língua, cozida",
+    "legacyId": "taco-365",
+    "name": "Carne bovina língua cozida",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 315,
@@ -7679,7 +8031,8 @@
   },
   {
     "id": "taco-366",
-    "name": "Carne, bovina, língua, crua",
+    "legacyId": "taco-366",
+    "name": "Carne bovina língua crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 215,
@@ -7700,7 +8053,8 @@
   },
   {
     "id": "taco-367",
-    "name": "Carne, bovina, maminha, crua",
+    "legacyId": "taco-367",
+    "name": "Carne bovina maminha crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 153,
@@ -7721,8 +8075,8 @@
   },
   {
     "id": "taco-368",
-    "legacyId": "1f7d83c8-f5e0-4267-883c-df102181409b",
-    "name": "Carne, bovina, maminha, grelhada",
+    "legacyId": "taco-368",
+    "name": "Carne bovina maminha grelhada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 153,
@@ -7743,7 +8097,8 @@
   },
   {
     "id": "taco-369",
-    "name": "Carne, bovina, miolo de alcatra, sem gordura, cru",
+    "legacyId": "taco-369",
+    "name": "Carne bovina miolo de alcatra sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 163,
@@ -7764,7 +8119,8 @@
   },
   {
     "id": "taco-370",
-    "name": "Carne, bovina, miolo de alcatra, sem gordura, grelhado",
+    "legacyId": "taco-370",
+    "name": "Carne bovina miolo de alcatra sem gordura grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 241,
@@ -7785,7 +8141,8 @@
   },
   {
     "id": "taco-371",
-    "name": "Carne, bovina, músculo, sem gordura, cozido",
+    "legacyId": "taco-371",
+    "name": "Carne bovina músculo sem gordura cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 194,
@@ -7806,7 +8163,8 @@
   },
   {
     "id": "taco-372",
-    "name": "Carne, bovina, músculo, sem gordura, cru",
+    "legacyId": "taco-372",
+    "name": "Carne bovina músculo sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 142,
@@ -7827,7 +8185,8 @@
   },
   {
     "id": "taco-373",
-    "name": "Carne, bovina, paleta, com gordura, crua",
+    "legacyId": "taco-373",
+    "name": "Carne bovina paleta com gordura crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 159,
@@ -7848,7 +8207,8 @@
   },
   {
     "id": "taco-374",
-    "name": "Carne, bovina, paleta, sem gordura, cozida",
+    "legacyId": "taco-374",
+    "name": "Carne bovina paleta sem gordura cozida",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 194,
@@ -7869,7 +8229,8 @@
   },
   {
     "id": "taco-375",
-    "name": "Carne, bovina, paleta, sem gordura, crua",
+    "legacyId": "taco-375",
+    "name": "Carne bovina paleta sem gordura crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 141,
@@ -7890,7 +8251,8 @@
   },
   {
     "id": "taco-376",
-    "name": "Carne, bovina, patinho, sem gordura, cru",
+    "legacyId": "taco-376",
+    "name": "Carne bovina patinho sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 133,
@@ -7911,7 +8273,8 @@
   },
   {
     "id": "taco-377",
-    "name": "Carne, bovina, patinho, sem gordura, grelhado",
+    "legacyId": "taco-377",
+    "name": "Carne bovina patinho sem gordura grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 219,
@@ -7932,7 +8295,8 @@
   },
   {
     "id": "taco-378",
-    "name": "Carne, bovina, peito, sem gordura, cozido",
+    "legacyId": "taco-378",
+    "name": "Carne bovina peito sem gordura cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 338,
@@ -7953,7 +8317,8 @@
   },
   {
     "id": "taco-379",
-    "name": "Carne, bovina, peito, sem gordura, cru",
+    "legacyId": "taco-379",
+    "name": "Carne bovina peito sem gordura cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 259,
@@ -7974,7 +8339,8 @@
   },
   {
     "id": "taco-380",
-    "name": "Carne, bovina, picanha, com gordura, crua",
+    "legacyId": "taco-380",
+    "name": "Carne bovina picanha com gordura crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 213,
@@ -7995,7 +8361,8 @@
   },
   {
     "id": "taco-381",
-    "name": "Carne, bovina, picanha, com gordura, grelhada",
+    "legacyId": "taco-381",
+    "name": "Carne bovina picanha com gordura grelhada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 289,
@@ -8016,7 +8383,8 @@
   },
   {
     "id": "taco-382",
-    "name": "Carne, bovina, picanha, sem gordura, crua",
+    "legacyId": "taco-382",
+    "name": "Carne bovina picanha sem gordura crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 134,
@@ -8037,7 +8405,8 @@
   },
   {
     "id": "taco-383",
-    "name": "Carne, bovina, picanha, sem gordura, grelhada",
+    "legacyId": "taco-383",
+    "name": "Carne bovina picanha sem gordura grelhada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 238,
@@ -8058,7 +8427,8 @@
   },
   {
     "id": "taco-384",
-    "name": "Carne, bovina, seca, cozida",
+    "legacyId": "taco-384",
+    "name": "Carne bovina seca cozida",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 313,
@@ -8079,7 +8449,8 @@
   },
   {
     "id": "taco-385",
-    "name": "Carne, bovina, seca, crua",
+    "legacyId": "taco-385",
+    "name": "Carne bovina seca crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 313,
@@ -8100,7 +8471,8 @@
   },
   {
     "id": "taco-386",
-    "name": "Coxinha de frango, frita",
+    "legacyId": "taco-386",
+    "name": "Coxinha de frango frita",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 283,
@@ -8121,7 +8493,8 @@
   },
   {
     "id": "taco-387",
-    "name": "Croquete, de carne, cru",
+    "legacyId": "taco-387",
+    "name": "Croquete de carne cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 246,
@@ -8142,7 +8515,8 @@
   },
   {
     "id": "taco-388",
-    "name": "Croquete, de carne, frito",
+    "legacyId": "taco-388",
+    "name": "Croquete de carne frito",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 347,
@@ -8163,7 +8537,8 @@
   },
   {
     "id": "taco-389",
-    "name": "Empada de frango, pré-cozida, assada",
+    "legacyId": "taco-389",
+    "name": "Empada de frango pré-cozida assada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 358,
@@ -8184,7 +8559,8 @@
   },
   {
     "id": "taco-390",
-    "name": "Empada, de frango, pré-cozida",
+    "legacyId": "taco-390",
+    "name": "Empada de frango pré-cozida",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 377,
@@ -8205,7 +8581,8 @@
   },
   {
     "id": "taco-391",
-    "name": "Frango, asa, com pele, crua",
+    "legacyId": "taco-391",
+    "name": "Frango asa com pele crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 213,
@@ -8226,7 +8603,8 @@
   },
   {
     "id": "taco-392",
-    "name": "Frango, caipira, inteiro, com pele, cozido",
+    "legacyId": "taco-392",
+    "name": "Frango caipira inteiro com pele cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 243,
@@ -8247,7 +8625,8 @@
   },
   {
     "id": "taco-393",
-    "name": "Frango, caipira, inteiro, sem pele, cozido",
+    "legacyId": "taco-393",
+    "name": "Frango caipira inteiro sem pele cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 196,
@@ -8268,7 +8647,8 @@
   },
   {
     "id": "taco-394",
-    "name": "Frango, coração, cru",
+    "legacyId": "taco-394",
+    "name": "Frango coração cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 222,
@@ -8289,7 +8669,8 @@
   },
   {
     "id": "taco-395",
-    "name": "Frango, coração, grelhado",
+    "legacyId": "taco-395",
+    "name": "Frango coração grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 207,
@@ -8310,7 +8691,8 @@
   },
   {
     "id": "taco-396",
-    "name": "Frango, coxa, com pele, assada",
+    "legacyId": "taco-396",
+    "name": "Frango coxa com pele assada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 215,
@@ -8331,7 +8713,8 @@
   },
   {
     "id": "taco-397",
-    "name": "Frango, coxa, com pele, crua",
+    "legacyId": "taco-397",
+    "name": "Frango coxa com pele crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 161,
@@ -8352,7 +8735,8 @@
   },
   {
     "id": "taco-398",
-    "name": "Frango, coxa, sem pele, cozida",
+    "legacyId": "taco-398",
+    "name": "Frango coxa sem pele cozida",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 167,
@@ -8373,7 +8757,8 @@
   },
   {
     "id": "taco-399",
-    "name": "Frango, coxa, sem pele, crua",
+    "legacyId": "taco-399",
+    "name": "Frango coxa sem pele crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 120,
@@ -8394,7 +8779,8 @@
   },
   {
     "id": "taco-400",
-    "name": "Frango, fígado, cru",
+    "legacyId": "taco-400",
+    "name": "Frango fígado cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 106,
@@ -8415,7 +8801,8 @@
   },
   {
     "id": "taco-401",
-    "name": "Frango, filé, à milanesa",
+    "legacyId": "taco-401",
+    "name": "Frango filé à milanesa",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 221,
@@ -8436,7 +8823,8 @@
   },
   {
     "id": "taco-402",
-    "name": "Frango, inteiro, com pele, cru",
+    "legacyId": "taco-402",
+    "name": "Frango inteiro com pele cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 226,
@@ -8457,7 +8845,8 @@
   },
   {
     "id": "taco-403",
-    "name": "Frango, inteiro, sem pele, assado",
+    "legacyId": "taco-403",
+    "name": "Frango inteiro sem pele assado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 187,
@@ -8478,7 +8867,8 @@
   },
   {
     "id": "taco-404",
-    "name": "Frango, inteiro, sem pele, cozido",
+    "legacyId": "taco-404",
+    "name": "Frango inteiro sem pele cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 170,
@@ -8499,7 +8889,8 @@
   },
   {
     "id": "taco-405",
-    "name": "Frango, inteiro, sem pele, cru",
+    "legacyId": "taco-405",
+    "name": "Frango inteiro sem pele cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 129,
@@ -8520,7 +8911,8 @@
   },
   {
     "id": "taco-406",
-    "name": "Frango, peito, com pele, assado",
+    "legacyId": "taco-406",
+    "name": "Frango peito com pele assado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 212,
@@ -8541,7 +8933,8 @@
   },
   {
     "id": "taco-407",
-    "name": "Frango, peito, com pele, cru",
+    "legacyId": "taco-407",
+    "name": "Frango peito com pele cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 149,
@@ -8562,7 +8955,8 @@
   },
   {
     "id": "taco-408",
-    "name": "Frango, peito, sem pele, cozido",
+    "legacyId": "taco-408",
+    "name": "Frango peito sem pele cozido",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 163,
@@ -8583,7 +8977,8 @@
   },
   {
     "id": "taco-409",
-    "name": "Frango, peito, sem pele, cru",
+    "legacyId": "taco-409",
+    "name": "Frango peito sem pele cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 119,
@@ -8604,7 +8999,8 @@
   },
   {
     "id": "taco-410",
-    "name": "Frango, peito, sem pele, grelhado",
+    "legacyId": "taco-410",
+    "name": "Frango peito sem pele grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 159,
@@ -8625,7 +9021,8 @@
   },
   {
     "id": "taco-411",
-    "name": "Frango, sobrecoxa, com pele, assada",
+    "legacyId": "taco-411",
+    "name": "Frango sobrecoxa com pele assada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 260,
@@ -8646,7 +9043,8 @@
   },
   {
     "id": "taco-412",
-    "name": "Frango, sobrecoxa, com pele, crua",
+    "legacyId": "taco-412",
+    "name": "Frango sobrecoxa com pele crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 255,
@@ -8667,7 +9065,8 @@
   },
   {
     "id": "taco-413",
-    "name": "Frango, sobrecoxa, sem pele, assada",
+    "legacyId": "taco-413",
+    "name": "Frango sobrecoxa sem pele assada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 233,
@@ -8688,7 +9087,8 @@
   },
   {
     "id": "taco-414",
-    "name": "Frango, sobrecoxa, sem pele, crua",
+    "legacyId": "taco-414",
+    "name": "Frango sobrecoxa sem pele crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 162,
@@ -8709,7 +9109,8 @@
   },
   {
     "id": "taco-415",
-    "name": "Hambúrguer, bovino, cru",
+    "legacyId": "taco-415",
+    "name": "Hambúrguer bovino cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 215,
@@ -8730,7 +9131,8 @@
   },
   {
     "id": "taco-416",
-    "name": "Hambúrguer, bovino, frito",
+    "legacyId": "taco-416",
+    "name": "Hambúrguer bovino frito",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 258,
@@ -8751,7 +9153,8 @@
   },
   {
     "id": "taco-417",
-    "name": "Hambúrguer, bovino, grelhado",
+    "legacyId": "taco-417",
+    "name": "Hambúrguer bovino grelhado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 210,
@@ -8772,7 +9175,8 @@
   },
   {
     "id": "taco-418",
-    "name": "Lingüiça, frango, crua",
+    "legacyId": "taco-418",
+    "name": "Lingüiça frango crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 218,
@@ -8793,7 +9197,8 @@
   },
   {
     "id": "taco-419",
-    "name": "Lingüiça, frango, frita",
+    "legacyId": "taco-419",
+    "name": "Lingüiça frango frita",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 245,
@@ -8814,7 +9219,8 @@
   },
   {
     "id": "taco-420",
-    "name": "Lingüiça, frango, grelhada",
+    "legacyId": "taco-420",
+    "name": "Lingüiça frango grelhada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 244,
@@ -8835,7 +9241,8 @@
   },
   {
     "id": "taco-421",
-    "name": "Lingüiça, porco, crua",
+    "legacyId": "taco-421",
+    "name": "Lingüiça porco crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 227,
@@ -8856,7 +9263,8 @@
   },
   {
     "id": "taco-422",
-    "name": "Lingüiça, porco, frita",
+    "legacyId": "taco-422",
+    "name": "Lingüiça porco frita",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 280,
@@ -8877,7 +9285,8 @@
   },
   {
     "id": "taco-423",
-    "name": "Lingüiça, porco, grelhada",
+    "legacyId": "taco-423",
+    "name": "Lingüiça porco grelhada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 296,
@@ -8898,6 +9307,7 @@
   },
   {
     "id": "taco-424",
+    "legacyId": "taco-424",
     "name": "Mortadela",
     "category": "Carnes e derivados",
     "source": "TACO",
@@ -8919,7 +9329,8 @@
   },
   {
     "id": "taco-425",
-    "name": "Peru, congelado, assado",
+    "legacyId": "taco-425",
+    "name": "Peru congelado assado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 163,
@@ -8940,7 +9351,8 @@
   },
   {
     "id": "taco-426",
-    "name": "Peru, congelado, cru",
+    "legacyId": "taco-426",
+    "name": "Peru congelado cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 94,
@@ -8961,7 +9373,8 @@
   },
   {
     "id": "taco-427",
-    "name": "Porco, bisteca, crua",
+    "legacyId": "taco-427",
+    "name": "Porco bisteca crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 164,
@@ -8982,7 +9395,8 @@
   },
   {
     "id": "taco-428",
-    "name": "Porco, bisteca, frita",
+    "legacyId": "taco-428",
+    "name": "Porco bisteca frita",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 311,
@@ -9003,7 +9417,8 @@
   },
   {
     "id": "taco-429",
-    "name": "Porco, bisteca, grelhada",
+    "legacyId": "taco-429",
+    "name": "Porco bisteca grelhada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 280,
@@ -9024,7 +9439,8 @@
   },
   {
     "id": "taco-430",
-    "name": "Porco, costela, assada",
+    "legacyId": "taco-430",
+    "name": "Porco costela assada",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 402,
@@ -9045,7 +9461,8 @@
   },
   {
     "id": "taco-431",
-    "name": "Porco, costela, crua",
+    "legacyId": "taco-431",
+    "name": "Porco costela crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 256,
@@ -9066,7 +9483,8 @@
   },
   {
     "id": "taco-432",
-    "name": "Porco, lombo, assado",
+    "legacyId": "taco-432",
+    "name": "Porco lombo assado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 210,
@@ -9087,7 +9505,8 @@
   },
   {
     "id": "taco-433",
-    "name": "Porco, lombo, cru",
+    "legacyId": "taco-433",
+    "name": "Porco lombo cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 176,
@@ -9108,7 +9527,8 @@
   },
   {
     "id": "taco-434",
-    "name": "Porco, orelha, salgada, crua",
+    "legacyId": "taco-434",
+    "name": "Porco orelha salgada crua",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 258,
@@ -9129,7 +9549,8 @@
   },
   {
     "id": "taco-435",
-    "name": "Porco, pernil, assado",
+    "legacyId": "taco-435",
+    "name": "Porco pernil assado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 262,
@@ -9150,7 +9571,8 @@
   },
   {
     "id": "taco-436",
-    "name": "Porco, pernil, cru",
+    "legacyId": "taco-436",
+    "name": "Porco pernil cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 186,
@@ -9171,7 +9593,8 @@
   },
   {
     "id": "taco-437",
-    "name": "Porco, rabo, salgado, cru",
+    "legacyId": "taco-437",
+    "name": "Porco rabo salgado cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 377,
@@ -9192,7 +9615,8 @@
   },
   {
     "id": "taco-438",
-    "name": "Presunto, com capa de gordura",
+    "legacyId": "taco-438",
+    "name": "Presunto com capa de gordura",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 128,
@@ -9213,7 +9637,8 @@
   },
   {
     "id": "taco-439",
-    "name": "Presunto, sem capa de gordura",
+    "legacyId": "taco-439",
+    "name": "Presunto sem capa de gordura",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 94,
@@ -9234,7 +9659,8 @@
   },
   {
     "id": "taco-440",
-    "name": "Quibe, assado",
+    "legacyId": "taco-440",
+    "name": "Quibe assado",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 136,
@@ -9255,7 +9681,8 @@
   },
   {
     "id": "taco-441",
-    "name": "Quibe, cru",
+    "legacyId": "taco-441",
+    "name": "Quibe cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 109,
@@ -9276,7 +9703,8 @@
   },
   {
     "id": "taco-442",
-    "name": "Quibe, frito",
+    "legacyId": "taco-442",
+    "name": "Quibe frito",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 254,
@@ -9297,6 +9725,7 @@
   },
   {
     "id": "taco-443",
+    "legacyId": "taco-443",
     "name": "Salame",
     "category": "Carnes e derivados",
     "source": "TACO",
@@ -9318,7 +9747,8 @@
   },
   {
     "id": "taco-444",
-    "name": "Toucinho, cru",
+    "legacyId": "taco-444",
+    "name": "Toucinho cru",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 593,
@@ -9339,7 +9769,8 @@
   },
   {
     "id": "taco-445",
-    "name": "Toucinho, frito",
+    "legacyId": "taco-445",
+    "name": "Toucinho frito",
     "category": "Carnes e derivados",
     "source": "TACO",
     "caloriesPer100g": 697,
@@ -9360,7 +9791,8 @@
   },
   {
     "id": "taco-446",
-    "name": "Bebida láctea, pêssego",
+    "legacyId": "taco-446",
+    "name": "Bebida láctea pêssego",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 55,
@@ -9381,6 +9813,7 @@
   },
   {
     "id": "taco-447",
+    "legacyId": "taco-447",
     "name": "Creme de Leite",
     "category": "Leite e derivados",
     "source": "TACO",
@@ -9402,7 +9835,8 @@
   },
   {
     "id": "taco-448",
-    "name": "Iogurte, natural",
+    "legacyId": "taco-448",
+    "name": "Iogurte natural",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 51,
@@ -9423,8 +9857,8 @@
   },
   {
     "id": "taco-449",
-    "legacyId": "cc92ec24-4289-4148-8cdd-e63905727820",
-    "name": "Iogurte, natural, desnatado",
+    "legacyId": "taco-449",
+    "name": "Iogurte natural desnatado",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 41,
@@ -9445,7 +9879,8 @@
   },
   {
     "id": "taco-450",
-    "name": "Iogurte, sabor abacaxi",
+    "legacyId": "taco-450",
+    "name": "Iogurte sabor abacaxi",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 0,
@@ -9466,7 +9901,8 @@
   },
   {
     "id": "taco-451",
-    "name": "Iogurte, sabor morango",
+    "legacyId": "taco-451",
+    "name": "Iogurte sabor morango",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 70,
@@ -9487,7 +9923,8 @@
   },
   {
     "id": "taco-452",
-    "name": "Iogurte, sabor pêssego",
+    "legacyId": "taco-452",
+    "name": "Iogurte sabor pêssego",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 68,
@@ -9508,7 +9945,8 @@
   },
   {
     "id": "taco-453",
-    "name": "Leite, condensado",
+    "legacyId": "taco-453",
+    "name": "Leite condensado",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 313,
@@ -9529,7 +9967,8 @@
   },
   {
     "id": "taco-454",
-    "name": "Leite, de cabra",
+    "legacyId": "taco-454",
+    "name": "Leite de cabra",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 66,
@@ -9550,7 +9989,8 @@
   },
   {
     "id": "taco-455",
-    "name": "Leite, de vaca, achocolatado",
+    "legacyId": "taco-455",
+    "name": "Leite de vaca achocolatado",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 83,
@@ -9571,7 +10011,8 @@
   },
   {
     "id": "taco-456",
-    "name": "Leite, de vaca, desnatado, pó",
+    "legacyId": "taco-456",
+    "name": "Leite de vaca desnatado em pó",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 362,
@@ -9592,7 +10033,8 @@
   },
   {
     "id": "taco-457",
-    "name": "Leite, de vaca, desnatado, UHT",
+    "legacyId": "taco-457",
+    "name": "Leite de vaca desnatado UHT",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 0,
@@ -9613,7 +10055,8 @@
   },
   {
     "id": "taco-458",
-    "name": "Leite, de vaca, integral",
+    "legacyId": "taco-458",
+    "name": "Leite de vaca integral",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 0,
@@ -9634,7 +10077,8 @@
   },
   {
     "id": "taco-459",
-    "name": "Leite, de vaca, integral, pó",
+    "legacyId": "taco-459",
+    "name": "Leite de vaca integral em pó",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 497,
@@ -9655,7 +10099,8 @@
   },
   {
     "id": "taco-460",
-    "name": "Leite, fermentado",
+    "legacyId": "taco-460",
+    "name": "Leite fermentado",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 70,
@@ -9676,8 +10121,8 @@
   },
   {
     "id": "taco-461",
-    "legacyId": "cd359ef5-1532-4f89-b62f-1670e62a5349",
-    "name": "Queijo, minas, frescal",
+    "legacyId": "taco-461",
+    "name": "Queijo minas frescal",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 264,
@@ -9698,7 +10143,8 @@
   },
   {
     "id": "taco-462",
-    "name": "Queijo, minas, meia cura",
+    "legacyId": "taco-462",
+    "name": "Queijo minas meia cura",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 321,
@@ -9719,7 +10165,8 @@
   },
   {
     "id": "taco-463",
-    "name": "Queijo, mozarela",
+    "legacyId": "taco-463",
+    "name": "Queijo mozarela",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 330,
@@ -9740,7 +10187,8 @@
   },
   {
     "id": "taco-464",
-    "name": "Queijo, parmesão",
+    "legacyId": "taco-464",
+    "name": "Queijo parmesão",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 453,
@@ -9761,7 +10209,8 @@
   },
   {
     "id": "taco-465",
-    "name": "Queijo, pasteurizado",
+    "legacyId": "taco-465",
+    "name": "Queijo pasteurizado",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 303,
@@ -9782,7 +10231,8 @@
   },
   {
     "id": "taco-466",
-    "name": "Queijo, petit suisse, morango",
+    "legacyId": "taco-466",
+    "name": "Queijo petit suisse morango",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 121,
@@ -9803,7 +10253,8 @@
   },
   {
     "id": "taco-467",
-    "name": "Queijo, prato",
+    "legacyId": "taco-467",
+    "name": "Queijo prato",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 360,
@@ -9824,7 +10275,8 @@
   },
   {
     "id": "taco-468",
-    "name": "Maria mole",
+    "legacyId": "taco-504",
+    "name": "Maria mole láctea",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 257,
@@ -9845,7 +10297,8 @@
   },
   {
     "id": "taco-469",
-    "name": "Queijo, ricota",
+    "legacyId": "taco-469",
+    "name": "Queijo ricota",
     "category": "Leite e derivados",
     "source": "TACO",
     "caloriesPer100g": 140,
@@ -9866,7 +10319,8 @@
   },
   {
     "id": "taco-470",
-    "name": "Bebida isotônica, sabores variados",
+    "legacyId": "taco-470",
+    "name": "Bebida isotônica sabores variados",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 26,
@@ -9887,7 +10341,8 @@
   },
   {
     "id": "taco-471",
-    "name": "Café, infusão 10%",
+    "legacyId": "taco-471",
+    "name": "Café infusão 10%",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 9,
@@ -9908,7 +10363,8 @@
   },
   {
     "id": "taco-472",
-    "name": "Cana, aguardente 1",
+    "legacyId": "taco-472",
+    "name": "Cana aguardente 1",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 216,
@@ -9929,7 +10385,8 @@
   },
   {
     "id": "taco-473",
-    "name": "Cana, caldo de",
+    "legacyId": "taco-473",
+    "name": "Cana caldo de",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 65,
@@ -9950,7 +10407,8 @@
   },
   {
     "id": "taco-474",
-    "name": "Cerveja, pilsen 2",
+    "legacyId": "taco-474",
+    "name": "Cerveja pilsen 2",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 41,
@@ -9971,7 +10429,8 @@
   },
   {
     "id": "taco-475",
-    "name": "Chá, erva-doce, infusão 5%",
+    "legacyId": "taco-475",
+    "name": "Chá erva-doce infusão 5%",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 1,
@@ -9992,7 +10451,8 @@
   },
   {
     "id": "taco-476",
-    "name": "Chá, mate, infusão 5%",
+    "legacyId": "taco-476",
+    "name": "Chá mate infusão 5%",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 3,
@@ -10013,7 +10473,8 @@
   },
   {
     "id": "taco-477",
-    "name": "Chá, preto, infusão 5%",
+    "legacyId": "taco-477",
+    "name": "Chá preto infusão 5%",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 2,
@@ -10034,7 +10495,8 @@
   },
   {
     "id": "taco-478",
-    "name": "Coco, água de",
+    "legacyId": "taco-478",
+    "name": "Coco água de",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 22,
@@ -10055,7 +10517,8 @@
   },
   {
     "id": "taco-479",
-    "name": "Refrigerante, tipo água tônica",
+    "legacyId": "taco-479",
+    "name": "Refrigerante tipo água tônica",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 31,
@@ -10076,7 +10539,8 @@
   },
   {
     "id": "taco-480",
-    "name": "Refrigerante, tipo cola",
+    "legacyId": "taco-480",
+    "name": "Refrigerante tipo cola",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 34,
@@ -10097,7 +10561,8 @@
   },
   {
     "id": "taco-481",
-    "name": "Refrigerante, tipo guaraná",
+    "legacyId": "taco-481",
+    "name": "Refrigerante tipo guaraná",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 39,
@@ -10118,7 +10583,8 @@
   },
   {
     "id": "taco-482",
-    "name": "Refrigerante, tipo laranja",
+    "legacyId": "taco-482",
+    "name": "Refrigerante tipo laranja",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 46,
@@ -10139,7 +10605,8 @@
   },
   {
     "id": "taco-483",
-    "name": "Refrigerante, tipo limão",
+    "legacyId": "taco-483",
+    "name": "Refrigerante tipo limão",
     "category": "Bebidas (alcoólicas e não alcoólicas)",
     "source": "TACO",
     "caloriesPer100g": 40,
@@ -10160,7 +10627,8 @@
   },
   {
     "id": "taco-484",
-    "name": "Omelete, de queijo",
+    "legacyId": "taco-484",
+    "name": "Omelete de queijo",
     "category": "Ovos e derivados",
     "source": "TACO",
     "caloriesPer100g": 268,
@@ -10181,7 +10649,8 @@
   },
   {
     "id": "taco-485",
-    "name": "Ovo, de codorna, inteiro, cru",
+    "legacyId": "taco-485",
+    "name": "Ovo de codorna inteiro cru",
     "category": "Ovos e derivados",
     "source": "TACO",
     "caloriesPer100g": 177,
@@ -10202,7 +10671,8 @@
   },
   {
     "id": "taco-486",
-    "name": "Ovo, de galinha, clara, cozida/10minutos",
+    "legacyId": "taco-486",
+    "name": "Ovo de galinha clara cozida",
     "category": "Ovos e derivados",
     "source": "TACO",
     "caloriesPer100g": 59,
@@ -10223,7 +10693,8 @@
   },
   {
     "id": "taco-487",
-    "name": "Ovo, de galinha, gema, cozida/10minutos",
+    "legacyId": "taco-487",
+    "name": "Ovo de galinha gema cozida",
     "category": "Ovos e derivados",
     "source": "TACO",
     "caloriesPer100g": 353,
@@ -10244,7 +10715,8 @@
   },
   {
     "id": "taco-488",
-    "name": "Ovo, de galinha, inteiro, cozido/10minutos",
+    "legacyId": "8968e1c5-1173-4806-8a71-edd887949b30",
+    "name": "Ovo de galinha inteiro cozido",
     "category": "Ovos e derivados",
     "source": "TACO",
     "caloriesPer100g": 146,
@@ -10265,7 +10737,8 @@
   },
   {
     "id": "taco-489",
-    "name": "Ovo, de galinha, inteiro, cru",
+    "legacyId": "taco-489",
+    "name": "Ovo de galinha inteiro cru",
     "category": "Ovos e derivados",
     "source": "TACO",
     "caloriesPer100g": 143,
@@ -10286,7 +10759,8 @@
   },
   {
     "id": "taco-490",
-    "name": "Ovo, de galinha, inteiro, frito",
+    "legacyId": "taco-490",
+    "name": "Ovo de galinha inteiro frito",
     "category": "Ovos e derivados",
     "source": "TACO",
     "caloriesPer100g": 240,
@@ -10307,7 +10781,8 @@
   },
   {
     "id": "taco-491",
-    "name": "Achocolatado, pó",
+    "legacyId": "taco-491",
+    "name": "Achocolatado em pó",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 401,
@@ -10328,7 +10803,8 @@
   },
   {
     "id": "taco-492",
-    "name": "Açúcar, cristal",
+    "legacyId": "taco-492",
+    "name": "Açúcar cristal",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 387,
@@ -10349,7 +10825,8 @@
   },
   {
     "id": "taco-493",
-    "name": "Açúcar, mascavo",
+    "legacyId": "taco-493",
+    "name": "Açúcar mascavo",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 369,
@@ -10370,7 +10847,8 @@
   },
   {
     "id": "taco-494",
-    "name": "Açúcar, refinado",
+    "legacyId": "taco-494",
+    "name": "Açúcar refinado",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 387,
@@ -10391,7 +10869,8 @@
   },
   {
     "id": "taco-495",
-    "name": "Chocolate, ao leite",
+    "legacyId": "taco-495",
+    "name": "Chocolate ao leite",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 540,
@@ -10412,7 +10891,8 @@
   },
   {
     "id": "taco-496",
-    "name": "Chocolate, ao leite, com castanha do Pará",
+    "legacyId": "taco-496",
+    "name": "Chocolate ao leite com castanha do Pará",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 559,
@@ -10433,7 +10913,8 @@
   },
   {
     "id": "taco-497",
-    "name": "Chocolate, ao leite, dietético",
+    "legacyId": "taco-497",
+    "name": "Chocolate ao leite dietético",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 557,
@@ -10454,7 +10935,8 @@
   },
   {
     "id": "taco-498",
-    "name": "Chocolate, meio amargo",
+    "legacyId": "taco-498",
+    "name": "Chocolate meio amargo",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 475,
@@ -10475,6 +10957,7 @@
   },
   {
     "id": "taco-499",
+    "legacyId": "taco-499",
     "name": "Cocada branca",
     "category": "Produtos açucarados",
     "source": "TACO",
@@ -10496,7 +10979,8 @@
   },
   {
     "id": "taco-500",
-    "name": "Doce, de abóbora, cremoso",
+    "legacyId": "taco-500",
+    "name": "Doce de abóbora cremoso",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 199,
@@ -10517,7 +11001,8 @@
   },
   {
     "id": "taco-501",
-    "name": "Doce, de leite, cremoso",
+    "legacyId": "taco-501",
+    "name": "Doce de leite cremoso",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 306,
@@ -10538,7 +11023,8 @@
   },
   {
     "id": "taco-502",
-    "name": "Geléia, mocotó, natural",
+    "legacyId": "taco-502",
+    "name": "Geléia mocotó natural",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 106,
@@ -10559,6 +11045,7 @@
   },
   {
     "id": "taco-503",
+    "legacyId": "taco-503",
     "name": "Glicose de milho",
     "category": "Produtos açucarados",
     "source": "TACO",
@@ -10580,7 +11067,8 @@
   },
   {
     "id": "taco-504",
-    "name": "Maria mole",
+    "legacyId": "taco-504",
+    "name": "Maria mole doce tradicional",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 301,
@@ -10601,7 +11089,8 @@
   },
   {
     "id": "taco-505",
-    "name": "Maria mole, coco queimado",
+    "legacyId": "taco-505",
+    "name": "Maria mole coco queimado",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 307,
@@ -10622,6 +11111,7 @@
   },
   {
     "id": "taco-506",
+    "legacyId": "taco-506",
     "name": "Marmelada",
     "category": "Produtos açucarados",
     "source": "TACO",
@@ -10643,7 +11133,8 @@
   },
   {
     "id": "taco-507",
-    "name": "Mel, de abelha",
+    "legacyId": "taco-507",
+    "name": "Mel de abelha",
     "category": "Produtos açucarados",
     "source": "TACO",
     "caloriesPer100g": 309,
@@ -10664,6 +11155,7 @@
   },
   {
     "id": "taco-508",
+    "legacyId": "taco-508",
     "name": "Melado",
     "category": "Produtos açucarados",
     "source": "TACO",
@@ -10685,6 +11177,7 @@
   },
   {
     "id": "taco-509",
+    "legacyId": "taco-509",
     "name": "Quindim",
     "category": "Produtos açucarados",
     "source": "TACO",
@@ -10706,6 +11199,7 @@
   },
   {
     "id": "taco-510",
+    "legacyId": "taco-510",
     "name": "Rapadura",
     "category": "Produtos açucarados",
     "source": "TACO",
@@ -10727,7 +11221,8 @@
   },
   {
     "id": "taco-511",
-    "name": "Café, pó, torrado",
+    "legacyId": "taco-511",
+    "name": "Café pó torrado",
     "category": "Miscelâneas",
     "source": "TACO",
     "caloriesPer100g": 419,
@@ -10748,7 +11243,8 @@
   },
   {
     "id": "taco-512",
-    "name": "Capuccino, pó",
+    "legacyId": "taco-512",
+    "name": "Capuccino em pó",
     "category": "Miscelâneas",
     "source": "TACO",
     "caloriesPer100g": 417,
@@ -10769,7 +11265,8 @@
   },
   {
     "id": "taco-513",
-    "name": "Fermento em pó, químico",
+    "legacyId": "taco-513",
+    "name": "Fermento em pó químico",
     "category": "Miscelâneas",
     "source": "TACO",
     "caloriesPer100g": 90,
@@ -10790,7 +11287,8 @@
   },
   {
     "id": "taco-514",
-    "name": "Fermento, biológico, levedura, tablete",
+    "legacyId": "taco-514",
+    "name": "Fermento biológico levedura tablete",
     "category": "Miscelâneas",
     "source": "TACO",
     "caloriesPer100g": 90,
@@ -10811,7 +11309,8 @@
   },
   {
     "id": "taco-515",
-    "name": "Gelatina, sabores variados, pó",
+    "legacyId": "taco-515",
+    "name": "Gelatina sabores variados em pó",
     "category": "Miscelâneas",
     "source": "TACO",
     "caloriesPer100g": 380,
@@ -10832,7 +11331,8 @@
   },
   {
     "id": "taco-516",
-    "name": "Sal, dietético",
+    "legacyId": "taco-516",
+    "name": "Sal dietético",
     "category": "Miscelâneas",
     "source": "TACO",
     "caloriesPer100g": 0,
@@ -10853,7 +11353,8 @@
   },
   {
     "id": "taco-517",
-    "name": "Sal, grosso",
+    "legacyId": "taco-517",
+    "name": "Sal grosso",
     "category": "Miscelâneas",
     "source": "TACO",
     "caloriesPer100g": 0,
@@ -10874,6 +11375,7 @@
   },
   {
     "id": "taco-518",
+    "legacyId": "taco-518",
     "name": "Shoyu",
     "category": "Miscelâneas",
     "source": "TACO",
@@ -10895,6 +11397,7 @@
   },
   {
     "id": "taco-519",
+    "legacyId": "taco-519",
     "name": "Tempero a base de sal",
     "category": "Miscelâneas",
     "source": "TACO",
@@ -10916,7 +11419,8 @@
   },
   {
     "id": "taco-520",
-    "name": "Azeitona, preta, conserva",
+    "legacyId": "taco-520",
+    "name": "Azeitona preta em conserva",
     "category": "Outros alimentos industrializados",
     "source": "TACO",
     "caloriesPer100g": 194,
@@ -10937,7 +11441,8 @@
   },
   {
     "id": "taco-521",
-    "name": "Azeitona, verde, conserva",
+    "legacyId": "taco-521",
+    "name": "Azeitona verde em conserva",
     "category": "Outros alimentos industrializados",
     "source": "TACO",
     "caloriesPer100g": 137,
@@ -10958,7 +11463,8 @@
   },
   {
     "id": "taco-522",
-    "name": "Chantilly, spray, com gordura vegetal",
+    "legacyId": "taco-522",
+    "name": "Chantilly spray com gordura vegetal",
     "category": "Outros alimentos industrializados",
     "source": "TACO",
     "caloriesPer100g": 315,
@@ -10979,7 +11485,8 @@
   },
   {
     "id": "taco-523",
-    "name": "Leite, de coco",
+    "legacyId": "taco-523",
+    "name": "Leite de coco",
     "category": "Outros alimentos industrializados",
     "source": "TACO",
     "caloriesPer100g": 166,
@@ -11000,7 +11507,8 @@
   },
   {
     "id": "taco-524",
-    "name": "Maionese, tradicional com ovos",
+    "legacyId": "taco-524",
+    "name": "Maionese tradicional com ovos",
     "category": "Outros alimentos industrializados",
     "source": "TACO",
     "caloriesPer100g": 302,
@@ -11021,6 +11529,7 @@
   },
   {
     "id": "taco-525",
+    "legacyId": "taco-525",
     "name": "Acarajé",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11042,6 +11551,7 @@
   },
   {
     "id": "taco-526",
+    "legacyId": "taco-526",
     "name": "Arroz carreteiro",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11063,7 +11573,8 @@
   },
   {
     "id": "taco-527",
-    "name": "Baião de dois, arroz e feijão-de-corda",
+    "legacyId": "taco-527",
+    "name": "Baião de dois arroz e feijão-de-corda",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 136,
@@ -11084,6 +11595,7 @@
   },
   {
     "id": "taco-528",
+    "legacyId": "taco-528",
     "name": "Barreado",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11105,7 +11617,8 @@
   },
   {
     "id": "taco-529",
-    "name": "Bife à cavalo, com contra filé",
+    "legacyId": "taco-529",
+    "name": "Bife à cavalo com contra filé",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 291,
@@ -11126,6 +11639,7 @@
   },
   {
     "id": "taco-530",
+    "legacyId": "taco-530",
     "name": "Bolinho de arroz",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11147,6 +11661,7 @@
   },
   {
     "id": "taco-531",
+    "legacyId": "taco-531",
     "name": "Camarão à baiana",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11168,7 +11683,8 @@
   },
   {
     "id": "taco-532",
-    "name": "Charuto, de repolho",
+    "legacyId": "taco-532",
+    "name": "Charuto de repolho",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 78,
@@ -11189,7 +11705,8 @@
   },
   {
     "id": "taco-533",
-    "name": "Cuscuz, de milho, cozido com sal",
+    "legacyId": "taco-533",
+    "name": "Cuscuz de milho cozido com sal",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 113,
@@ -11210,7 +11727,8 @@
   },
   {
     "id": "taco-534",
-    "name": "Cuscuz, paulista",
+    "legacyId": "taco-534",
+    "name": "Cuscuz paulista",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 142,
@@ -11231,7 +11749,8 @@
   },
   {
     "id": "taco-535",
-    "name": "Cuxá, molho",
+    "legacyId": "taco-535",
+    "name": "Cuxá molho",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 80,
@@ -11252,6 +11771,7 @@
   },
   {
     "id": "taco-536",
+    "legacyId": "taco-536",
     "name": "Dobradinha",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11273,6 +11793,7 @@
   },
   {
     "id": "taco-537",
+    "legacyId": "taco-537",
     "name": "Estrogonofe de carne",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11294,6 +11815,7 @@
   },
   {
     "id": "taco-538",
+    "legacyId": "taco-538",
     "name": "Estrogonofe de frango",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11315,6 +11837,7 @@
   },
   {
     "id": "taco-539",
+    "legacyId": "taco-539",
     "name": "Feijão tropeiro mineiro",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11336,6 +11859,7 @@
   },
   {
     "id": "taco-540",
+    "legacyId": "taco-540",
     "name": "Feijoada",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11357,7 +11881,8 @@
   },
   {
     "id": "taco-541",
-    "name": "Frango, com açafrão",
+    "legacyId": "taco-541",
+    "name": "Frango com açafrão",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 113,
@@ -11378,7 +11903,8 @@
   },
   {
     "id": "taco-542",
-    "name": "Macarrão, molho bolognesa",
+    "legacyId": "taco-542",
+    "name": "Macarrão molho bolognesa",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 120,
@@ -11399,6 +11925,7 @@
   },
   {
     "id": "taco-543",
+    "legacyId": "taco-543",
     "name": "Maniçoba",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11420,6 +11947,7 @@
   },
   {
     "id": "taco-544",
+    "legacyId": "taco-544",
     "name": "Quibebe",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11441,7 +11969,8 @@
   },
   {
     "id": "taco-545",
-    "name": "Salada, de legumes, com maionese",
+    "legacyId": "taco-545",
+    "name": "Salada de legumes com maionese",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 96,
@@ -11462,7 +11991,8 @@
   },
   {
     "id": "taco-546",
-    "name": "Salada, de legumes, cozida no vapor",
+    "legacyId": "taco-546",
+    "name": "Salada de legumes cozida no vapor",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 35,
@@ -11483,7 +12013,8 @@
   },
   {
     "id": "taco-547",
-    "name": "Salpicão, de frango",
+    "legacyId": "taco-547",
+    "name": "Salpicão de frango",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 148,
@@ -11504,6 +12035,7 @@
   },
   {
     "id": "taco-548",
+    "legacyId": "taco-548",
     "name": "Sarapatel",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11525,6 +12057,7 @@
   },
   {
     "id": "taco-549",
+    "legacyId": "taco-549",
     "name": "Tabule",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11546,6 +12079,7 @@
   },
   {
     "id": "taco-550",
+    "legacyId": "taco-550",
     "name": "Tacacá",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11567,7 +12101,8 @@
   },
   {
     "id": "taco-551",
-    "name": "Tapioca, com manteiga",
+    "legacyId": "taco-551",
+    "name": "Tapioca com manteiga",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 348,
@@ -11588,7 +12123,8 @@
   },
   {
     "id": "taco-552",
-    "name": "Tucupi, com pimenta-de-cheiro",
+    "legacyId": "taco-552",
+    "name": "Tucupi com pimenta-de-cheiro",
     "category": "Alimentos preparados",
     "source": "TACO",
     "caloriesPer100g": 27,
@@ -11609,6 +12145,7 @@
   },
   {
     "id": "taco-553",
+    "legacyId": "taco-553",
     "name": "Vaca atolada",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11630,6 +12167,7 @@
   },
   {
     "id": "taco-554",
+    "legacyId": "taco-554",
     "name": "Vatapá",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11651,6 +12189,7 @@
   },
   {
     "id": "taco-555",
+    "legacyId": "taco-555",
     "name": "Virado à paulista",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11672,6 +12211,7 @@
   },
   {
     "id": "taco-556",
+    "legacyId": "taco-556",
     "name": "Yakisoba",
     "category": "Alimentos preparados",
     "source": "TACO",
@@ -11693,7 +12233,8 @@
   },
   {
     "id": "taco-557",
-    "name": "Amendoim, grão, cru",
+    "legacyId": "taco-557",
+    "name": "Amendoim grão cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 544,
@@ -11714,7 +12255,8 @@
   },
   {
     "id": "taco-558",
-    "name": "Amendoim, torrado, salgado",
+    "legacyId": "taco-558",
+    "name": "Amendoim torrado salgado",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 606,
@@ -11735,7 +12277,8 @@
   },
   {
     "id": "taco-559",
-    "name": "Ervilha, em vagem",
+    "legacyId": "taco-559",
+    "name": "Ervilha em vagem",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 88,
@@ -11756,7 +12299,8 @@
   },
   {
     "id": "taco-560",
-    "name": "Ervilha, enlatada, drenada",
+    "legacyId": "taco-560",
+    "name": "Ervilha enlatada drenada",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 74,
@@ -11777,7 +12321,8 @@
   },
   {
     "id": "taco-561",
-    "name": "Feijão, carioca, cozido",
+    "legacyId": "taco-561",
+    "name": "Feijão carioca cozido",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 76,
@@ -11798,7 +12343,8 @@
   },
   {
     "id": "taco-562",
-    "name": "Feijão, carioca, cru",
+    "legacyId": "taco-562",
+    "name": "Feijão carioca cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 329,
@@ -11819,8 +12365,8 @@
   },
   {
     "id": "taco-563",
-    "legacyId": "f306b547-0d76-48c1-8f3b-f0bd4c0ff27f",
-    "name": "Feijão, fradinho, cozido",
+    "legacyId": "taco-563",
+    "name": "Feijão fradinho cozido",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 78,
@@ -11841,7 +12387,8 @@
   },
   {
     "id": "taco-564",
-    "name": "Feijão, fradinho, cru",
+    "legacyId": "taco-564",
+    "name": "Feijão fradinho cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 339,
@@ -11862,7 +12409,8 @@
   },
   {
     "id": "taco-565",
-    "name": "Feijão, jalo, cozido",
+    "legacyId": "taco-565",
+    "name": "Feijão jalo cozido",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 93,
@@ -11883,7 +12431,8 @@
   },
   {
     "id": "taco-566",
-    "name": "Feijão, jalo, cru",
+    "legacyId": "taco-566",
+    "name": "Feijão jalo cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 328,
@@ -11904,7 +12453,8 @@
   },
   {
     "id": "taco-567",
-    "name": "Feijão, preto, cozido",
+    "legacyId": "taco-567",
+    "name": "Feijão preto cozido",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 77,
@@ -11925,7 +12475,8 @@
   },
   {
     "id": "taco-568",
-    "name": "Feijão, preto, cru",
+    "legacyId": "taco-568",
+    "name": "Feijão preto cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 324,
@@ -11946,7 +12497,8 @@
   },
   {
     "id": "taco-569",
-    "name": "Feijão, rajado, cozido",
+    "legacyId": "taco-569",
+    "name": "Feijão rajado cozido",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 85,
@@ -11967,7 +12519,8 @@
   },
   {
     "id": "taco-570",
-    "name": "Feijão, rajado, cru",
+    "legacyId": "taco-570",
+    "name": "Feijão rajado cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 326,
@@ -11988,7 +12541,8 @@
   },
   {
     "id": "taco-571",
-    "name": "Feijão, rosinha, cozido",
+    "legacyId": "taco-571",
+    "name": "Feijão rosinha cozido",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 68,
@@ -12009,7 +12563,8 @@
   },
   {
     "id": "taco-572",
-    "name": "Feijão, rosinha, cru",
+    "legacyId": "taco-572",
+    "name": "Feijão rosinha cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 337,
@@ -12030,7 +12585,8 @@
   },
   {
     "id": "taco-573",
-    "name": "Feijão, roxo, cozido",
+    "legacyId": "taco-573",
+    "name": "Feijão roxo cozido",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 77,
@@ -12051,7 +12607,8 @@
   },
   {
     "id": "taco-574",
-    "name": "Feijão, roxo, cru",
+    "legacyId": "taco-574",
+    "name": "Feijão roxo cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 331,
@@ -12072,7 +12629,8 @@
   },
   {
     "id": "taco-575",
-    "name": "Grão-de-bico, cru",
+    "legacyId": "taco-575",
+    "name": "Grão-de-bico cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 355,
@@ -12093,7 +12651,8 @@
   },
   {
     "id": "taco-576",
-    "name": "Guandu, cru",
+    "legacyId": "taco-576",
+    "name": "Guandu cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 344,
@@ -12114,8 +12673,8 @@
   },
   {
     "id": "taco-577",
-    "legacyId": "e0ee5823-52da-4721-87ef-cb2059f74a63",
-    "name": "Lentilha, cozida",
+    "legacyId": "taco-577",
+    "name": "Lentilha cozida",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 93,
@@ -12136,7 +12695,8 @@
   },
   {
     "id": "taco-578",
-    "name": "Lentilha, crua",
+    "legacyId": "taco-578",
+    "name": "Lentilha crua",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 339,
@@ -12157,7 +12717,8 @@
   },
   {
     "id": "taco-579",
-    "name": "Paçoca, amendoim",
+    "legacyId": "taco-579",
+    "name": "Paçoca amendoim",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 487,
@@ -12178,7 +12739,8 @@
   },
   {
     "id": "taco-580",
-    "name": "Pé-de-moleque, amendoim",
+    "legacyId": "taco-580",
+    "name": "Pé-de-moleque amendoim",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 503,
@@ -12199,7 +12761,8 @@
   },
   {
     "id": "taco-581",
-    "name": "Soja, farinha",
+    "legacyId": "taco-581",
+    "name": "Soja farinha",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 404,
@@ -12220,7 +12783,8 @@
   },
   {
     "id": "taco-582",
-    "name": "Soja, extrato solúvel, natural, fluido",
+    "legacyId": "taco-582",
+    "name": "Soja extrato solúvel natural fluido",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 39,
@@ -12241,7 +12805,8 @@
   },
   {
     "id": "taco-583",
-    "name": "Soja, extrato solúvel, pó",
+    "legacyId": "taco-583",
+    "name": "Soja extrato solúvel em pó",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 459,
@@ -12262,7 +12827,8 @@
   },
   {
     "id": "taco-584",
-    "name": "Soja, queijo (tofu)",
+    "legacyId": "taco-584",
+    "name": "Soja queijo (tofu)",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 64,
@@ -12283,7 +12849,8 @@
   },
   {
     "id": "taco-585",
-    "name": "Tremoço, cru",
+    "legacyId": "taco-585",
+    "name": "Tremoço cru",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 381,
@@ -12304,7 +12871,8 @@
   },
   {
     "id": "taco-586",
-    "name": "Tremoço, em conserva",
+    "legacyId": "taco-586",
+    "name": "Tremoço em conserva",
     "category": "Leguminosas e derivados",
     "source": "TACO",
     "caloriesPer100g": 121,
@@ -12325,7 +12893,8 @@
   },
   {
     "id": "taco-587",
-    "name": "Amêndoa, torrada, salgada",
+    "legacyId": "taco-587",
+    "name": "Amêndoa torrada salgada",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 581,
@@ -12346,7 +12915,8 @@
   },
   {
     "id": "taco-588",
-    "name": "Castanha-de-caju, torrada, salgada",
+    "legacyId": "taco-588",
+    "name": "Castanha-de-caju torrada salgada",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 570,
@@ -12367,7 +12937,8 @@
   },
   {
     "id": "taco-589",
-    "name": "Castanha-do-Brasil, crua",
+    "legacyId": "taco-589",
+    "name": "Castanha-do-Brasil crua",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 643,
@@ -12388,7 +12959,8 @@
   },
   {
     "id": "taco-590",
-    "name": "Coco, cru",
+    "legacyId": "taco-590",
+    "name": "Coco cru",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 406,
@@ -12409,7 +12981,8 @@
   },
   {
     "id": "taco-591",
-    "name": "Coco, verde, cru",
+    "legacyId": "taco-591",
+    "name": "Coco verde cru",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 0,
@@ -12430,7 +13003,8 @@
   },
   {
     "id": "taco-592",
-    "name": "Farinha, de mesocarpo de babaçu, crua",
+    "legacyId": "taco-592",
+    "name": "Farinha de mesocarpo de babaçu crua",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 329,
@@ -12451,7 +13025,8 @@
   },
   {
     "id": "taco-593",
-    "name": "Gergelim, semente",
+    "legacyId": "taco-593",
+    "name": "Gergelim semente",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 584,
@@ -12472,7 +13047,8 @@
   },
   {
     "id": "taco-594",
-    "name": "Linhaça, semente",
+    "legacyId": "taco-594",
+    "name": "Linhaça semente",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 495,
@@ -12493,7 +13069,8 @@
   },
   {
     "id": "taco-595",
-    "name": "Pinhão, cozido",
+    "legacyId": "taco-595",
+    "name": "Pinhão cozido",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 174,
@@ -12514,7 +13091,8 @@
   },
   {
     "id": "taco-596",
-    "name": "Pupunha, cozida",
+    "legacyId": "taco-596",
+    "name": "Pupunha cozida",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 219,
@@ -12535,7 +13113,8 @@
   },
   {
     "id": "taco-597",
-    "name": "Noz, crua",
+    "legacyId": "taco-597",
+    "name": "Noz crua",
     "category": "Nozes e sementes",
     "source": "TACO",
     "caloriesPer100g": 620,
@@ -13565,19 +14144,6 @@
     "carbsPer100g": 3.1,
     "fatPer100g": 0.2,
     "fiberPer100g": 1.2,
-    "micronutrients": null,
-    "isVerified": true
-  },
-  {
-    "id": "8968e1c5-1173-4806-8a71-edd887949b30",
-    "name": "Ovo de galinha inteiro cozido",
-    "category": "Ovos e derivados",
-    "source": "TACO",
-    "caloriesPer100g": 146,
-    "proteinPer100g": 13.3,
-    "carbsPer100g": 0.6,
-    "fatPer100g": 9.5,
-    "fiberPer100g": 0,
     "micronutrients": null,
     "isVerified": true
   },

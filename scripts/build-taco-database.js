@@ -5,10 +5,11 @@ const https = require('https');
 const existingExportPath = path.resolve(__dirname, '..', 'api', 'firebase-export', 'foods.json');
 const targetExportPath = path.resolve(__dirname, '..', 'api', 'firebase-export', 'foods.json');
 const targetWebPath = path.resolve(__dirname, '..', 'web', 'src', 'data', 'tacoFoods.json');
+const targetLocalCache = path.resolve(__dirname, '..', 'api', 'local-cache', 'foods.json');
 
 const existingFoods = JSON.parse(fs.readFileSync(existingExportPath, 'utf8'));
 
-console.log(`Carregados ${existingFoods.length} alimentos legados.`);
+console.log(`Carregados ${existingFoods.length} alimentos da base atual.`);
 
 https.get('https://raw.githubusercontent.com/marcelosanto/tabela_taco/master/tabela_alimentos.json', (res) => {
   let data = '';
@@ -35,6 +36,47 @@ https.get('https://raw.githubusercontent.com/marcelosanto/tabela_taco/master/tab
       return decimals === 0 ? Math.round(num) : Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
     }
 
+    function cleanFoodName(rawName) {
+      if (!rawName || typeof rawName !== 'string') return rawName;
+
+      let cleaned = rawName.trim();
+
+      // Ajustes específicos de rótulos TACO invertidos
+      if (/^Bolo,\s*mistura\s*para/i.test(cleaned)) {
+        const rest = cleaned.replace(/^Bolo,\s*mistura\s*para,?\s*/i, '').trim();
+        cleaned = rest ? `Mistura para bolo (${rest})` : 'Mistura para bolo';
+      } else if (/^Curau,\s*milho\s*verde,\s*mistura\s*para/i.test(cleaned)) {
+        cleaned = 'Mistura para curau de milho verde';
+      }
+
+      // Substituição de marcadores de pó, conserva e tempo
+      cleaned = cleaned.replace(/,\s*pó(?:\s|$)/gi, ' em pó ');
+      cleaned = cleaned.replace(/,\s*conserva(?:\s|$)/gi, ' em conserva ');
+      cleaned = cleaned.replace(/\/10minutos/gi, '');
+
+      // Conectivos e preposições sem vírgula
+      cleaned = cleaned.replace(/,\s*de\s+/gi, ' de ');
+      cleaned = cleaned.replace(/,\s*da\s+/gi, ' da ');
+      cleaned = cleaned.replace(/,\s*do\s+/gi, ' do ');
+      cleaned = cleaned.replace(/,\s*com\s+/gi, ' com ');
+      cleaned = cleaned.replace(/,\s*sem\s+/gi, ' sem ');
+      cleaned = cleaned.replace(/,\s*em\s+/gi, ' em ');
+      cleaned = cleaned.replace(/,\s*para\s+/gi, ' para ');
+      cleaned = cleaned.replace(/,\s*ao\s+/gi, ' ao ');
+      cleaned = cleaned.replace(/,\s*à\s+/gi, ' à ');
+
+      // Substitui qualquer vírgula restante por espaço limpo
+      cleaned = cleaned.replace(/,\s*/g, ' ');
+
+      // Remove espaços múltiplos e limpa bordas
+      cleaned = cleaned.replace(/\s+/g, ' ').trim();
+
+      // Primeira letra sempre maiúscula
+      cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+
+      return cleaned;
+    }
+
     function guessCategory(name) {
       const n = (name || '').toLowerCase();
       if (n.includes('whey') || n.includes('creatina') || n.includes('caseína') || n.includes('albumina') || n.includes('shake proteico')) return 'Suplementos';
@@ -55,22 +97,34 @@ https.get('https://raw.githubusercontent.com/marcelosanto/tabela_taco/master/tab
 
     const existingByNorm = new Map();
     existingFoods.forEach(e => {
+      existingByNorm.set(normalize(cleanFoodName(e.name)), e);
       existingByNorm.set(normalize(e.name), e);
     });
 
     const tacoNormSet = new Set();
     const finalFoods = [];
 
-    // 1. Process all 597 TACO foods
+    // 1. Processa todos os 597 alimentos da TACO com escrita limpa e sem vírgulas
     tacoList.forEach(t => {
-      const norm = normalize(t.description);
+      let cleanedName = cleanFoodName(t.description);
+
+      // Desambiguação de nomes homônimos da TACO
+      if (t.id === 468 && t.category === 'Leite e derivados') {
+        cleanedName = 'Maria mole láctea';
+      } else if (t.id === 504 && t.category === 'Produtos açucarados') {
+        cleanedName = 'Maria mole doce tradicional';
+      }
+
+      const norm = normalize(cleanedName);
       tacoNormSet.add(norm);
-      const matchExisting = existingByNorm.get(norm);
+      tacoNormSet.add(normalize(t.description));
+
+      const matchExisting = existingByNorm.get(norm) || existingByNorm.get(normalize(t.description));
 
       finalFoods.push({
         id: 'taco-' + t.id,
         legacyId: matchExisting ? matchExisting.id : undefined,
-        name: t.description,
+        name: cleanedName,
         category: t.category,
         source: 'TACO',
         caloriesPer100g: parseNum(t.energy_kcal, 0),
@@ -91,17 +145,22 @@ https.get('https://raw.githubusercontent.com/marcelosanto/tabela_taco/master/tab
       });
     });
 
-    // 2. Add preserved non-TACO foods
+    // 2. Adiciona alimentos suplementares/personalizados preservados (sem duplicatas)
     let preservedCount = 0;
     existingFoods.forEach(e => {
-      const norm = normalize(e.name);
-      if (!tacoNormSet.has(norm)) {
+      const cleanedExistingName = cleanFoodName(e.name);
+      const norm = normalize(cleanedExistingName);
+      const rawNorm = normalize(e.name);
+
+      if (!tacoNormSet.has(norm) && !tacoNormSet.has(rawNorm)) {
         preservedCount++;
+        tacoNormSet.add(norm);
+
         finalFoods.push({
           id: e.id,
-          name: e.name,
-          category: guessCategory(e.name),
-          source: (e.name.toLowerCase().includes('whey') || e.name.toLowerCase().includes('creatina')) ? 'SUPPLEMENT' : (e.source || 'TACO'),
+          name: cleanedExistingName,
+          category: guessCategory(cleanedExistingName),
+          source: (cleanedExistingName.toLowerCase().includes('whey') || cleanedExistingName.toLowerCase().includes('creatina')) ? 'SUPPLEMENT' : (e.source || 'TACO'),
           caloriesPer100g: parseNum(e.caloriesPer100g, 0),
           proteinPer100g: parseNum(e.proteinPer100g, 1),
           carbsPer100g: parseNum(e.carbsPer100g, 1),
@@ -113,7 +172,7 @@ https.get('https://raw.githubusercontent.com/marcelosanto/tabela_taco/master/tab
       }
     });
 
-    console.log(`TACO processados: ${tacoList.length}`);
+    console.log(`TACO processados com escrita limpa: ${tacoList.length}`);
     console.log(`Alimentos preservados (suplementos/extras): ${preservedCount}`);
     console.log(`Total final de alimentos: ${finalFoods.length}`);
 
@@ -121,7 +180,10 @@ https.get('https://raw.githubusercontent.com/marcelosanto/tabela_taco/master/tab
     const jsonOutput = JSON.stringify(finalFoods, null, 2);
     fs.writeFileSync(targetExportPath, jsonOutput, 'utf8');
     fs.writeFileSync(targetWebPath, jsonOutput, 'utf8');
+    if (fs.existsSync(path.dirname(targetLocalCache))) {
+      fs.writeFileSync(targetLocalCache, jsonOutput, 'utf8');
+    }
 
-    console.log(`Arquivos gravados com sucesso em:\n- ${targetExportPath}\n- ${targetWebPath}`);
+    console.log(`Base de alimentos gravada com sucesso em todos os destinos!`);
   });
 });

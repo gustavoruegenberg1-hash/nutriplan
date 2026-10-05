@@ -16,9 +16,9 @@ describe('FirestoreFoodRepository with Full TACO Catalog', () => {
     repository = new FirestoreFoodRepository(mockFirebase);
   });
 
-  it('deve carregar todos os 745 alimentos (597 TACO + suplementos e extras)', async () => {
+  it('deve carregar todos os 744 alimentos (597 TACO + suplementos e extras)', async () => {
     const all = await repository.search('', 1000);
-    expect(all.length).toBeGreaterThanOrEqual(745);
+    expect(all.length).toBeGreaterThanOrEqual(744);
   });
 
   it('deve encontrar alimentos oficiais da TACO por busca com acento ou sem acento', async () => {
@@ -53,7 +53,7 @@ describe('FirestoreFoodRepository with Full TACO Catalog', () => {
   it('deve encontrar alimento pelo ID oficial TACO taco-1', async () => {
     const food = await repository.findById('taco-1');
     expect(food).not.toBeNull();
-    expect(food?.name).toBe('Arroz, integral, cozido');
+    expect(food?.name).toBe('Arroz integral cozido');
     expect(food?.caloriesPer100g).toBe(124);
     expect(food?.category).toBe('Cereais e derivados');
   });

@@ -48,6 +48,21 @@ import {
   ChevronUp,
   Play,
   Lightbulb,
+  CookingPot,
+  CupSoda,
+  Beef,
+  Wheat,
+  Apple,
+  Droplets,
+  Bean,
+  Milk,
+  Boxes,
+  Nut,
+  Package,
+  Egg,
+  Fish,
+  Candy,
+  Carrot,
 } from 'lucide-react';
 
 export type PortionUnit = 'g' | 'ml' | 'un' | 'scoop' | 'colher' | 'fatia' | 'copo' | 'lata' | 'file';
@@ -109,13 +124,29 @@ export const QUICK_DIET_COMBOS = [
   },
 ];
 
-export const FOOD_CATEGORIES = [
-  { id: 'ALL', label: 'Todos os Alimentos', icon: '🍽️' },
-  { id: 'PROTEIN', label: 'Proteínas', icon: '🍗' },
-  { id: 'CARBS', label: 'Carboidratos', icon: '🍚' },
-  { id: 'FATS', label: 'Gorduras Boas', icon: '🥑' },
-  { id: 'FIBERS', label: 'Fibras & Vegetais', icon: '🥦' },
-  { id: 'FRUITS', label: 'Frutas', icon: '🍎' },
+export interface FoodCategoryConfig {
+  id: string;
+  label: string;
+  iconComponent: React.ComponentType<{ className?: string }>;
+}
+
+export const FOOD_CATEGORIES: FoodCategoryConfig[] = [
+  { id: 'Alimentos preparados', label: 'Alimentos preparados', iconComponent: CookingPot },
+  { id: 'Bebidas (alcoólicas e não alcoólicas)', label: 'Bebidas (alcoólicas e não alcoólicas)', iconComponent: CupSoda },
+  { id: 'Carnes e derivados', label: 'Carnes e derivados', iconComponent: Beef },
+  { id: 'Cereais e derivados', label: 'Cereais e derivados', iconComponent: Wheat },
+  { id: 'Frutas e derivados', label: 'Frutas e derivados', iconComponent: Apple },
+  { id: 'Gorduras e óleos', label: 'Gorduras e óleos', iconComponent: Droplets },
+  { id: 'Leguminosas e derivados', label: 'Leguminosas e derivados', iconComponent: Bean },
+  { id: 'Leite e derivados', label: 'Leite e derivados', iconComponent: Milk },
+  { id: 'Miscelâneas', label: 'Miscelâneas', iconComponent: Boxes },
+  { id: 'Nozes e sementes', label: 'Nozes e sementes', iconComponent: Nut },
+  { id: 'Outros alimentos industrializados', label: 'Outros alimentos industrializados', iconComponent: Package },
+  { id: 'Ovos e derivados', label: 'Ovos e derivados', iconComponent: Egg },
+  { id: 'Pescados e frutos do mar', label: 'Pescados e frutos do mar', iconComponent: Fish },
+  { id: 'Produtos açucarados', label: 'Produtos açucarados', iconComponent: Candy },
+  { id: 'Suplementos', label: 'Suplementos', iconComponent: Dumbbell },
+  { id: 'Verduras, hortaliças e derivados', label: 'Verduras, hortaliças e derivados', iconComponent: Carrot },
 ];
 
 export interface LocalMealItem {
@@ -766,6 +797,7 @@ export const DietPlanner: React.FC = () => {
   const [selectedTargetMealIdx, setSelectedTargetMealIdx] = useState<number>(0);
   const [expandedFoods, setExpandedFoods] = useState<Record<string, boolean>>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [isGroupsExpanded, setIsGroupsExpanded] = useState<boolean>(true);
   const [recentlyAddedFoodId, setRecentlyAddedFoodId] = useState<string | null>(null);
   const [recentlyAddedFoodMsg, setRecentlyAddedFoodMsg] = useState<string | null>(null);
   const [isDiagnosisOpen, setIsDiagnosisOpen] = useState<boolean>(false);
@@ -1470,120 +1502,22 @@ export const DietPlanner: React.FC = () => {
     return diagnosis;
   }, [currentMeals, dayTotals, user, userMetabolism]);
 
-  // Filtro de alimentos da busca TACO por categoria selecionada
+  // Filtro de alimentos da busca TACO por grupo alimentar selecionado
   const filteredFoods = useMemo(() => {
-    if (selectedCategory === 'ALL') return searchResults;
+    let source = searchResults;
 
-    return searchResults.filter((f: FoodItem) => {
-      const lower = f.name.toLowerCase();
-      const p = Number(f.proteinPer100g) || 0;
-      const c = Number(f.carbsPer100g) || 0;
-      const g = Number(f.fatPer100g) || 0;
-      const fib = Number(f.fiberPer100g) || 0;
+    // Se uma categoria estiver selecionada e não houver termo de busca digitado,
+    // carrega todos os alimentos daquele grupo da base completa
+    if (!searchQuery.trim() && selectedCategory !== 'ALL') {
+      source = foodService.getAllFoods();
+    }
 
-      const cat = f.category?.toLowerCase() || '';
+    if (selectedCategory === 'ALL') {
+      return source;
+    }
 
-      switch (selectedCategory) {
-        case 'PROTEIN':
-          return (
-            cat.includes('carnes') ||
-            cat.includes('pescados') ||
-            cat.includes('ovos') ||
-            cat.includes('suplementos') ||
-            p >= 12 ||
-            lower.includes('frango') ||
-            lower.includes('carne') ||
-            lower.includes('patinho') ||
-            lower.includes('alcatra') ||
-            lower.includes('bovina') ||
-            lower.includes('ovo') ||
-            lower.includes('peixe') ||
-            lower.includes('tilápia') ||
-            lower.includes('tilapia') ||
-            lower.includes('salmão') ||
-            lower.includes('salmao') ||
-            lower.includes('atum') ||
-            lower.includes('whey') ||
-            lower.includes('queijo') ||
-            lower.includes('iogurte') ||
-            lower.includes('leite')
-          );
-        case 'CARBS':
-          return (
-            cat.includes('cereais') ||
-            cat.includes('produtos açucarados') ||
-            c >= 18 ||
-            lower.includes('arroz') ||
-            lower.includes('batata') ||
-            lower.includes('aveia') ||
-            lower.includes('pão') ||
-            lower.includes('pao') ||
-            lower.includes('macarrão') ||
-            lower.includes('macarrao') ||
-            lower.includes('mandioca') ||
-            lower.includes('tapioca') ||
-            lower.includes('cuscuz') ||
-            lower.includes('milho') ||
-            lower.includes('granola')
-          );
-        case 'FATS':
-          return (
-            cat.includes('gorduras') ||
-            cat.includes('nozes e sementes') ||
-            g >= 12 ||
-            lower.includes('azeite') ||
-            lower.includes('óleo') ||
-            lower.includes('oleo') ||
-            lower.includes('pasta de amendoim') ||
-            lower.includes('castanha') ||
-            lower.includes('nozes') ||
-            lower.includes('amêndoa') ||
-            lower.includes('amendoa') ||
-            lower.includes('abacate') ||
-            lower.includes('manteiga')
-          );
-        case 'FIBERS':
-          return (
-            cat.includes('verduras') ||
-            cat.includes('leguminosas') ||
-            fib >= 2.5 ||
-            lower.includes('brócolis') ||
-            lower.includes('brocolis') ||
-            lower.includes('couve') ||
-            lower.includes('alface') ||
-            lower.includes('espinafre') ||
-            lower.includes('feijão') ||
-            lower.includes('feijao') ||
-            lower.includes('lentilha') ||
-            lower.includes('cenoura') ||
-            lower.includes('tomate') ||
-            lower.includes('rúcula') ||
-            lower.includes('rucula') ||
-            lower.includes('salada')
-          );
-        case 'FRUITS':
-          return (
-            cat.includes('frutas') ||
-            lower.includes('banana') ||
-            lower.includes('maçã') ||
-            lower.includes('maca') ||
-            lower.includes('laranja') ||
-            lower.includes('morango') ||
-            lower.includes('kiwi') ||
-            lower.includes('uva') ||
-            lower.includes('abacaxi') ||
-            lower.includes('mamão') ||
-            lower.includes('mamao') ||
-            lower.includes('melancia') ||
-            lower.includes('manga') ||
-            lower.includes('limão') ||
-            lower.includes('limao')
-          );
-        default:
-          return true;
-      }
-    });
-  }, [searchResults, selectedCategory]);
+    return source.filter((f: FoodItem) => f.category === selectedCategory);
+  }, [searchResults, searchQuery, selectedCategory]);
 
   // Contadores e métricas para a Caixa 2 (Dieta Montada)
   const totalFoodsCount = useMemo(() => {
@@ -2033,40 +1967,70 @@ export const DietPlanner: React.FC = () => {
           </div>
         </div>
 
-        {/* Seleção de Tags / Categorias Nutricionais */}
-        <div className="space-y-2 pt-1 border-t border-[#243044]">
+        {/* Grupos alimentares (Referência Oficial TACO) */}
+        <div className="space-y-3 pt-2 border-t border-[#243044]">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-              <span>Categorias de Alimentos:</span>
-            </label>
-            <span className="text-[11px] text-emerald-400 font-bold">
-              {filteredFoods.length} {filteredFoods.length === 1 ? 'disponível' : 'disponíveis'}
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {FOOD_CATEGORIES.map((cat) => {
-              const isSelected = selectedCategory === cat.id;
-              return (
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-xs sm:text-sm font-extrabold text-white tracking-wide flex items-center gap-1.5">
+                <span>Grupos alimentares</span>
+              </label>
+              {selectedCategory !== 'ALL' && (
                 <button
                   type="button"
-                  key={cat.id}
                   onClick={() => {
                     triggerHapticFeedback();
-                    setSelectedCategory(cat.id);
+                    setSelectedCategory('ALL');
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                    isSelected
-                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25 ring-1 ring-emerald-400 font-extrabold'
-                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
-                  }`}
+                  className="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/40 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
                 >
-                  <span>{cat.icon}</span>
-                  <span>{cat.label}</span>
-                  {isSelected && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                  <X className="w-3 h-3" />
+                  <span>Limpar: {selectedCategory}</span>
                 </button>
-              );
-            })}
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-emerald-400 font-bold">
+                {filteredFoods.length} {filteredFoods.length === 1 ? 'disponível' : 'disponíveis'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsGroupsExpanded(!isGroupsExpanded)}
+                className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs cursor-pointer transition-all"
+                title={isGroupsExpanded ? 'Recolher grupos' : 'Expandir grupos'}
+              >
+                {isGroupsExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+            </div>
           </div>
+
+          {isGroupsExpanded && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5">
+              {FOOD_CATEGORIES.map((cat) => {
+                const isSelected = selectedCategory === cat.id;
+                const IconComp = cat.iconComponent;
+                return (
+                  <button
+                    type="button"
+                    key={cat.id}
+                    onClick={() => {
+                      triggerHapticFeedback();
+                      setSelectedCategory(isSelected ? 'ALL' : cat.id);
+                    }}
+                    className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center gap-2 min-h-[72px] transition-all cursor-pointer select-none active:scale-[0.97] ${
+                      isSelected
+                        ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-black shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400/50'
+                        : 'bg-slate-900/60 hover:bg-slate-800/80 text-slate-300 hover:text-white border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <IconComp className={`w-5 h-5 shrink-0 ${isSelected ? 'text-slate-950 stroke-[2.5]' : 'text-slate-400'}`} />
+                    <span className="text-[11px] sm:text-xs font-bold leading-tight">
+                      {cat.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* BUSCA E GRADE DE ALIMENTOS DA TABELA TACO */}
