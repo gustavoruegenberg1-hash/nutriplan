@@ -1,9 +1,26 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { NutritionModule } from './modules/nutrition/nutrition.module';
+import { ProfileModule } from './modules/profile/profile.module';
+import { FoodsModule } from './modules/foods/foods.module';
+import { DietsModule } from './modules/diets/diets.module';
+import { WorkoutsModule } from './modules/workouts/workouts.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
-  imports: [],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    NutritionModule,
+    ProfileModule,
+    FoodsModule,
+    DietsModule,
+    WorkoutsModule,
+    DashboardModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
