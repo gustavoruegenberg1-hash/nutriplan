@@ -201,7 +201,7 @@ export const ProfessionalClients: React.FC = () => {
                   <span>Diretrizes de Atendimento Clínico</span>
                 </h4>
                 <p>
-                  Como responsável técnico, utilize o canal de comunicação para orientar o aluno sobre substituições na base TACO (RN10), adequação dos macronutrientes da dieta e controle de sobrecarga progressiva nos treinos.
+                  Como responsável técnico, utilize o canal de comunicação para orientar o aluno sobre substituições na base TACO, adequação dos macronutrientes da dieta e controle de sobrecarga progressiva nos treinos.
                 </p>
               </div>
             </div>

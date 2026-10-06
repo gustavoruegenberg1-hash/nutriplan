@@ -1099,7 +1099,7 @@ export const DietPlanner: React.FC = () => {
               {wizardStep === 5 && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-white">Etapa 5: Preferências e Restrições Alimentares</h3>
-                  <p className="text-xs text-slate-400">Alertas de incompatibilidade alimentar serão emitidos (RN12/RN17).</p>
+                  <p className="text-xs text-slate-400">Alertas de incompatibilidade alimentar serão emitidos automaticamente.</p>
 
                   <div className="grid grid-cols-2 gap-3">
                     {[
@@ -1279,7 +1279,7 @@ export const DietPlanner: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-emerald-400 font-bold text-base">
                 <Calculator size={20} />
-                <span>Simulador Proporcional de Porção (RN10)</span>
+                <span>Simulador Proporcional de Porção</span>
               </div>
               <span className="text-xs text-slate-400">
                 Fórmula: <code className="text-emerald-300 bg-slate-800 px-2 py-0.5 rounded">Nutriente = Ref × Gramas / 100</code>

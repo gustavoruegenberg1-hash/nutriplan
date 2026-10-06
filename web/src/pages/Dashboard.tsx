@@ -15,6 +15,7 @@ import {
   PlayCircle,
 } from 'lucide-react';
 import { ProfessionalContactModal } from '../components/ProfessionalContactModal';
+import { formatFriendlyName } from '../utils/formatters';
 
 export const Dashboard: React.FC = () => {
   const [data, setData] = useState<any>(null);
@@ -213,7 +214,7 @@ export const Dashboard: React.FC = () => {
               ) : (
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-slate-200 text-sm">{activeDiet.name}</span>
+                    <span className="font-bold text-slate-200 text-sm">{formatFriendlyName(activeDiet.name)}</span>
                     <span className="text-emerald-400 font-extrabold">{activeDiet.totals.calories} kcal</span>
                   </div>
 
@@ -280,8 +281,8 @@ export const Dashboard: React.FC = () => {
                       className="p-3 rounded-2xl bg-slate-800/40 border border-slate-800 flex items-center justify-between text-xs"
                     >
                       <div>
-                        <strong className="text-white block text-sm">{w.name}</strong>
-                        <span className="text-slate-400">{w.splitName || 'Treino'} • {w.estimatedDurationMin} min</span>
+                        <strong className="text-white block text-sm">{formatFriendlyName(w.name)}</strong>
+                        <span className="text-slate-400">{formatFriendlyName(w.splitName) || 'Treino'} • {w.estimatedDurationMin} min</span>
                       </div>
                       <Link
                         to={`/workouts?tab=logger`}

@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   RotateCcw,
 } from 'lucide-react';
+import { formatFriendlyName } from '../utils/formatters';
 
 interface LogExercise {
   id: string;
@@ -181,7 +182,7 @@ export const WorkoutHistory: React.FC = () => {
                           <CheckCircle2 size={18} />
                         </span>
                         <h3 className="font-bold text-white text-base">
-                          {log.workoutName || 'Treino Concluído'}
+                          {formatFriendlyName(log.workoutName) || 'Treino Concluído'}
                         </h3>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 pl-10.5">
@@ -235,7 +236,7 @@ export const WorkoutHistory: React.FC = () => {
                               className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5"
                             >
                               <div className="font-bold text-white text-xs truncate">
-                                {idx + 1}. {ex.exerciseName}
+                                {idx + 1}. {formatFriendlyName(ex.exerciseName) || 'Exercício'}
                               </div>
                               <div className="flex items-center justify-between text-xs text-slate-300">
                                 <span>

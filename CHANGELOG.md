@@ -16,6 +16,10 @@ Correção de Bug / Localização PT-BR / UX
    - Aplicação consistente do formatador `formatFriendlyName` em todos os locais do frontend onde grupos musculares e equipamentos são apresentados (cards de sugestão, rotina ativa, modal de adição de exercícios e catálogo de exercícios).
    - Ampliação do dicionário `FRIENDLY_DICTIONARY` com equipamentos (`BARBELL: 'Barra'`, `MACHINE: 'Máquina'`, `CABLE: 'Cabo'`, etc.) e suporte a correspondência insensível a maiúsculas/minúsculas (`upperCase` e regex `gi`).
    - Eliminação de identificadores em inglês como `CHEST`, `TRICEPS`, `SHOULDERS` na interface do usuário.
+3. **Remoção Completa de Menções a Requisitos Internos (RN10, RN11, RN12, RN17) e Tradução no Painel e Catálogo**:
+   - Eliminação de qualquer código técnico ou identificador interno exibido para o usuário em `DietPlanner`, `FoodCatalog`, `ProfessionalClients`, `Dashboard` e `WorkoutHistory`.
+   - Aplicação de `formatFriendlyName` nos cards de resumo do Painel (`Dashboard.tsx`), no Histórico (`WorkoutHistory.tsx`) e no Banco de Exercícios (`ExerciseCatalog.tsx`).
+   - Validação da ergonomia mobile e touch-target dos botões compactos `+` e feedback imediato `✓` em todas as listagens de alimentos e exercícios.
 
 ## [2026-10-06] - Refatoração Completa: Montagem de Treino com Múltiplas Sugestões, Timer de Execução e Descanso em Tempo Real, Correção do Histórico e Limpeza de Termos Técnicos
 

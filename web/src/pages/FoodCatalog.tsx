@@ -131,17 +131,17 @@ export const FoodCatalog: React.FC = () => {
             </span>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            Base científica da Tabela Brasileira de Composição de Alimentos (UNICAMP/NEPA, 4ª Edição). Sem estimativas fictícias (RN10/RN11).
+            Base científica da Tabela Brasileira de Composição de Alimentos (UNICAMP/NEPA, 4ª Edição). Valores oficiais e certificados.
           </p>
         </div>
       </div>
 
-      {/* Widget Interativo de Cálculo Proporcional (RN10) */}
+      {/* Widget Interativo de Cálculo Proporcional */}
       <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/30 shadow-xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-emerald-400 font-bold text-base">
             <Calculator size={20} />
-            <span>Simulador Proporcional de Porção (RN10)</span>
+            <span>Simulador Proporcional de Porção</span>
           </div>
           <span className="text-xs text-slate-400">
             Fórmula: <code className="text-emerald-300 bg-slate-800/80 px-2 py-0.5 rounded">Nutriente = Ref × Gramas / 100</code>

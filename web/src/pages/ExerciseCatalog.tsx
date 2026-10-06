@@ -6,6 +6,7 @@ import {
   Activity,
   ChevronRight,
 } from 'lucide-react';
+import { formatFriendlyName } from '../utils/formatters';
 
 interface Exercise {
   id: string;
@@ -165,17 +166,17 @@ export const ExerciseCatalog: React.FC = () => {
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-bold text-white text-base leading-snug">{item.name}</h3>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20 whitespace-nowrap">
-                      {item.muscleGroup}
+                      {formatFriendlyName(item.muscleGroup)}
                     </span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-400">
                     <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                      {item.equipment || 'Peso Corporal'}
+                      {formatFriendlyName(item.equipment) || 'Peso Corporal'}
                     </span>
                     {item.difficultyLevel && (
                       <span className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-400 border border-slate-700/60 text-[11px]">
-                        Nível: {item.difficultyLevel}
+                        Nível: {formatFriendlyName(item.difficultyLevel)}
                       </span>
                     )}
                   </div>
@@ -204,10 +205,10 @@ export const ExerciseCatalog: React.FC = () => {
                 <h3 className="font-bold text-xl text-white">{selectedExerciseDetail.name}</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20 font-bold">
-                    {selectedExerciseDetail.muscleGroup}
+                    {formatFriendlyName(selectedExerciseDetail.muscleGroup)}
                   </span>
                   <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                    {selectedExerciseDetail.equipment || 'Peso Corporal'}
+                    {formatFriendlyName(selectedExerciseDetail.equipment) || 'Peso Corporal'}
                   </span>
                 </div>
               </div>
