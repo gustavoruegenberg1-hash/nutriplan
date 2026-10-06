@@ -173,7 +173,7 @@ describe('DietsService (Montagem de Dieta, Recálculo e Isolamento Multiusuário
     }
   });
 
-  it('TEST-DIET-009: deve gerar proposta de dieta assistida editável (Seção 13)', async () => {
+  it('TEST-DIET-009: deve gerar proposta de dieta assistida editável e torná-la ativa (Seção 13)', async () => {
     await profileService.updateProfile(userAId, {
       age: 25,
       gender: 'MALE',
@@ -185,8 +185,26 @@ describe('DietsService (Montagem de Dieta, Recálculo e Isolamento Multiusuário
 
     const suggestion = await dietsService.generateSuggestion(userAId, { goal: 'LOSE_WEIGHT' });
     expect(suggestion).toBeDefined();
+    expect(suggestion.isActive).toBe(true);
     expect(suggestion.meals.length).toBe(4);
     expect(suggestion.totals.calories).toBeGreaterThan(1000);
     expect(suggestion.legalDisclaimer).toBeDefined();
+  });
+
+  it('TEST-DIET-010: deve gerar proposta de dieta com número dinâmico de refeições (ex: 5 refeições)', async () => {
+    const suggestion5 = await dietsService.generateSuggestion(userAId, {
+      goal: 'GAIN_WEIGHT',
+      mealsCount: 5,
+    });
+    expect(suggestion5).toBeDefined();
+    expect(suggestion5.isActive).toBe(true);
+    expect(suggestion5.meals.length).toBe(5);
+    expect(suggestion5.meals.map((m) => m.name)).toEqual([
+      'Café da Manhã',
+      'Lanche da Manhã',
+      'Almoço',
+      'Lanche da Tarde',
+      'Jantar',
+    ]);
   });
 });

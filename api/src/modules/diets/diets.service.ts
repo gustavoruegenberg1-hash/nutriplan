@@ -467,40 +467,136 @@ export class DietsService {
     const dietName = `Sugestão NutriPlan — ${dto.goal || profile?.goal || 'Equilibrada'}`;
     const dietId = randomUUID();
     const now = new Date().toISOString();
+    const mealsCount = dto.mealsCount && [3, 4, 5, 6].includes(Number(dto.mealsCount)) ? Number(dto.mealsCount) : 4;
 
     this.db.transaction(() => {
+      // Desativa outras dietas do usuário para que a nova sugestão seja o plano ativo imediato
+      this.db.run('UPDATE diets SET is_active = 0 WHERE user_id = ?', [userId]);
+
       this.db.run(
         `INSERT INTO diets (id, user_id, name, description, is_active, created_at, updated_at)
-         VALUES (?, ?, ?, 'Sugestão assistida baseada em metas. 100% editável.', 0, ?, ?)`,
+         VALUES (?, ?, ?, 'Sugestão assistida baseada em metas. 100% editável.', 1, ?, ?)`,
         [dietId, userId, dietName, now, now]
       );
 
-      // Café da manhã
-      const m1 = randomUUID();
-      this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Café da Manhã', 0, ?)`, [m1, dietId, now]);
-      if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 0, ?)`, [randomUUID(), m1, ovo.id, now]);
-      if (aveia) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 40, 1, ?)`, [randomUUID(), m1, aveia.id, now]);
-      if (banana) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 80, 2, ?)`, [randomUUID(), m1, banana.id, now]);
+      if (mealsCount === 3) {
+        // Café da Manhã
+        const m1 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Café da Manhã', 0, ?)`, [m1, dietId, now]);
+        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m1, ovo.id, now]);
+        if (aveia) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 50, 1, ?)`, [randomUUID(), m1, aveia.id, now]);
+        if (banana) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 2, ?)`, [randomUUID(), m1, banana.id, now]);
 
-      // Almoço
-      const m2 = randomUUID();
-      this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Almoço', 1, ?)`, [m2, dietId, now]);
-      if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 150, 0, ?)`, [randomUUID(), m2, arroz.id, now]);
-      if (feijao) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 1, ?)`, [randomUUID(), m2, feijao.id, now]);
-      if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 2, ?)`, [randomUUID(), m2, frango.id, now]);
-      if (azeite) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 10, 3, ?)`, [randomUUID(), m2, azeite.id, now]);
+        // Almoço
+        const m2 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Almoço', 1, ?)`, [m2, dietId, now]);
+        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 160, 0, ?)`, [randomUUID(), m2, arroz.id, now]);
+        if (feijao) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 1, ?)`, [randomUUID(), m2, feijao.id, now]);
+        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 150, 2, ?)`, [randomUUID(), m2, frango.id, now]);
+        if (azeite) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 12, 3, ?)`, [randomUUID(), m2, azeite.id, now]);
 
-      // Lanche
-      const m3 = randomUUID();
-      this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Tarde', 2, ?)`, [m3, dietId, now]);
-      if (maca) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m3, maca.id, now]);
-      if (whey) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 30, 1, ?)`, [randomUUID(), m3, whey.id, now]);
+        // Jantar
+        const m3 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Jantar', 2, ?)`, [m3, dietId, now]);
+        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 0, ?)`, [randomUUID(), m3, arroz.id, now]);
+        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 140, 1, ?)`, [randomUUID(), m3, frango.id, now]);
+        if (maca) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 2, ?)`, [randomUUID(), m3, maca.id, now]);
+      } else if (mealsCount === 5) {
+        // Café da Manhã
+        const m1 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Café da Manhã', 0, ?)`, [m1, dietId, now]);
+        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 0, ?)`, [randomUUID(), m1, ovo.id, now]);
+        if (aveia) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 40, 1, ?)`, [randomUUID(), m1, aveia.id, now]);
 
-      // Jantar
-      const m4 = randomUUID();
-      this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Jantar', 3, ?)`, [m4, dietId, now]);
-      if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m4, arroz.id, now]);
-      if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 1, ?)`, [randomUUID(), m4, frango.id, now]);
+        // Lanche da Manhã
+        const m2 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Manhã', 1, ?)`, [m2, dietId, now]);
+        if (banana) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 80, 0, ?)`, [randomUUID(), m2, banana.id, now]);
+        if (whey) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 25, 1, ?)`, [randomUUID(), m2, whey.id, now]);
+
+        // Almoço
+        const m3 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Almoço', 2, ?)`, [m3, dietId, now]);
+        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 140, 0, ?)`, [randomUUID(), m3, arroz.id, now]);
+        if (feijao) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 90, 1, ?)`, [randomUUID(), m3, feijao.id, now]);
+        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 2, ?)`, [randomUUID(), m3, frango.id, now]);
+        if (azeite) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 10, 3, ?)`, [randomUUID(), m3, azeite.id, now]);
+
+        // Lanche da Tarde
+        const m4 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Tarde', 3, ?)`, [m4, dietId, now]);
+        if (maca) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m4, maca.id, now]);
+
+        // Jantar
+        const m5 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Jantar', 4, ?)`, [m5, dietId, now]);
+        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m5, arroz.id, now]);
+        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 1, ?)`, [randomUUID(), m5, frango.id, now]);
+      } else if (mealsCount === 6) {
+        // Café da Manhã
+        const m1 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Café da Manhã', 0, ?)`, [m1, dietId, now]);
+        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 0, ?)`, [randomUUID(), m1, ovo.id, now]);
+        if (aveia) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 35, 1, ?)`, [randomUUID(), m1, aveia.id, now]);
+
+        // Lanche da Manhã
+        const m2 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Manhã', 1, ?)`, [m2, dietId, now]);
+        if (banana) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 70, 0, ?)`, [randomUUID(), m2, banana.id, now]);
+
+        // Almoço
+        const m3 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Almoço', 2, ?)`, [m3, dietId, now]);
+        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 0, ?)`, [randomUUID(), m3, arroz.id, now]);
+        if (feijao) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 80, 1, ?)`, [randomUUID(), m3, feijao.id, now]);
+        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 110, 2, ?)`, [randomUUID(), m3, frango.id, now]);
+        if (azeite) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 8, 3, ?)`, [randomUUID(), m3, azeite.id, now]);
+
+        // Lanche da Tarde
+        const m4 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Tarde', 3, ?)`, [m4, dietId, now]);
+        if (maca) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 110, 0, ?)`, [randomUUID(), m4, maca.id, now]);
+        if (whey) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 25, 1, ?)`, [randomUUID(), m4, whey.id, now]);
+
+        // Jantar
+        const m5 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Jantar', 4, ?)`, [m5, dietId, now]);
+        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 110, 0, ?)`, [randomUUID(), m5, arroz.id, now]);
+        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 110, 1, ?)`, [randomUUID(), m5, frango.id, now]);
+
+        // Ceia
+        const m6 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Ceia', 5, ?)`, [m6, dietId, now]);
+        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 60, 0, ?)`, [randomUUID(), m6, ovo.id, now]);
+      } else {
+        // Padrão: 4 Refeições
+        // Café da manhã
+        const m1 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Café da Manhã', 0, ?)`, [m1, dietId, now]);
+        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 0, ?)`, [randomUUID(), m1, ovo.id, now]);
+        if (aveia) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 40, 1, ?)`, [randomUUID(), m1, aveia.id, now]);
+        if (banana) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 80, 2, ?)`, [randomUUID(), m1, banana.id, now]);
+
+        // Almoço
+        const m2 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Almoço', 1, ?)`, [m2, dietId, now]);
+        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 150, 0, ?)`, [randomUUID(), m2, arroz.id, now]);
+        if (feijao) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 1, ?)`, [randomUUID(), m2, feijao.id, now]);
+        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 2, ?)`, [randomUUID(), m2, frango.id, now]);
+        if (azeite) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 10, 3, ?)`, [randomUUID(), m2, azeite.id, now]);
+
+        // Lanche
+        const m3 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Tarde', 2, ?)`, [m3, dietId, now]);
+        if (maca) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m3, maca.id, now]);
+        if (whey) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 30, 1, ?)`, [randomUUID(), m3, whey.id, now]);
+
+        // Jantar
+        const m4 = randomUUID();
+        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Jantar', 3, ?)`, [m4, dietId, now]);
+        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m4, arroz.id, now]);
+        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 1, ?)`, [randomUUID(), m4, frango.id, now]);
+      }
     });
 
     return this.getDietById(userId, dietId);

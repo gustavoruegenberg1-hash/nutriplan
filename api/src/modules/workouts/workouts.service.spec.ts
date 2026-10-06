@@ -246,4 +246,21 @@ describe('WorkoutsService (Módulo de Treinos, Exercícios e Logs Históricos)',
     await expect(workoutsService.getWorkoutById(userBId, workoutA.id)).rejects.toThrow(ForbiddenException);
     await expect(workoutsService.deleteWorkout(userBId, workoutA.id)).rejects.toThrow(ForbiddenException);
   });
+
+  it('TEST-WORK-006: deve gerar proposta assistida de treino com exercícios do catálogo e ativar a rotina', async () => {
+    const suggestion = await workoutsService.generateSuggestion(userAId, {
+      goal: 'Hipertrofia',
+      level: 'INTERMEDIATE',
+      daysPerWeek: 4,
+      availableTimeMin: 60,
+    });
+
+    expect(suggestion).toBeDefined();
+    expect(suggestion.isActive).toBe(true);
+    expect(suggestion.exercises.length).toBeGreaterThan(0);
+    expect(suggestion.exercises[0].exerciseId).toBeDefined();
+    expect(suggestion.exercises[0].name).toBeDefined();
+    expect(suggestion.exercises[0].exercise).toBeDefined();
+    expect(suggestion.exercises[0].exercise?.name).toBe(suggestion.exercises[0].name);
+  });
 });

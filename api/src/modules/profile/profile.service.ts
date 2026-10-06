@@ -174,7 +174,17 @@ export class ProfileService {
     const newGender = dto.gender !== undefined ? dto.gender.toUpperCase() : current.profile.gender;
     const newWeight = dto.weight !== undefined ? dto.weight : current.profile.weight;
     const newHeight = dto.height !== undefined ? dto.height : current.profile.height;
-    const newActivity = dto.activityLevel !== undefined ? dto.activityLevel.toUpperCase() : current.profile.activityLevel;
+    const normalizeActivity = (act?: string): string => {
+      if (!act) return 'SEDENTARY';
+      const upper = act.toUpperCase();
+      if (upper === 'LIGHT') return 'LIGHTLY_ACTIVE';
+      if (upper === 'MODERATE') return 'MODERATELY_ACTIVE';
+      if (upper === 'INTENSE') return 'VERY_ACTIVE';
+      if (upper === 'VERY_INTENSE') return 'EXTRA_ACTIVE';
+      return upper;
+    };
+
+    const newActivity = dto.activityLevel !== undefined ? normalizeActivity(dto.activityLevel) : current.profile.activityLevel;
     const newGoal = dto.goal !== undefined ? dto.goal.toUpperCase() : current.profile.goal;
     const newNotes = dto.dietaryNotes !== undefined ? dto.dietaryNotes : current.profile.dietaryNotes;
 

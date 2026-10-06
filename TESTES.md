@@ -24,9 +24,9 @@ Para assegurar a confiabilidade, robustez e conformidade acadêmica com a Engenh
 ## 2. Resumo da Execução e Métricas de Cobertura
 
 ### 2.1. Status da Execução
-* **Arquivos de Teste:** 9 arquivos (`*.spec.ts`)
-* **Total de Testes:** 47 testes aprovados (100% de sucesso)
-* **Tempo Total de Execução:** ~3.3 segundos
+* **Arquivos de Teste:** 12 arquivos (`*.spec.ts`)
+* **Total de Testes:** 58 testes aprovados (100% de sucesso)
+* **Tempo Total de Execução:** ~12.2 segundos
 * **Falhas / Erros:** 0 falhas
 
 ### 2.2. Cobertura de Código Global (`Vitest Coverage`)
@@ -80,25 +80,28 @@ Testa isoladamente as regras matemáticas e biomédicas:
 
 ### 3.4. Suíte 4: Módulo de Dietas (`diets.service.spec.ts`)
 * **TEST-DIET-001**: Criação de plano de dieta vinculado ao usuário logado (RN02).
-* **TEST-DIET-002**: Criação e ordenação de refeições (Café da Manhã, Almoço, Lanche, Jantar).
-* **TEST-DIET-003**: Adição de alimentos da TACO com recálculo atômico e automático dos totais (RN08, RN10).
-* **TEST-DIET-004**: Atualização de gramas recalculando proporcionalmente todos os macronutrientes.
-* **TEST-DIET-005**: Remoção de alimento atualizando os totais da refeição e da dieta (RN09).
-* **TEST-DIET-006**: Cálculo da diferença exata (*delta*) entre consumo planejado e meta do perfil (RN13).
-* **TEST-DIET-007**: Disparo de alerta quando alimento infringe restrição cadastrada do usuário (RN12).
-* **TEST-DIET-008**: Proteção IDOR: usuário A não pode visualizar, alterar ou excluir a dieta do usuário B (RN01).
+* **TEST-DIET-002**: Adição de alimento da TACO com recálculo atômico e automático dos totais (RN06, RN10, RN16).
+* **TEST-DIET-003**: Atualização de gramas recalculando proporcionalmente todos os macronutrientes (RN08, RN16).
+* **TEST-DIET-004**: Remoção de alimento atualizando os totais da refeição e da dieta (RN09, RN16).
+* **TEST-DIET-005**: Rejeição de porção igual a zero ou negativa (RN05, RN14).
+* **TEST-SEC-003**: Proteção IDOR: usuário B não pode visualizar ou alterar a dieta do usuário A (RN01, RN03).
+* **TEST-DIET-007**: Disparo de alerta quando alimento infringe restrição cadastrada do usuário (RN12, RN17).
+* **TEST-DIET-009**: Geração de proposta assistida de dieta completa com alimentos TACO e status ativo (Seção 13).
+* **TEST-DIET-010**: Geração de proposta assistida com suporte a número dinâmico de refeições (3 a 6 refeições).
 
 ---
 
 ### 3.5. Suíte 5: Módulo de Treinos e Histórico Imutável (`workouts.service.spec.ts`)
-* **TEST-WORK-001**: Criação de rotinas com divisões de treino (A, B, C, D).
+* **TEST-EXER-001**: Consulta e filtragem de exercícios no catálogo oficial por grupamento muscular e texto.
+* **TEST-WORK-001**: Criação de rotinas com divisões de treino (A, B, C, D) vinculadas ao usuário (RN14, RN20).
 * **TEST-WORK-002**: Inclusão de exercícios com séries, repetições, carga em kg e tempo de descanso.
-* **TEST-WORK-003**: Remoção de exercício da rotina ativa.
-* **TEST-WORK-004**: Registro de sessão de treino concluída na tabela de histórico (`workout_logs`).
-* **TEST-WORK-005**: **Teste Crítico RN24 (Imutabilidade do Histórico)**: Ao excluir ou alterar a rotina de treino original, o log histórico de execução permanece intacto e acessível.
-* **TEST-WORK-006**: Proteção IDOR em rotinas de treino e registros de execução (RN14).
-* **TEST-WORK-007**: Listagem cronológica e paginação do histórico de execuções (RN23).
-* **TEST-WORK-008**: Consulta e filtragem de exercícios no catálogo oficial por grupamento muscular.
+* **TEST-WORK-003**: Rejeição de séries, repetições inválidas ou exercício inexistente (RN16, RN18).
+* **TEST-WORK-004**: Atualização de dados de séries e cargas e remoção de exercício da rotina ativa.
+* **TEST-WORK-005**: Reordenação atômica de exercícios na rotina de treino e persistência da ordem no banco.
+* **TEST-LOG-001**: Registro de sessão de treino concluída na tabela de histórico (`workout_logs`, RN24).
+* **TEST-LOG-002**: **Teste Crítico RN24 (Imutabilidade do Histórico)**: Ao excluir ou alterar a rotina de treino original, o log histórico de execução permanece intacto e acessível.
+* **TEST-SEC-004**: Proteção IDOR em rotinas de treino e registros de execução (RN14).
+* **TEST-WORK-006**: Geração de proposta assistida de treino com exercícios reais do catálogo oficial e status ativo.
 
 ---
 

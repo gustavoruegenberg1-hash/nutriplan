@@ -2,6 +2,56 @@
 
 Todas as alterações notáveis, correções de bugs, melhorias arquiteturais e refatorações realizadas no projeto NutriPlan v2 são documentadas neste arquivo.
 
+## [2026-10-06] - Correção Crítica — Assistente de Dieta, Treino, Adição de Exercícios e Catálogo TACO
+
+### Tipo
+Correção Crítica de Bugs / Confiabilidade de Dados / Robustez de Interface
+
+### Alteração
+1. **Assistente de Montagem de Dieta ("Falha ao concluir montagem da dieta")**:
+   - **Causa Raiz Identificada**: O frontend enviava `'MODERATE'` para o campo `activityLevel`, mas o validador DTO (`UpdateProfileDto`) no NestJS aceitava estritamente o enum canônico `'MODERATELY_ACTIVE'`, gerando rejeição `400 Bad Request`.
+   - **Correção no Backend**: Adicionados aliases amigáveis (`LIGHT`, `MODERATE`, `INTENSE`, `VERY_INTENSE` e versões minúsculas) no `@IsIn` do DTO e normalização automática para os valores canônicos em `profile.service.ts`.
+   - **Ativação da Dieta**: Atualizado `diets.service.ts` para que a geração assistida (`generateSuggestion`) defina explicitamente `is_active = 1` e desative quaisquer planos anteriores em transação atômica SQLite. Suporte a 3, 4, 5 e 6 refeições dinâmicas.
+   - **Validação e Resiliência no Frontend**: Adicionada função de pré-validação abrangente (`validateWizardData`) em `DietPlanner.tsx`, verificando meta, idade (10-120), peso (20-350 kg), altura (50-250 cm), calorias e atividade física. Adicionado banner de erro com botão `[ Tentar Novamente ]` sem perder os dados preenchidos pelo usuário.
+
+2. **Página de Treino e Adição de Exercícios ("Treino não carrega" / Falha ao adicionar)**:
+   - **Causa Raiz Identificada**: Em `WorkoutPlanner.tsx`, múltiplos componentes acessavam `item.exercise.name`, mas a API `getWorkoutById` retornava os dados com estrutura plana (`item.name`, `item.muscleGroup`, `item.equipment`). Essa inconsistência disparava `TypeError: Cannot read properties of undefined (reading 'name')`, travando a tela com erro não capturado ou impedindo a renderização do novo exercício.
+   - **Correção no Backend**: Atualizado `workouts.service.ts` para retornar tanto os campos no nível raiz quanto o objeto aninhado `exercise: { id, name, muscleGroup, equipment }`, garantindo retrocompatibilidade total. Corrigida a busca do gerador de treino de termos em português para os enums oficiais (`CHEST`, `BACK`, `QUADRICEPS`, etc.).
+   - **Defensividade no Frontend**: Atualizada a interface `WorkoutExercise` e todos os acessos para fallback seguro: `item.name || item.exercise?.name || 'Exercício'`.
+   - **Estados da Tela de Treino**: Implementados os 4 estados obrigatórios: Carregando (*skeleton/spinner*), Carregado (ficha ativa), Vazio amigável (*"Você ainda não possui um treino. Monte agora mesmo de forma rápida e personalizada!"* com botão `[ INICIAR MONTAGEM ]`), e Erro com botão `[ TENTAR NOVAMENTE ]`.
+
+3. **Aba "Base TACO & Alimentos"**:
+   - **Causa Raiz Identificada**: O endpoint `/foods` retorna o objeto paginado `{ items: [...], total: 744 }`. Em `DietPlanner.tsx`, o estado recebia o objeto direto e tentava executar `.map()`, disparando `TypeError: tacoFoods.map is not a function`.
+   - **Correção no Frontend**: Extração resiliente com `Array.isArray(res.data) ? res.data : (res.data?.items || [])`. Adicionado tratamento de erro com botão de recarregamento e aviso amigável quando nenhum alimento for encontrado na busca. Todos os 744 alimentos da tabela TACO são navegáveis e paginados.
+
+4. **Testes e Validação Completa**:
+   - Adicionados testes automatizados `TEST-DIET-010` (geração de proposta assistida com número dinâmico de refeições) e `TEST-WORK-006` (geração assistida de treino com exercícios reais do catálogo e ativação de rotina).
+   - Suíte de testes do backend expandida para 58 testes em 12 arquivos, com 100% de aprovação.
+   - Compilação estrita TypeScript do backend e frontend validada com código 0.
+
+### Arquivos/áreas afetadas
+- `api/src/modules/profile/dto/update-profile.dto.ts`
+- `api/src/modules/profile/profile.service.ts`
+- `api/src/modules/diets/diets.service.ts`
+- `api/src/modules/diets/diets.service.spec.ts`
+- `api/src/modules/workouts/workouts.service.ts`
+- `api/src/modules/workouts/workouts.service.spec.ts`
+- `web/src/pages/DietPlanner.tsx`
+- `web/src/pages/WorkoutPlanner.tsx`
+- `TESTES.md`
+- `CHANGELOG.md`
+
+### Testes
+- **Backend Unitário & Integração**: 58 testes aprovados em 12 suítes (`npm test`), 0 falhas.
+- **Backend Build**: `npm run build` compilado com código 0.
+- **Frontend Build**: `npm run build` compilado com código 0.
+
+### Resultado
+- Assistente de montagem de dieta conclui com sucesso, persiste no banco relacional SQLite e ativa a dieta imediatamente.
+- Página de treino carrega perfeitamente tanto no estado vazio quanto com plano ativo, permitindo adicionar, editar, reordenar e excluir exercícios sem erros.
+- Aba da Base TACO renderiza a totalidade dos alimentos sem travar.
+- Tratamento de erros e botões de repetição presentes em todas as etapas sem perda de dados.
+
 ---
 
 ## [2026-10-06] - Correção e Refinamento de Dieta, Treino, Responsividade e Suporte com Personal

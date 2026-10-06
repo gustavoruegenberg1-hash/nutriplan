@@ -30,6 +30,12 @@ export interface DetailedWorkoutExercise {
   weightKg: number;
   restSeconds: number;
   notes: string | null;
+  exercise?: {
+    id: string;
+    name: string;
+    muscleGroup: string;
+    equipment: string | null;
+  };
 }
 
 export interface DetailedWorkout {
@@ -234,6 +240,12 @@ export class WorkoutsService {
         weightKg: r.weight_kg,
         restSeconds: r.rest_seconds,
         notes: r.notes,
+        exercise: {
+          id: r.exercise_id,
+          name: r.name,
+          muscleGroup: r.muscle_group,
+          equipment: r.equipment,
+        },
       };
     });
 
@@ -514,30 +526,39 @@ export class WorkoutsService {
 
     let routineName = 'Treino A - Peito e Tríceps';
     let splitName = 'Treino A';
-    let targetMuscles = ['Peito', 'Tríceps', 'Ombros'];
+    let targetMuscles = ['CHEST', 'TRICEPS', 'SHOULDERS'];
 
     if (days === 1) {
       routineName = 'Treino Full Body (Corpo Inteiro)';
       splitName = 'Full Body';
-      targetMuscles = ['Peito', 'Costas', 'Quadríceps', 'Ombros'];
+      targetMuscles = ['CHEST', 'BACK', 'QUADRICEPS', 'SHOULDERS', 'ABS'];
     } else if (days === 2) {
       routineName = 'Treino A - Membros Superiores';
       splitName = 'Superior';
-      targetMuscles = ['Peito', 'Costas', 'Ombros', 'Bíceps', 'Tríceps'];
+      targetMuscles = ['CHEST', 'BACK', 'SHOULDERS', 'BICEPS', 'TRICEPS'];
     } else if (days >= 4) {
       routineName = 'Treino A - Push (Peito, Ombros e Tríceps)';
       splitName = 'Push';
-      targetMuscles = ['Peito', 'Ombros', 'Tríceps'];
+      targetMuscles = ['CHEST', 'SHOULDERS', 'TRICEPS'];
     }
+
+    // Desativa outros treinos do usuário para ativar este novo programa
+    this.db.run('UPDATE workouts SET is_active = 0 WHERE user_id = ?', [userId]);
 
     // Busca exercícios correspondentes no banco
     const exercisesFound: any[] = [];
     for (const muscle of targetMuscles) {
       const ex = this.db.query(
-        'SELECT * FROM exercises WHERE muscle_group LIKE ? AND is_active = 1 LIMIT 2',
-        [`%${muscle}%`]
+        'SELECT * FROM exercises WHERE (muscle_group = ? OR muscle_group LIKE ?) AND is_active = 1 LIMIT 2',
+        [muscle, `%${muscle}%`]
       );
       exercisesFound.push(...ex);
+    }
+
+    // Se nenhum exercício foi encontrado pelos filtros específicos, pega os primeiros ativos do catálogo
+    if (exercisesFound.length === 0) {
+      const fallback = this.db.query('SELECT * FROM exercises WHERE is_active = 1 LIMIT 6');
+      exercisesFound.push(...fallback);
     }
 
     // Cria a rotina no banco

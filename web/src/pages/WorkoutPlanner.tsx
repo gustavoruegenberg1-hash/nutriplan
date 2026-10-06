@@ -38,7 +38,7 @@ interface ExerciseItem {
 
 interface WorkoutExercise {
   id: string;
-  workoutId: string;
+  workoutId?: string;
   exerciseId: string;
   orderIndex: number;
   sets: number;
@@ -46,7 +46,10 @@ interface WorkoutExercise {
   weightKg: number;
   restSeconds: number;
   notes: string | null;
-  exercise: ExerciseItem;
+  name?: string;
+  muscleGroup?: string;
+  equipment?: string | null;
+  exercise?: ExerciseItem;
 }
 
 interface WorkoutDetail {
@@ -75,6 +78,8 @@ export const WorkoutPlanner: React.FC = () => {
   const [workouts, setWorkouts] = useState<any[]>([]);
   const [activeWorkout, setActiveWorkout] = useState<WorkoutDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [workoutLoadError, setWorkoutLoadError] = useState<string | null>(null);
+  const [wizardWorkoutError, setWizardWorkoutError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Modal Novo Treino Manual
@@ -171,18 +176,23 @@ export const WorkoutPlanner: React.FC = () => {
 
   const loadWorkouts = async () => {
     setLoading(true);
+    setWorkoutLoadError(null);
     try {
       const res = await api.get('/workouts');
-      setWorkouts(res.data);
-      if (res.data.length > 0) {
+      const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+      setWorkouts(items);
+      if (items.length > 0) {
         const currentId = activeWorkout?.id;
-        const targetId = currentId && res.data.some((w: any) => w.id === currentId) ? currentId : res.data[0].id;
+        const targetId = currentId && items.some((w: any) => w.id === currentId) ? currentId : items[0].id;
         const detailRes = await api.get(`/workouts/${targetId}`);
         setActiveWorkout(detailRes.data);
       } else {
         setActiveWorkout(null);
       }
-    } catch {
+    } catch (err: any) {
+      setWorkoutLoadError(
+        err.response?.data?.message || 'Não foi possível carregar seus treinos. Verifique sua conexão e tente novamente.'
+      );
       setFeedback({ type: 'error', message: 'Falha ao carregar rotinas de treino.' });
     } finally {
       setLoading(false);
@@ -342,7 +352,7 @@ export const WorkoutPlanner: React.FC = () => {
       setFeedback({ type: 'success', message: `Exercício "${selectedEx.name}" adicionado à rotina com sucesso!` });
     } catch (err: any) {
       setExerciseModalError(
-        err.response?.data?.message || 'Falha ao adicionar exercício. Verifique os dados e tente novamente.'
+        err.response?.data?.message || 'Não foi possível adicionar este exercício.'
       );
     } finally {
       setIsAddingExercise(false);
@@ -418,8 +428,28 @@ export const WorkoutPlanner: React.FC = () => {
   // -------------------------------------------------------------
   // LÓGICA DO WIZARD DE TREINO (GERAÇÃO ASSISTIDA)
   // -------------------------------------------------------------
+  const validateWorkoutWizardData = (): string | null => {
+    if (!wizardGoal) return 'O objetivo de treinamento deve ser selecionado.';
+    if (!wizardLevel) return 'O nível de experiência deve ser selecionado.';
+    if (!wizardFrequency || wizardFrequency < 1 || wizardFrequency > 7) {
+      return 'A frequência semanal de treinos deve ser entre 1 e 7 dias.';
+    }
+    if (!wizardDuration || wizardDuration < 15 || wizardDuration > 180) {
+      return 'A duração estimada por sessão deve ser entre 15 e 180 minutos.';
+    }
+    return null;
+  };
+
   const handleFinishWizard = async () => {
+    const valError = validateWorkoutWizardData();
+    if (valError) {
+      setWizardWorkoutError(valError);
+      setFeedback({ type: 'error', message: valError });
+      return;
+    }
+
     setWizardGenerating(true);
+    setWizardWorkoutError(null);
     setFeedback(null);
     try {
       const res = await api.post('/workouts/generate-suggestion', {
@@ -427,6 +457,8 @@ export const WorkoutPlanner: React.FC = () => {
         daysPerWeek: wizardFrequency,
         level: wizardLevel,
         durationMin: wizardDuration,
+        availableTimeMin: wizardDuration,
+        equipment: wizardEquipment,
       });
       await loadWorkouts();
       setActiveWorkout(res.data);
@@ -435,10 +467,14 @@ export const WorkoutPlanner: React.FC = () => {
       setWizardStep(1);
       setFeedback({
         type: 'success',
-        message: 'Programa de treino gerado com sucesso! Exercícios organizados com base no seu objetivo.',
+        message: 'Seu treino foi criado com sucesso! Exercícios organizados com base no seu objetivo.',
       });
-    } catch {
-      setFeedback({ type: 'error', message: 'Falha ao gerar treino automático.' });
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message ||
+        'Não foi possível gerar seu treino. Verifique os dados e tente novamente.';
+      setWizardWorkoutError(msg);
+      setFeedback({ type: 'error', message: msg });
     } finally {
       setWizardGenerating(false);
     }
@@ -448,10 +484,10 @@ export const WorkoutPlanner: React.FC = () => {
   // LÓGICA DO LOGGER DE EXECUÇÃO (RN24)
   // -------------------------------------------------------------
   const prepareLoggerFromActiveWorkout = () => {
-    if (!activeWorkout) return;
+    if (!activeWorkout || !activeWorkout.exercises) return;
     const initialRows = activeWorkout.exercises.map((item) => ({
       exerciseId: item.exerciseId,
-      exerciseName: item.exercise.name,
+      exerciseName: item.name || item.exercise?.name || 'Exercício',
       setsCompleted: item.sets,
       repsCompleted: item.reps,
       weightUsedKg: item.weightKg,
@@ -553,8 +589,24 @@ export const WorkoutPlanner: React.FC = () => {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 flex flex-col items-center justify-center min-h-[50vh]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-slate-400 text-sm">Carregando rotinas e exercícios...</p>
+        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-slate-400 text-sm">Carregando seus treinos...</p>
+      </div>
+    );
+  }
+
+  if (workoutLoadError && workouts.length === 0 && !activeWorkout) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16 flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+        <AlertTriangle size={48} className="text-rose-400 mx-auto" />
+        <h2 className="text-xl font-bold text-white">Não foi possível carregar seus treinos.</h2>
+        <p className="text-slate-400 text-sm max-w-md">{workoutLoadError}</p>
+        <button
+          onClick={loadWorkouts}
+          className="px-6 py-3 rounded-2xl bg-teal-600 hover:bg-teal-500 text-slate-950 font-extrabold text-sm transition shadow-lg shadow-teal-500/20"
+        >
+          [ TENTAR NOVAMENTE ]
+        </button>
       </div>
     );
   }
@@ -763,7 +815,7 @@ export const WorkoutPlanner: React.FC = () => {
           {!activeWorkout ? (
             <div className="p-12 text-center rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
               <Dumbbell size={48} className="mx-auto text-slate-600" />
-              <h2 className="text-xl font-bold text-white">Nenhuma ficha de treino ativa</h2>
+              <h2 className="text-xl font-bold text-white">Você ainda não possui um treino.</h2>
               <p className="text-slate-400 text-sm max-w-md mx-auto">
                 Comece gerando um programa completo com nosso assistente ou estruture sua rotina manualmente.
               </p>
@@ -772,7 +824,7 @@ export const WorkoutPlanner: React.FC = () => {
                   onClick={() => handleTabChange('wizard')}
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20"
                 >
-                  Iniciar Montagem Passo a Passo
+                  [ INICIAR MONTAGEM ]
                 </button>
                 <button
                   onClick={() => setIsNewWorkoutModalOpen(true)}
@@ -893,13 +945,15 @@ export const WorkoutPlanner: React.FC = () => {
 
                           <div className="flex-1 min-w-0">
                             <div className="font-bold text-sm text-white flex flex-wrap items-center gap-2">
-                              <span>{item.exercise.name}</span>
-                              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">
-                                {item.exercise.muscleGroup}
-                              </span>
+                              <span>{item.name || item.exercise?.name || 'Exercício'}</span>
+                              {(item.muscleGroup || item.exercise?.muscleGroup) && (
+                                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                                  {item.muscleGroup || item.exercise?.muscleGroup}
+                                </span>
+                              )}
                             </div>
                             <div className="text-slate-400 text-[11px] mt-1 flex flex-wrap items-center gap-2">
-                              <span>Equipamento: <strong className="text-slate-300">{item.exercise.equipment}</strong></span>
+                              <span>Equipamento: <strong className="text-slate-300">{item.equipment || item.exercise?.equipment || 'Livre'}</strong></span>
                               {item.notes && (
                                 <span className="text-slate-400 italic bg-slate-800/60 px-2 py-0.5 rounded-md">
                                   "{item.notes}"
@@ -932,7 +986,7 @@ export const WorkoutPlanner: React.FC = () => {
                               onClick={() =>
                                 setEditingExercise({
                                   id: item.id,
-                                  exerciseName: item.exercise.name,
+                                  exerciseName: item.name || item.exercise?.name || 'Exercício',
                                   sets: item.sets,
                                   reps: item.reps,
                                   weightKg: item.weightKg,
@@ -1223,6 +1277,22 @@ export const WorkoutPlanner: React.FC = () => {
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
                     Ao confirmar, a rotina completa com exercícios selecionados do catálogo de 128 itens será gravada na sua conta.
                   </p>
+
+                  {wizardWorkoutError && (
+                    <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 max-w-md mx-auto text-left">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle size={18} className="shrink-0 text-rose-400" />
+                        <span>{wizardWorkoutError}</span>
+                      </div>
+                      <button
+                        onClick={handleFinishWizard}
+                        className="px-3 py-1.5 rounded-xl bg-rose-600/30 hover:bg-rose-600 text-white font-bold text-xs shrink-0 transition"
+                      >
+                        Tentar Novamente
+                      </button>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleFinishWizard}
                     disabled={wizardGenerating}

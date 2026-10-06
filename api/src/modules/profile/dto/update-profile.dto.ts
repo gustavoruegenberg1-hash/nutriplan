@@ -30,7 +30,26 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
-  @IsIn(['SEDENTARY', 'LIGHTLY_ACTIVE', 'MODERATELY_ACTIVE', 'VERY_ACTIVE', 'EXTRA_ACTIVE', 'sedentary', 'lightly_active', 'moderately_active', 'very_active', 'extra_active'])
+  @IsIn([
+    'SEDENTARY',
+    'LIGHTLY_ACTIVE',
+    'MODERATELY_ACTIVE',
+    'VERY_ACTIVE',
+    'EXTRA_ACTIVE',
+    'LIGHT',
+    'MODERATE',
+    'INTENSE',
+    'VERY_INTENSE',
+    'sedentary',
+    'lightly_active',
+    'moderately_active',
+    'very_active',
+    'extra_active',
+    'light',
+    'moderate',
+    'intense',
+    'very_intense',
+  ], { message: 'Nível de atividade física inválido' })
   activityLevel?: string;
 
   @IsOptional()

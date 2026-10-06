@@ -71,10 +71,11 @@ export const DietPlanner: React.FC = () => {
   const [wizardGender, setWizardGender] = useState<'MALE' | 'FEMALE'>('MALE');
   const [wizardWeight, setWizardWeight] = useState<number>(75);
   const [wizardHeight, setWizardHeight] = useState<number>(175);
-  const [wizardActivity, setWizardActivity] = useState<string>('MODERATE');
+  const [wizardActivity, setWizardActivity] = useState<string>('MODERATELY_ACTIVE');
   const [wizardMealsCount, setWizardMealsCount] = useState<number>(4);
   const [wizardRestrictions, setWizardRestrictions] = useState<string[]>([]);
   const [wizardGenerating, setWizardGenerating] = useState(false);
+  const [wizardError, setWizardError] = useState<string | null>(null);
 
   // -------------------------------------------------------------
   // ESTADOS DA ABA BASE TACO
@@ -85,6 +86,7 @@ export const DietPlanner: React.FC = () => {
   const [tacoCategory, setTacoCategory] = useState('');
   const [tacoTag, setTacoTag] = useState('');
   const [tacoLoading, setTacoLoading] = useState(false);
+  const [tacoError, setTacoError] = useState<string | null>(null);
   const [calcFood, setCalcFood] = useState<any | null>(null);
   const [calcGrams, setCalcGrams] = useState<number>(150);
   const [calculatedPortion, setCalculatedPortion] = useState<any>(null);
@@ -106,7 +108,15 @@ export const DietPlanner: React.FC = () => {
           if (profRes.data.profile.weight) setWizardWeight(profRes.data.profile.weight);
           if (profRes.data.profile.height) setWizardHeight(profRes.data.profile.height);
           if (profRes.data.profile.goal) setWizardGoal(profRes.data.profile.goal);
-          if (profRes.data.profile.activityLevel) setWizardActivity(profRes.data.profile.activityLevel);
+          if (profRes.data.profile.activityLevel) {
+            const rawAct = profRes.data.profile.activityLevel;
+            const normalized =
+              rawAct === 'LIGHT' ? 'LIGHTLY_ACTIVE' :
+              rawAct === 'MODERATE' ? 'MODERATELY_ACTIVE' :
+              rawAct === 'INTENSE' ? 'VERY_ACTIVE' :
+              rawAct === 'VERY_INTENSE' ? 'EXTRA_ACTIVE' : rawAct;
+            setWizardActivity(normalized);
+          }
         }
       }
 
@@ -302,9 +312,13 @@ export const DietPlanner: React.FC = () => {
 
   const activityFactors: Record<string, number> = {
     SEDENTARY: 1.2,
+    LIGHTLY_ACTIVE: 1.375,
     LIGHT: 1.375,
+    MODERATELY_ACTIVE: 1.55,
     MODERATE: 1.55,
+    VERY_ACTIVE: 1.725,
     INTENSE: 1.725,
+    EXTRA_ACTIVE: 1.9,
     VERY_INTENSE: 1.9,
   };
 
@@ -322,8 +336,42 @@ export const DietPlanner: React.FC = () => {
   const targetFatGrams = Math.round((targetCalories * 0.25) / 9);
   const targetCarbsGrams = Math.max(0, Math.round((targetCalories - targetProteinGrams * 4 - targetFatGrams * 9) / 4));
 
+  const validateWizardData = (): string | null => {
+    if (!wizardGoal) return 'O objetivo nutricional deve ser selecionado.';
+    if (!wizardAge || isNaN(wizardAge) || wizardAge < 10 || wizardAge > 120) {
+      return 'A idade deve estar entre 10 e 120 anos.';
+    }
+    if (!wizardGender || !['MALE', 'FEMALE'].includes(wizardGender)) {
+      return 'O sexo biológico deve ser informado.';
+    }
+    if (!wizardWeight || isNaN(wizardWeight) || wizardWeight < 20 || wizardWeight > 350) {
+      return 'O peso atual deve estar entre 20 e 350 kg.';
+    }
+    if (!wizardHeight || isNaN(wizardHeight) || wizardHeight < 50 || wizardHeight > 250) {
+      return 'A altura deve estar entre 50 e 250 cm.';
+    }
+    if (!wizardActivity) {
+      return 'O nível de atividade física semanal deve ser selecionado.';
+    }
+    if (!wizardMealsCount || ![3, 4, 5, 6].includes(wizardMealsCount)) {
+      return 'A quantidade de refeições diárias deve ser definida entre 3 e 6.';
+    }
+    if (isNaN(targetCalories) || targetCalories <= 0) {
+      return 'Não foi possível concluir porque os dados nutricionais não puderam ser calculados.';
+    }
+    return null;
+  };
+
   const handleFinishWizard = async () => {
+    const validationError = validateWizardData();
+    if (validationError) {
+      setWizardError(validationError);
+      setFeedback({ type: 'error', message: validationError });
+      return;
+    }
+
     setWizardGenerating(true);
+    setWizardError(null);
     setFeedback(null);
     try {
       // 1. Atualiza perfil do usuário com as escolhas
@@ -336,8 +384,13 @@ export const DietPlanner: React.FC = () => {
         goal: wizardGoal,
       });
 
-      // 2. Gera a proposta automática de dieta baseada na TACO
-      const res = await api.post('/diets/generate-suggestion', {});
+      // 2. Gera a proposta automática de dieta baseada na TACO com os parâmetros do usuário
+      const res = await api.post('/diets/generate-suggestion', {
+        goal: wizardGoal,
+        mealsCount: wizardMealsCount,
+        customCalories: targetCalories,
+      });
+
       await loadData();
       setActiveDiet(res.data);
       setActiveTab('current');
@@ -345,10 +398,14 @@ export const DietPlanner: React.FC = () => {
       setWizardStep(1);
       setFeedback({
         type: 'success',
-        message: 'Dieta gerada com sucesso! Você pode editar qualquer refeição e alimento abaixo.',
+        message: 'Sua dieta foi criada com sucesso! Você pode editar refeições e alimentos livremente abaixo.',
       });
-    } catch {
-      setFeedback({ type: 'error', message: 'Falha ao concluir montagem da dieta.' });
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message ||
+        'Não foi possível criar sua dieta. Verifique os dados e tente novamente.';
+      setWizardError(msg);
+      setFeedback({ type: 'error', message: msg });
     } finally {
       setWizardGenerating(false);
     }
@@ -362,7 +419,7 @@ export const DietPlanner: React.FC = () => {
       const fetchTacoCategories = async () => {
         try {
           const res = await api.get('/foods/categories');
-          setTacoCategories(res.data);
+          setTacoCategories(Array.isArray(res.data) ? res.data : []);
         } catch {
           // ignore
         }
@@ -375,6 +432,7 @@ export const DietPlanner: React.FC = () => {
     if (activeTab === 'taco') {
       const fetchTaco = async () => {
         setTacoLoading(true);
+        setTacoError(null);
         try {
           const res = await api.get('/foods', {
             params: {
@@ -384,10 +442,12 @@ export const DietPlanner: React.FC = () => {
               limit: 40,
             },
           });
-          setTacoFoods(res.data);
-          if (!calcFood && res.data.length > 0) setCalcFood(res.data[0]);
+          const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+          setTacoFoods(items);
+          if (items.length > 0 && !calcFood) setCalcFood(items[0]);
         } catch {
-          // ignore
+          setTacoFoods([]);
+          setTacoError('Não foi possível carregar a base de alimentos TACO.');
         } finally {
           setTacoLoading(false);
         }
@@ -949,10 +1009,10 @@ export const DietPlanner: React.FC = () => {
                   <div className="space-y-2">
                     {[
                       { id: 'SEDENTARY', title: 'Sedentário', desc: 'Pouco ou nenhum exercício semanal' },
-                      { id: 'LIGHT', title: 'Levemente Ativo', desc: 'Exercício leve 1 a 3 dias por semana' },
-                      { id: 'MODERATE', title: 'Moderadamente Ativo', desc: 'Exercício moderado 3 a 5 dias por semana' },
-                      { id: 'INTENSE', title: 'Altamente Ativo', desc: 'Exercício intenso 6 a 7 dias por semana' },
-                      { id: 'VERY_INTENSE', title: 'Extremamente Ativo', desc: 'Treinos intensos bidiários ou trabalho braçal pesado' },
+                      { id: 'LIGHTLY_ACTIVE', title: 'Levemente Ativo', desc: 'Exercício leve 1 a 3 dias por semana' },
+                      { id: 'MODERATELY_ACTIVE', title: 'Moderadamente Ativo', desc: 'Exercício moderado 3 a 5 dias por semana' },
+                      { id: 'VERY_ACTIVE', title: 'Altamente Ativo', desc: 'Exercício intenso 6 a 7 dias por semana' },
+                      { id: 'EXTRA_ACTIVE', title: 'Extremamente Ativo', desc: 'Treinos intensos bidiários ou trabalho braçal pesado' },
                     ].map((lvl) => (
                       <div
                         key={lvl.id}
@@ -1111,6 +1171,22 @@ export const DietPlanner: React.FC = () => {
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
                     Ao confirmar, a dieta será gravada como seu plano ativo. Você poderá editar, trocar ou adicionar qualquer alimento a qualquer momento.
                   </p>
+
+                  {wizardError && (
+                    <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 max-w-md mx-auto text-left">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle size={18} className="shrink-0 text-rose-400" />
+                        <span>{wizardError}</span>
+                      </div>
+                      <button
+                        onClick={handleFinishWizard}
+                        className="px-3 py-1.5 rounded-xl bg-rose-600/30 hover:bg-rose-600 text-white font-bold text-xs shrink-0 transition"
+                      >
+                        Tentar Novamente
+                      </button>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleFinishWizard}
                     disabled={wizardGenerating}
@@ -1260,12 +1336,29 @@ export const DietPlanner: React.FC = () => {
 
           {/* Lista de Alimentos da Base TACO */}
           {tacoLoading ? (
-            <div className="py-12 flex justify-center">
+            <div className="py-16 flex flex-col items-center justify-center gap-2">
               <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-slate-400 text-xs">Carregando base de alimentos TACO...</span>
+            </div>
+          ) : tacoError ? (
+            <div className="p-10 text-center rounded-3xl bg-slate-900 border border-rose-500/30 text-rose-300 text-xs space-y-3">
+              <AlertTriangle size={32} className="mx-auto text-rose-400" />
+              <p>{tacoError}</p>
+              <button
+                onClick={() => {
+                  setTacoSearch('');
+                  setTacoCategory('');
+                  setTacoTag('');
+                }}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition"
+              >
+                Tentar Novamente
+              </button>
             </div>
           ) : tacoFoods.length === 0 ? (
-            <div className="p-12 text-center rounded-2xl bg-slate-900 border border-slate-800 text-slate-500 text-xs">
-              Nenhum alimento encontrado na busca.
+            <div className="p-12 text-center rounded-2xl bg-slate-900 border border-slate-800 text-slate-500 text-xs space-y-1">
+              <p className="font-semibold text-slate-400">Nenhum alimento encontrado para os filtros selecionados.</p>
+              <p className="text-[11px] text-slate-500">A base TACO contém 744 itens catalogados pelo NEPA/UNICAMP. Tente buscar por outros termos.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
