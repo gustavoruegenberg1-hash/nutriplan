@@ -115,8 +115,10 @@ export const MUSCLE_PT_MAP: Record<string, string> = {
 
 export interface WorkoutSuggestionItem {
   exerciseId: string;
+  name: string;
   exerciseName: string;
   muscleGroup: string;
+  muscleGroupName?: string;
   equipment: string | null;
   sets: number;
   reps: number;
@@ -127,6 +129,7 @@ export interface WorkoutSuggestionItem {
 
 export interface WorkoutSuggestionOption {
   id: string;
+  suggestionId?: string;
   name: string;
   splitName: string;
   subtitle: string;
@@ -746,12 +749,14 @@ export class WorkoutsService {
           const ex = list[(i + opt.offset) % list.length];
           selectedExercises.push({
             exerciseId: ex.id,
+            name: ex.name,
             exerciseName: ex.name,
             muscleGroup: ex.muscle_group,
+            muscleGroupName: MUSCLE_PT_MAP[ex.muscle_group] || ex.muscle_group,
             equipment: ex.equipment,
             sets,
             reps,
-            weightKg: ex.equipment === 'Peso Corporal' ? 0 : weight,
+            weightKg: ex.equipment === 'Peso Corporal' || ex.equipment === 'Peso corporal' ? 0 : weight,
             restSeconds: 60,
             notes: 'Foco em execução controlada e postura correta.',
           });
@@ -767,12 +772,14 @@ export class WorkoutsService {
               const ex = list[(i + opt.offset) % list.length];
               selectedExercises.push({
                 exerciseId: ex.id,
+                name: ex.name,
                 exerciseName: ex.name,
                 muscleGroup: ex.muscle_group,
+                muscleGroupName: MUSCLE_PT_MAP[ex.muscle_group] || ex.muscle_group,
                 equipment: ex.equipment,
                 sets,
                 reps,
-                weightKg: ex.equipment === 'Peso Corporal' ? 0 : weight,
+                weightKg: ex.equipment === 'Peso Corporal' || ex.equipment === 'Peso corporal' ? 0 : weight,
                 restSeconds: 60,
                 notes: 'Foco em execução controlada e postura correta.',
               });
@@ -789,12 +796,14 @@ export class WorkoutsService {
               const ex = list[(i + opt.offset) % list.length];
               selectedExercises.push({
                 exerciseId: ex.id,
+                name: ex.name,
                 exerciseName: ex.name,
                 muscleGroup: ex.muscle_group,
+                muscleGroupName: MUSCLE_PT_MAP[ex.muscle_group] || ex.muscle_group,
                 equipment: ex.equipment,
                 sets,
                 reps,
-                weightKg: ex.equipment === 'Peso Corporal' ? 0 : weight,
+                weightKg: ex.equipment === 'Peso Corporal' || ex.equipment === 'Peso corporal' ? 0 : weight,
                 restSeconds: 60,
                 notes: 'Foco em execução controlada e postura correta.',
               });
@@ -809,8 +818,10 @@ export class WorkoutsService {
         for (const ex of fallback) {
           selectedExercises.push({
             exerciseId: ex.id,
+            name: ex.name,
             exerciseName: ex.name,
             muscleGroup: ex.muscle_group,
+            muscleGroupName: MUSCLE_PT_MAP[ex.muscle_group] || ex.muscle_group,
             equipment: ex.equipment,
             sets,
             reps,
@@ -833,6 +844,7 @@ export class WorkoutsService {
 
       suggestions.push({
         id: opt.id,
+        suggestionId: opt.id,
         name: opt.name,
         splitName: opt.splitName,
         subtitle: opt.subtitle,

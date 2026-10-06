@@ -1179,7 +1179,7 @@ export const WorkoutPlanner: React.FC = () => {
                                   <span>{item.name || item.exercise?.name || 'Exercício'}</span>
                                   {(item.muscleGroup || item.exercise?.muscleGroup) && (
                                     <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">
-                                      {item.muscleGroup || item.exercise?.muscleGroup}
+                                      {formatFriendlyName(item.muscleGroup || item.exercise?.muscleGroup)}
                                     </span>
                                   )}
                                   {isCompleted && (
@@ -1190,7 +1190,7 @@ export const WorkoutPlanner: React.FC = () => {
                                   )}
                                 </div>
                                 <div className="text-slate-400 text-[11px] mt-1 flex flex-wrap items-center gap-2">
-                                  <span>Equipamento: <strong className="text-slate-300">{item.equipment || item.exercise?.equipment || 'Livre'}</strong></span>
+                                  <span>Equipamento: <strong className="text-slate-300">{formatFriendlyName(item.equipment || item.exercise?.equipment) || 'Livre'}</strong></span>
                                   {item.notes && (
                                     <span className="text-slate-400 italic bg-slate-800/60 px-2 py-0.5 rounded-md">
                                       "{item.notes}"
@@ -1389,19 +1389,20 @@ export const WorkoutPlanner: React.FC = () => {
               {/* Cards das Sugestões Geradas */}
               <div className="space-y-4">
                 {wizardSuggestions.map((sug, sIdx) => {
-                  const isExpanded = expandedSuggestionId === sug.suggestionId;
-                  const isApplying = applyingSuggestionId === sug.suggestionId;
+                  const sugId = sug.suggestionId || sug.id || `sug-${sIdx}`;
+                  const isExpanded = expandedSuggestionId === sugId;
+                  const isApplying = applyingSuggestionId === sugId;
 
                   return (
                     <div
-                      key={sug.suggestionId || sIdx}
+                      key={sugId}
                       className="rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition overflow-hidden shadow-lg"
                     >
                       {/* Header do Treino Sugerido */}
                       <div className="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-950/40">
                         <div
                           onClick={() =>
-                            setExpandedSuggestionId(isExpanded ? null : sug.suggestionId)
+                            setExpandedSuggestionId(isExpanded ? null : sugId)
                           }
                           className="flex-1 cursor-pointer"
                         >
@@ -1445,7 +1446,7 @@ export const WorkoutPlanner: React.FC = () => {
                           <button
                             type="button"
                             onClick={() =>
-                              setExpandedSuggestionId(isExpanded ? null : sug.suggestionId)
+                              setExpandedSuggestionId(isExpanded ? null : sugId)
                             }
                             className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
                             title={isExpanded ? 'Recolher detalhes' : 'Ver exercícios'}
@@ -1463,39 +1464,45 @@ export const WorkoutPlanner: React.FC = () => {
                           </h4>
 
                           <div className="grid grid-cols-1 gap-2.5">
-                            {sug.exercises?.map((ex: any, eIdx: number) => (
-                              <div
-                                key={ex.exerciseId || eIdx}
-                                className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <span className="w-6 h-6 rounded-lg bg-slate-800 text-teal-400 font-black flex items-center justify-center text-[11px] shrink-0 border border-slate-700">
-                                    {eIdx + 1}
-                                  </span>
-                                  <div>
-                                    <strong className="text-white text-sm block">
-                                      {ex.name}
-                                    </strong>
-                                    <span className="text-[11px] text-slate-400">
-                                      {ex.muscleGroup} • Equipamento:{' '}
-                                      <span className="text-slate-300">{ex.equipment || 'Livre'}</span>
+                            {sug.exercises?.map((ex: any, eIdx: number) => {
+                              const exName = ex.name || ex.exerciseName || 'Exercício';
+                              const muscleText = formatFriendlyName(ex.muscleGroupName || ex.muscleGroup || ex.muscle_group);
+                              const equipText = formatFriendlyName(ex.equipment) || 'Livre';
+
+                              return (
+                                <div
+                                  key={ex.exerciseId || eIdx}
+                                  className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <span className="w-6 h-6 rounded-lg bg-slate-800 text-teal-400 font-black flex items-center justify-center text-[11px] shrink-0 border border-slate-700">
+                                      {eIdx + 1}
+                                    </span>
+                                    <div>
+                                      <strong className="text-white text-sm block">
+                                        {exName}
+                                      </strong>
+                                      <span className="text-[11px] text-slate-400">
+                                        {muscleText} • Equipamento:{' '}
+                                        <span className="text-slate-300">{equipText}</span>
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                                    <span className="px-2.5 py-1 rounded-lg bg-slate-800 font-bold text-white border border-slate-700">
+                                      {ex.sets} × {ex.reps} reps
+                                    </span>
+                                    <span className="px-2.5 py-1 rounded-lg bg-slate-800 font-bold text-teal-400 border border-slate-700">
+                                      {ex.weightKg > 0 ? `${ex.weightKg} kg` : 'Corporal'}
+                                    </span>
+                                    <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 border border-slate-700">
+                                      {ex.restSeconds}s desc.
                                     </span>
                                   </div>
                                 </div>
-
-                                <div className="flex items-center gap-2 self-start sm:self-auto">
-                                  <span className="px-2.5 py-1 rounded-lg bg-slate-800 font-bold text-white border border-slate-700">
-                                    {ex.sets} × {ex.reps} reps
-                                  </span>
-                                  <span className="px-2.5 py-1 rounded-lg bg-slate-800 font-bold text-teal-400 border border-slate-700">
-                                    {ex.weightKg > 0 ? `${ex.weightKg} kg` : 'Corporal'}
-                                  </span>
-                                  <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 border border-slate-700">
-                                    {ex.restSeconds}s desc.
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
 
                           <div className="pt-2 flex justify-end">
@@ -1910,7 +1917,7 @@ export const WorkoutPlanner: React.FC = () => {
                               key={idx}
                               className="p-2.5 rounded-xl bg-slate-800/40 flex items-center justify-between"
                             >
-                              <span className="font-semibold text-slate-200">{exItem.exerciseName}</span>
+                              <span className="font-semibold text-slate-200">{exItem.exerciseName || exItem.name || 'Exercício'}</span>
                               <span className="text-slate-400 font-mono">
                                 {exItem.setsCompleted} séries × {exItem.repsCompleted} reps • {exItem.weightUsedKg} kg
                               </span>
@@ -1987,11 +1994,11 @@ export const WorkoutPlanner: React.FC = () => {
                   <div className="flex items-start justify-between">
                     <strong className="text-white text-sm block">{ex.name}</strong>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-teal-400 font-bold">
-                      {ex.muscleGroup}
+                      {formatFriendlyName(ex.muscleGroup)}
                     </span>
                   </div>
                   <p className="text-slate-400 text-[11px]">
-                    Equipamento: <strong>{ex.equipment}</strong>
+                    Equipamento: <strong>{formatFriendlyName(ex.equipment) || 'Livre'}</strong>
                   </p>
                   {ex.instructions && (
                     <p className="text-slate-400 text-[11px] line-clamp-2 italic">
@@ -2265,8 +2272,8 @@ export const WorkoutPlanner: React.FC = () => {
                               )}
                             </div>
                             <div className="text-[11px] text-slate-400 mt-0.5 truncate">
-                              <span className="text-teal-400 font-semibold">{ex.muscleGroup}</span>
-                              {ex.equipment && <span> • Equipamento: {ex.equipment}</span>}
+                              <span className="text-teal-400 font-semibold">{formatFriendlyName(ex.muscleGroup)}</span>
+                              {ex.equipment && <span> • Equipamento: {formatFriendlyName(ex.equipment)}</span>}
                             </div>
                           </div>
 

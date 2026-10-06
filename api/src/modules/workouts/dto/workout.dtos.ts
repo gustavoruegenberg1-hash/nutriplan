@@ -159,6 +159,26 @@ export class ApplySuggestionExerciseDto {
   exerciseId!: string;
 
   @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  exerciseName?: string;
+
+  @IsOptional()
+  @IsString()
+  muscleGroup?: string;
+
+  @IsOptional()
+  @IsString()
+  muscleGroupName?: string;
+
+  @IsOptional()
+  @IsString()
+  equipment?: string;
+
+  @IsOptional()
   @IsInt()
   sets?: number;
 

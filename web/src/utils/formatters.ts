@@ -51,6 +51,31 @@ const FRIENDLY_DICTIONARY: Record<string, string> = {
   FOREARMS: 'Antebraços',
   FULL_BODY: 'Corpo Inteiro',
   CARDIO: 'Cardio',
+
+  // Equipamentos e Tipos
+  BARBELL: 'Barra',
+  DUMBBELL: 'Halter',
+  DUMBBELLS: 'Halteres',
+  MACHINE: 'Máquina',
+  CABLE: 'Cabo',
+  BODYWEIGHT: 'Peso Corporal',
+  BODY_WEIGHT: 'Peso Corporal',
+  BAND: 'Elástico',
+  KETTLEBELL: 'Kettlebell',
+  FREE_WEIGHT: 'Peso Livre',
+  NONE: 'Livre',
+  LIVRE: 'Livre',
+
+  // Níveis e Status
+  EASY: 'Fácil',
+  MEDIUM: 'Médio',
+  HARD: 'Difícil',
+  ACTIVE: 'Ativo',
+  INACTIVE: 'Inativo',
+  COMPLETED: 'Concluído',
+  RESTING: 'Descansando',
+  RUNNING: 'Em Execução',
+  IDLE: 'Pendente',
 };
 
 /**
@@ -62,15 +87,19 @@ export function formatFriendlyName(text?: string | null): string {
 
   const trimmed = text.trim();
 
-  // Correspondência direta no dicionário
+  // Correspondência direta no dicionário (exata ou uppercase)
   if (FRIENDLY_DICTIONARY[trimmed]) {
     return FRIENDLY_DICTIONARY[trimmed];
+  }
+  const upper = trimmed.toUpperCase();
+  if (FRIENDLY_DICTIONARY[upper]) {
+    return FRIENDLY_DICTIONARY[upper];
   }
 
   // Substituição de palavras conhecidas dentro de frases maiores
   let result = trimmed;
   for (const [key, val] of Object.entries(FRIENDLY_DICTIONARY)) {
-    const regex = new RegExp(`\\b${key}\\b`, 'g');
+    const regex = new RegExp(`\\b${key}\\b`, 'gi');
     result = result.replace(regex, val);
   }
 

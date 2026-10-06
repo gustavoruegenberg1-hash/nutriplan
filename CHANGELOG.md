@@ -2,6 +2,21 @@
 
 Todas as alterações notáveis, correções de bugs, melhorias arquiteturais e refatorações realizadas no projeto NutriPlan v2 são documentadas neste arquivo.
 
+## [2026-10-06] - Correção dos Nomes de Exercícios e Tradução Completa para Português nas Sugestões de Treino
+
+### Tipo
+Correção de Bug / Localização PT-BR / UX
+
+### Alterações Principais
+1. **Exibição Correta dos Nomes dos Exercícios nas Sugestões**:
+   - Correção no backend (`generateMultipleSuggestions` em `workouts.service.ts`), garantindo o envio tanto de `name` quanto de `exerciseName` para cada item sugerido.
+   - Atualização do componente `WorkoutPlanner.tsx` para consumir com fallback seguro `{ex.name || ex.exerciseName || 'Exercício'}`, eliminando o título em branco nos cards de sugestão de treino.
+2. **Tradução Completa de Grupamentos Musculares e Equipamentos**:
+   - Mapeamento e envio do campo `muscleGroupName` em português pelo backend (`MUSCLE_PT_MAP`).
+   - Aplicação consistente do formatador `formatFriendlyName` em todos os locais do frontend onde grupos musculares e equipamentos são apresentados (cards de sugestão, rotina ativa, modal de adição de exercícios e catálogo de exercícios).
+   - Ampliação do dicionário `FRIENDLY_DICTIONARY` com equipamentos (`BARBELL: 'Barra'`, `MACHINE: 'Máquina'`, `CABLE: 'Cabo'`, etc.) e suporte a correspondência insensível a maiúsculas/minúsculas (`upperCase` e regex `gi`).
+   - Eliminação de identificadores em inglês como `CHEST`, `TRICEPS`, `SHOULDERS` na interface do usuário.
+
 ## [2026-10-06] - Refatoração Completa: Montagem de Treino com Múltiplas Sugestões, Timer de Execução e Descanso em Tempo Real, Correção do Histórico e Limpeza de Termos Técnicos
 
 ### Tipo
