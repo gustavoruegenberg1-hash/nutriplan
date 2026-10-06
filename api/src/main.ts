@@ -27,4 +27,4 @@ async function bootstrap() {
   logger.log(`API do NutriPlan v2 iniciada com sucesso em: http://localhost:${port}`);
 }
 
-await bootstrap();
+bootstrap();
