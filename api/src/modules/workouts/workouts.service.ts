@@ -480,4 +480,73 @@ export class WorkoutsService {
       createdAt: log.created_at,
     };
   }
+
+  async generateSuggestion(
+    userId: string,
+    dto: {
+      goal: string;
+      level?: string;
+      daysPerWeek: number;
+      availableTimeMin?: number;
+      equipment?: string;
+    },
+  ): Promise<DetailedWorkout> {
+    const days = Math.max(1, Math.min(7, Number(dto.daysPerWeek) || 3));
+    const duration = dto.availableTimeMin || 60;
+
+    let routineName = 'Treino A - Peito e Tríceps';
+    let splitName = 'Treino A';
+    let targetMuscles = ['Peito', 'Tríceps', 'Ombros'];
+
+    if (days === 1) {
+      routineName = 'Treino Full Body (Corpo Inteiro)';
+      splitName = 'Full Body';
+      targetMuscles = ['Peito', 'Costas', 'Quadríceps', 'Ombros'];
+    } else if (days === 2) {
+      routineName = 'Treino A - Membros Superiores';
+      splitName = 'Superior';
+      targetMuscles = ['Peito', 'Costas', 'Ombros', 'Bíceps', 'Tríceps'];
+    } else if (days >= 4) {
+      routineName = 'Treino A - Push (Peito, Ombros e Tríceps)';
+      splitName = 'Push';
+      targetMuscles = ['Peito', 'Ombros', 'Tríceps'];
+    }
+
+    // Busca exercícios correspondentes no banco
+    const exercisesFound: any[] = [];
+    for (const muscle of targetMuscles) {
+      const ex = this.db.query(
+        'SELECT * FROM exercises WHERE muscle_group LIKE ? AND is_active = 1 LIMIT 2',
+        [`%${muscle}%`]
+      );
+      exercisesFound.push(...ex);
+    }
+
+    // Cria a rotina no banco
+    const workout = await this.createWorkout(userId, {
+      name: routineName,
+      splitName,
+      estimatedDurationMin: duration,
+      description: `Rotina gerada pelo Assistente Inteligente para o objetivo de ${dto.goal} (${days}x por semana).`,
+    });
+
+    // Insere os exercícios encontrados
+    const setsByLevel = dto.level === 'ADVANCED' ? 4 : 3;
+    const repsByGoal = dto.goal === 'Força' ? 6 : dto.goal === 'Resistência' ? 15 : 10;
+
+    for (let i = 0; i < exercisesFound.length; i++) {
+      const ex = exercisesFound[i];
+      await this.addExerciseToWorkout(userId, workout.id, {
+        exerciseId: ex.id,
+        orderIndex: i,
+        sets: setsByLevel,
+        reps: repsByGoal,
+        weightKg: dto.level === 'BEGINNER' ? 10 : 25,
+        restSeconds: dto.goal === 'Força' ? 90 : 60,
+        notes: `Foco em execução controlada.`,
+      });
+    }
+
+    return this.getWorkoutById(userId, workout.id);
+  }
 }

@@ -492,3 +492,131 @@ Retorna em uma única chamada de alta performance todos os dados necessários pa
 * **Método:** `GET`
 * **Rota:** `/dashboard`
 * **Autenticação:** Requer Bearer Token
+
+---
+
+## 8. Módulo de Geração Assistida de Treino (`/workouts/generate-suggestion`)
+
+### 8.1. Gerar Proposta Automática de Treino
+Gera um programa completo com rotinas divididas por objetivo e nível utilizando o catálogo oficial de exercícios.
+* **Método:** `POST`
+* **Rota:** `/workouts/generate-suggestion`
+* **Autenticação:** Requer Bearer Token
+
+#### Corpo da Requisição (JSON)
+```json
+{
+  "goal": "HYPERTROPHY",
+  "daysPerWeek": 4,
+  "level": "INTERMEDIATE",
+  "durationMin": 60
+}
+```
+
+---
+
+## 9. Módulo de Profissionais (`/professionals`)
+
+### 9.1. Cadastro de Profissional (4 Etapas)
+Cria uma solicitação de credenciamento profissional com status inicial `PENDING`.
+* **Método:** `POST`
+* **Rota:** `/professionals/register`
+* **Autenticação:** Pública
+
+#### Corpo da Requisição (JSON)
+```json
+{
+  "name": "Dra. Renata Nutricionista",
+  "email": "renata@nutri.com",
+  "password": "SenhaSegura123",
+  "phone": "(11) 98888-7777",
+  "specialty": "NUTRITIONIST",
+  "councilType": "CRN",
+  "councilNumber": "CRN 54321/SP",
+  "councilState": "SP",
+  "bio": "Especialista em nutrição esportiva e clínica",
+  "documentName": "carteira_crn.pdf",
+  "documentData": "data:application/pdf;base64,..."
+}
+```
+
+### 9.2. Listar Profissionais Aprovados
+Retorna a lista de especialistas homologados para consulta dos alunos.
+* **Método:** `GET`
+* **Rota:** `/professionals`
+* **Autenticação:** Requer Bearer Token
+
+### 9.3. Obter Perfil do Profissional Conectado
+* **Método:** `GET`
+* **Rota:** `/professionals/me`
+* **Autenticação:** Requer Bearer Token (`PROFESSIONAL`)
+
+### 9.4. Listar Alunos e Pacientes Vinculados
+* **Método:** `GET`
+* **Rota:** `/professionals/clients`
+* **Autenticação:** Requer Bearer Token (`PROFESSIONAL`)
+
+### 9.5. Vincular Novo Aluno ao Profissional
+* **Método:** `POST`
+* **Rota:** `/professionals/clients/:clientId/link`
+* **Autenticação:** Requer Bearer Token (`PROFESSIONAL`)
+
+---
+
+## 10. Módulo de Administração (`/admin`)
+
+### 10.1. Métricas da Plataforma
+* **Método:** `GET`
+* **Rota:** `/admin/overview`
+* **Autenticação:** Requer Bearer Token (`ADMIN`)
+
+### 10.2. Listar Solicitações de Credenciamento
+* **Método:** `GET`
+* **Rota:** `/admin/professionals`
+* **Parâmetros de Consulta:** `status` (opcional: `PENDING`, `APPROVED`, `REJECTED`, `CORRECTION_REQUESTED`)
+* **Autenticação:** Requer Bearer Token (`ADMIN`)
+
+### 10.3. Moderar Cadastro Profissional
+* **Método:** `PUT`
+* **Rota:** `/admin/professionals/:id/status`
+* **Autenticação:** Requer Bearer Token (`ADMIN`)
+
+#### Corpo da Requisição (JSON)
+```json
+{
+  "status": "APPROVED",
+  "reviewNotes": "Registro validado no portal oficial do conselho de classe regional."
+}
+```
+
+### 10.4. Listar Todos os Usuários
+* **Método:** `GET`
+* **Rota:** `/admin/users`
+* **Autenticação:** Requer Bearer Token (`ADMIN`)
+
+---
+
+## 11. Módulo de Mensageria (`/messages`)
+
+### 11.1. Listar Conversas Ativas
+* **Método:** `GET`
+* **Rota:** `/messages/conversations`
+* **Autenticação:** Requer Bearer Token
+
+### 11.2. Consultar Histórico de Mensagens com um Contato
+* **Método:** `GET`
+* **Rota:** `/messages/:contactId`
+* **Autenticação:** Requer Bearer Token
+
+### 11.3. Enviar Mensagem Direta
+* **Método:** `POST`
+* **Rota:** `/messages/:contactId`
+* **Autenticação:** Requer Bearer Token
+
+#### Corpo da Requisição (JSON)
+```json
+{
+  "content": "Olá, preciso de orientação sobre a quantidade de carboidratos no pré-treino."
+}
+```
+

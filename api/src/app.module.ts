@@ -9,6 +9,9 @@ import { FoodsModule } from './modules/foods/foods.module';
 import { DietsModule } from './modules/diets/diets.module';
 import { WorkoutsModule } from './modules/workouts/workouts.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { ProfessionalsModule } from './modules/professionals/professionals.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { MessagesModule } from './modules/messages/messages.module';
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     DietsModule,
     WorkoutsModule,
     DashboardModule,
+    ProfessionalsModule,
+    AdminModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

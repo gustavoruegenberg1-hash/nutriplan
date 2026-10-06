@@ -70,3 +70,67 @@ Uma das regras críticas de Engenharia de Software no NutriPlan v2 é a garantia
 ## 7. Aviso Legal de Saúde e Domínio Profissional (RN27)
 O NutriPlan v2 segue estritamente as diretrizes éticas e legais de software para a área da saúde (CFN - Conselho Federal de Nutricionistas e CONFEF - Conselho Federal de Educação Física):
 > **Aviso Legal:** O NutriPlan v2 fornece planos nutricionais e fichas de treinamento como ferramenta de organização e suporte referencial computacional. O sistema não prescreve dietas médicas, diagnósticos ou condutas terapêuticas. Recomenda-se a avaliação e prescrição individualizada por profissionais habilitados (Nutricionista com CRN ativo e Profissional de Educação Física com CREF ativo).
+
+---
+
+## 8. Arquitetura Refatorada & Navegação por Perfis (RBAC)
+
+Para aprimorar a usabilidade e diminuir a dispersão visual de abas, o sistema foi organizado por papéis de acesso estritos:
+
+### 8.1. Estrutura de Navegação do Usuário Comum (4 Abas Principais)
+1. **Dashboard**: Painel consolidado com resumo de dieta ativa, treinos ativos, métricas antropométricas, alertas do sistema e botão direto *"Falar com Profissional"*.
+2. **Dieta**: Concentra todo o domínio nutricional em sub-abas internas:
+   - *Minha Dieta Atual*: Gestão de refeições, edição inline de porções (RN10), exclusão e alertas de restrições.
+   - *Montar Nova Dieta (8 Etapas)*: Assistente guiado passo a passo com estimativa de Mifflin-St Jeor e geração inteligente baseada na TACO.
+   - *Base TACO & Alimentos*: Consulta aos 744 alimentos da TACO e simulador proporcional de porção (RN10).
+   - *Metas & Balanço*: Comparativo gráfico de macronutrientes planejados vs metas estipuladas.
+3. **Treino**: Concentra todo o domínio de exercícios e treinamento resistido em sub-abas internas:
+   - *Meu Treino Atual*: Gestão das fichas e rotinas ativas (séries, repetições, carga e descanso).
+   - *Montar Novo Treino (8 Etapas)*: Assistente guiado passo a passo por objetivo, nível, dias/semana e equipamentos.
+   - *Registrar Treino*: Logger de sessão executada com cargas e séries reais (RN24).
+   - *Histórico*: Linha do tempo cronológica com imutabilidade histórica.
+   - *Banco de Exercícios*: Catálogo anatômico com 128 exercícios, agrupamentos musculares e instruções.
+4. **Perfil**: Concentra dados pessoais, metas antropométricas, linha do tempo de evolução (IMC e histórico de pesagens), segurança (alteração de senha) e conta.
+
+### 8.2. Estrutura do Profissional de Saúde (`PROFESSIONAL`)
+1. **Painel**: Visão dos atendimentos clínicos, status de homologação de conselho (`PENDING`, `APPROVED`, `CORRECTION_REQUESTED`) e atalhos rápidos.
+2. **Meus Clientes**: Listagem e busca de alunos supervisionados, inspeção de metas e histórico de peso, e canal de chat direto.
+3. **Perfil**: Configurações de credenciais e biografia.
+
+### 8.3. Estrutura do Administrador (`ADMIN`)
+1. **Visão Geral**: Métricas consolidadas em tempo real (total de usuários, profissionais ativos, aprovações pendentes, dietas e logs).
+2. **Moderação de Especialistas**: Tabela com filtros de status e modal para Aprovar, Rejeitar ou Solicitar Correção de documentos de conselho.
+3. **Gestão de Usuários**: Tabela geral de contas e papéis no sistema.
+4. **Perfil**: Configurações do administrador.
+
+---
+
+## 9. Assistentes Guiados por Etapas (Wizards Progressivos)
+
+As telas de montagem de dieta e treino deixaram de exibir formulários extensos monolíticos e foram transformadas em assistentes progressivos de 8 etapas:
+* **Landing Page Clara**: `# MONTE SUA DIETA` e `# MONTE SEU TREINO` com o botão destacado `[ INICIAR MONTAGEM ]`.
+* **Indicador Visual de Progresso**: Barra de progresso contínua e rótulo claro indicando `Etapa X de 8`.
+* **Fluxo Bidirecional**: O usuário pode avançar e voltar a qualquer momento sem perder o estado preenchido.
+* **Conclusão com Ação Direta**: Botão `[ VER MINHA DIETA ]` ou `[ VER TREINO ]` ao concluir a geração.
+
+---
+
+## 10. Credenciamento de Profissionais e Canal de Mensageria
+
+1. **Onboarding de Profissionais (`/register-professional`)**:
+   - 4 Etapas: Dados Pessoais -> Registro Profissional (CRN / CREF com UF) -> Upload de Documento Comprobatório -> Revisão e Envio.
+   - Status inicial gravado como `PENDING` ("Em Análise").
+2. **Homologação pelo Administrador**:
+   - O administrador avalia o registro e o documento anexado, podendo emitir pareceres de aprovação ou de retificação.
+3. **Canal de Comunicação Integrado**:
+   - Botão universal *"Falar com Profissional"* permite ao aluno localizar nutricionistas ou treinadores credenciados e trocar mensagens técnicas em tempo real com histórico preservado.
+
+---
+
+## 11. Resiliência de Interface e Tratamento de Estados Vazios
+
+Seguindo as diretrizes de UX de software, nenhuma tela exibe tela branca ou falha de renderização:
+1. **Estado de Carregamento**: Indicador giratório (*spinner*) com mensagem descritiva do que está sendo processado.
+2. **Estado Vazio Amigável**: Ícones temáticos, mensagens explicativas sobre o porquê de estar vazio e botões de ação imediata (ex: *"Montar Dieta Agora"*, *"Iniciar Novo Treino"*).
+3. **Estado de Erro com Retry**: Alertas informativos com botão *"Tentar Novamente"* para reexecutar a chamada de API sem necessidade de recarregar a página inteira.
+

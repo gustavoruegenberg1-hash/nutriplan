@@ -144,3 +144,60 @@ O Dashboard centraliza todas as informações essenciais em uma única visão:
 
 * Todas as estimativas de calorias, taxa metabólica e divisão de macronutrientes utilizam equações científicas amplamente aceitas pela comunidade médica e nutricional (Mifflin-St Jeor, 1990).
 * O NutriPlan v2 é uma ferramenta de apoio ao planejamento esportivo e nutricional. Sempre consulte um médico, nutricionista (CRN) e educador físico (CREF) antes de iniciar mudanças radicais em sua dieta ou protocolos de treinamento de alta intensidade.
+
+---
+
+## 9. Nova Navegação Simplificada (4 Abas Principais)
+
+O NutriPlan v2 agora possui uma interface concisa organizada em apenas 4 abas para o aluno:
+1. **Dashboard**: Painel inicial consolidado com resumo de dieta, treinos, progresso físico e botão para falar com especialistas.
+2. **Dieta**: Reúne sua dieta atual, o assistente passo a passo em 8 etapas, o catálogo de 744 alimentos da TACO e o balanço de metas.
+3. **Treino**: Reúne sua ficha atual, o assistente passo a passo em 8 etapas, o registrador de treino, a linha do tempo histórica e o catálogo de 128 exercícios.
+4. **Perfil**: Reúne seus dados antropométricos, metas, preferências, evolução de peso com IMC e alteração de senha de segurança.
+
+---
+
+## 10. Assistente de Montagem de Dieta (8 Etapas Guiadas)
+
+Ao acessar a aba **Dieta** e clicar em **"Montar Nova Dieta (8 Etapas)"**, você verá a tela de introdução `# MONTE SUA DIETA`. Clique em `[ INICIAR MONTAGEM ]` para seguir o fluxo:
+* **Etapa 1: Objetivo**: Escolha entre Emagrecimento, Manutenção ou Hipertrofia.
+* **Etapa 2: Dados Corporais**: Revise sua idade, sexo, peso e altura.
+* **Etapa 3: Nível de Atividade**: Selecione sua frequência e intensidade de atividades no dia a dia.
+* **Etapa 4: Número de Refeições**: Escolha entre 3 e 6 refeições diárias.
+* **Etapa 5: Preferências e Restrições**: Marque caso seja Vegetariano, Vegano, Celíaco (Sem Glúten) ou Intolerante a Lactose.
+* **Etapa 6: Estimativa de Calorias e Macros**: O sistema calcula sua TMB e GET pela fórmula de Mifflin-St Jeor e exibe a divisão ideal de Proteínas, Carboidratos e Gorduras.
+* **Etapa 7: Proposta Inicial de Refeições**: Uma estrutura de cardápio com alimentos da TACO é proposta.
+* **Etapa 8: Conclusão**: Clique no botão `[ VER MINHA DIETA ]`. A dieta será salva como ativa e você poderá editar qualquer gramagem livremente!
+
+---
+
+## 11. Assistente de Montagem de Treino (8 Etapas Guiadas)
+
+Ao acessar a aba **Treino** e clicar em **"Montar Novo Treino (8 Etapas)"**, você verá `# MONTE SEU TREINO`. Clique em `[ INICIAR MONTAGEM ]`:
+* **Etapa 1: Objetivo**: Hipertrofia, Força, Emagrecimento ou Condicionamento.
+* **Etapa 2: Nível de Experiência**: Iniciante, Intermediário ou Avançado.
+* **Etapa 3: Frequência Semanal**: 2 a 6 dias disponíveis por semana.
+* **Etapa 4: Tempo Disponível**: 30, 45, 60 ou 90 minutos por sessão.
+* **Etapa 5: Equipamentos**: Academia completa, halteres em casa ou apenas peso corporal.
+* **Etapa 6: Limitações**: Nenhuma, Coluna/Lombar, Joelhos ou Ombros.
+* **Etapa 7: Proposta de Divisão**: O sistema sugere a melhor divisão (Full Body, AB Upper/Lower ou ABC Push/Pull/Legs).
+* **Etapa 8: Conclusão**: Clique em `[ VER TREINO ]` para acessar a ficha montada com exercícios selecionados do banco de 128 itens!
+
+---
+
+## 12. Comunicação com Especialistas e Módulo Profissional
+
+* **Falar com Profissional**: Em qualquer tela ou pelo botão destacado no topo, clique em *"Falar com Profissional"*. Você poderá visualizar nutricionistas e educadores físicos homologados, iniciar conversas e tirar dúvidas técnicas.
+* **Cadastro de Profissional (`/register-professional`)**:
+  - Nutricionistas e treinadores realizam o cadastro em 4 etapas informando seu registro de classe (CRN / CREF) e anexando comprovante documental.
+  - O cadastro fica com status *"Em Análise"* até ser moderado pelo Administrador.
+* **Painel do Especialista (`/professional`)**:
+  - Profissionais aprovados acompanham seus alunos vinculados, inspecionam metas e históricos de peso e prestam suporte via chat.
+
+---
+
+## 13. Painel de Administração e Governança (`/admin`)
+
+* O Administrador da plataforma acessa indicadores em tempo real (total de usuários, profissionais ativos, dietas e treinos).
+* Na aba **"Moderação de Especialistas"**, analisa documentos anexados e pode **Aprovar**, **Solicitar Correções** com justificativa ou **Rejeitar** solicitações de credenciamento.
+

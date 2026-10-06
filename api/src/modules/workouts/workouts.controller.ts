@@ -51,6 +51,22 @@ export class WorkoutsController {
     return this.workoutsService.createWorkout(user.userId, dto);
   }
 
+  @Post('workouts/generate-suggestion')
+  @UseGuards(JwtAuthGuard)
+  async generateSuggestion(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body()
+    dto: {
+      goal: string;
+      level?: string;
+      daysPerWeek: number;
+      availableTimeMin?: number;
+      equipment?: string;
+    },
+  ) {
+    return this.workoutsService.generateSuggestion(user.userId, dto);
+  }
+
   @Get('workouts/:id')
   @UseGuards(JwtAuthGuard)
   async getWorkout(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {

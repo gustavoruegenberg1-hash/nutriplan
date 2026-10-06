@@ -92,11 +92,19 @@ export const Login: React.FC = () => {
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-slate-800/80 text-center text-sm text-slate-400">
-          Não possui uma conta?{' '}
-          <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold transition">
-            Cadastre-se gratuitamente
-          </Link>
+        <div className="mt-6 pt-6 border-t border-slate-800/80 text-center text-sm text-slate-400 space-y-2">
+          <div>
+            Não possui uma conta?{' '}
+            <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold transition">
+              Cadastre-se gratuitamente
+            </Link>
+          </div>
+          <div className="text-xs text-slate-500">
+            É nutricionista ou educador físico?{' '}
+            <Link to="/register-professional" className="text-teal-400 hover:text-teal-300 font-semibold transition">
+              Cadastre-se como Profissional
+            </Link>
+          </div>
         </div>
       </div>
     </div>

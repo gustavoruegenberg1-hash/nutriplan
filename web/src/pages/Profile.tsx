@@ -1,15 +1,38 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
-import { User as UserIcon, Scale, CheckCircle2, AlertCircle, Save, Plus } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  User as UserIcon,
+  Scale,
+  CheckCircle2,
+  AlertCircle,
+  Save,
+  Plus,
+  TrendingUp,
+  Lock,
+  ShieldCheck,
+  MessageSquare,
+} from 'lucide-react';
+import { ProfessionalContactModal } from '../components/ProfessionalContactModal';
 
 export const Profile: React.FC = () => {
+  const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const validTabs = ['personal', 'evolution', 'security'];
+  const tabParam = searchParams.get('tab');
+  const initialTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'personal';
+
+  const [activeTab, setActiveTab] = useState<'personal' | 'evolution' | 'security'>(initialTab as any);
   const [profileData, setProfileData] = useState<any>(null);
   const [availableRestrictions, setAvailableRestrictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-  // Form states
+  // Form states - Dados pessoais
   const [name, setName] = useState('');
   const [age, setAge] = useState<number | ''>('');
   const [gender, setGender] = useState<string>('MALE');
@@ -20,11 +43,19 @@ export const Profile: React.FC = () => {
   const [dietaryNotes, setDietaryNotes] = useState('');
   const [selectedRestrictions, setSelectedRestrictions] = useState<string[]>([]);
 
-  // Novo registro de peso
+  // Form states - Nova Pesagem
   const [newWeight, setNewWeight] = useState<number | ''>('');
   const [weightNote, setWeightNote] = useState('');
+  const [savingWeight, setSavingWeight] = useState(false);
+
+  // Form states - Alteração de Senha
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
 
   const loadData = async () => {
+    setLoading(true);
     try {
       const [profRes, restRes] = await Promise.all([
         api.get('/profile'),
@@ -55,6 +86,11 @@ export const Profile: React.FC = () => {
     loadData();
   }, []);
 
+  const handleTabChange = (tab: 'personal' | 'evolution' | 'security') => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  };
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -74,24 +110,25 @@ export const Profile: React.FC = () => {
       });
 
       setProfileData(res.data);
-      setFeedback({ type: 'success', message: 'Perfil e parâmetros nutricionais atualizados com sucesso!' });
+      setFeedback({ type: 'success', message: 'Perfil e parâmetros antropométricos atualizados com sucesso!' });
     } catch (err: any) {
       const msg = err.response?.data?.message;
       setFeedback({
         type: 'error',
-        message: Array.isArray(msg) ? msg.join(', ') : msg || 'Falha ao salvar perfil.',
+        message: Array.isArray(msg) ? msg.join(', ') : msg || 'Falha ao salvar dados do perfil.',
       });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleAddWeightRecord = async () => {
+  const handleAddWeightRecord = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!newWeight || Number(newWeight) < 20 || Number(newWeight) > 350) {
       setFeedback({ type: 'error', message: 'Informe um peso válido entre 20 e 350 kg.' });
       return;
     }
-
+    setSavingWeight(true);
     try {
       await api.post('/profile/weight', {
         weight: Number(newWeight),
@@ -100,294 +137,527 @@ export const Profile: React.FC = () => {
       setNewWeight('');
       setWeightNote('');
       await loadData();
-      setFeedback({ type: 'success', message: 'Novo peso registrado com sucesso no histórico!' });
+      setFeedback({ type: 'success', message: 'Nova pesagem registrada na evolução!' });
     } catch {
-      setFeedback({ type: 'error', message: 'Falha ao registrar peso.' });
+      setFeedback({ type: 'error', message: 'Falha ao registrar pesagem.' });
+    } finally {
+      setSavingWeight(false);
     }
   };
 
-  const toggleRestriction = (id: string) => {
-    setSelectedRestrictions((prev) =>
-      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
-    );
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      setFeedback({ type: 'error', message: 'A nova senha deve possuir no mínimo 8 caracteres.' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setFeedback({ type: 'error', message: 'A confirmação de senha não coincide.' });
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      await api.put('/auth/change-password', {
+        currentPassword,
+        newPassword,
+      });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setFeedback({ type: 'success', message: 'Senha de acesso alterada com sucesso!' });
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.response?.data?.message || 'Falha ao alterar senha.' });
+    } finally {
+      setSavingPassword(false);
+    }
   };
+
+  // Cálculo de IMC e Classificação
+  const currentWeightNum = profileData?.profile?.weight;
+  const heightCmNum = profileData?.profile?.height;
+  let bmi: number | null = null;
+  let bmiCategory = '';
+  let bmiColor = 'text-emerald-400';
+
+  if (currentWeightNum && heightCmNum && heightCmNum > 0) {
+    const heightM = heightCmNum / 100;
+    bmi = Math.round((currentWeightNum / (heightM * heightM)) * 10) / 10;
+    if (bmi < 18.5) {
+      bmiCategory = 'Baixo peso';
+      bmiColor = 'text-amber-400';
+    } else if (bmi < 25) {
+      bmiCategory = 'Eutrofia (Peso saudável)';
+      bmiColor = 'text-emerald-400';
+    } else if (bmi < 30) {
+      bmiCategory = 'Sobrepeso';
+      bmiColor = 'text-amber-400';
+    } else {
+      bmiCategory = 'Obesidade';
+      bmiColor = 'text-rose-400';
+    }
+  }
+
+  const weightHistory = profileData?.recentWeightHistory || [];
+  let weightDelta: number | null = null;
+  if (weightHistory.length >= 2) {
+    const oldest = weightHistory[weightHistory.length - 1].weight;
+    const newest = weightHistory[0].weight;
+    weightDelta = Math.round((newest - oldest) * 10) / 10;
+  }
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12 flex justify-center items-center min-h-[50vh]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="max-w-7xl mx-auto px-4 py-16 flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-slate-400 text-sm">Carregando dados do usuário...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-24 md:pb-12 text-slate-100">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-          <UserIcon className="text-emerald-400" size={28} />
-          <span>Meu Perfil & Parâmetros Fisiológicos</span>
-        </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Configure seus dados biométricos e restrições para calibração dos cálculos científicos.
-        </p>
-      </div>
-
-      {feedback && (
-        <div
-          className={`p-4 rounded-xl flex items-start gap-3 text-sm ${
-            feedback.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
-              : 'bg-rose-500/10 border border-rose-500/20 text-rose-300'
-          }`}
-        >
-          {feedback.type === 'success' ? <CheckCircle2 size={18} className="shrink-0 mt-0.5" /> : <AlertCircle size={18} className="shrink-0 mt-0.5" />}
-          <span>{feedback.message}</span>
-        </div>
-      )}
-
-      {/* Estimativas Calculadas (TMB, TDEE, Metas) */}
-      {profileData?.targets && (
-        <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 to-slate-900 border border-emerald-500/20 grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <>
+      <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8 space-y-6 pb-24 md:pb-12 text-slate-100">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
           <div>
-            <span className="text-xs text-slate-400 uppercase font-semibold">TMB Calculada</span>
-            <div className="text-xl sm:text-2xl font-bold text-white mt-1">
-              {profileData.profile.bmr} <span className="text-xs text-slate-400 font-normal">kcal</span>
-            </div>
-            <span className="text-[11px] text-slate-500">Mifflin-St Jeor</span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              <UserIcon className="text-emerald-400" size={28} />
+              <span>Perfil & Dados do Usuário</span>
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">
+              Gerencie seus dados pessoais, objetivos, histórico de evolução antropométrica e credenciais.
+            </p>
           </div>
 
-          <div>
-            <span className="text-xs text-slate-400 uppercase font-semibold">Gasto Diário (TDEE)</span>
-            <div className="text-xl sm:text-2xl font-bold text-white mt-1">
-              {profileData.profile.tdee} <span className="text-xs text-slate-400 font-normal">kcal</span>
-            </div>
-            <span className="text-[11px] text-slate-500">Com nível de atividade</span>
-          </div>
-
-          <div>
-            <span className="text-xs text-slate-400 uppercase font-semibold">Meta Calórica</span>
-            <div className="text-xl sm:text-2xl font-bold text-emerald-400 mt-1">
-              {profileData.targets.calories} <span className="text-xs text-slate-400 font-normal">kcal</span>
-            </div>
-            <span className="text-[11px] text-slate-500">Conforme objetivo</span>
-          </div>
-
-          <div>
-            <span className="text-xs text-slate-400 uppercase font-semibold">Macros Alvo (P/C/G)</span>
-            <div className="text-sm font-bold text-slate-200 mt-2">
-              <span className="text-sky-400">{profileData.targets.proteinGrams}g P</span> •{' '}
-              <span className="text-amber-400">{profileData.targets.carbsGrams}g C</span> •{' '}
-              <span className="text-rose-400">{profileData.targets.fatGrams}g G</span>
-            </div>
-            <span className="text-[11px] text-slate-500">2g/kg Prot • 0.9g/kg Gord</span>
-          </div>
-        </div>
-      )}
-
-      {/* Formulário Principal */}
-      <form onSubmit={handleSaveProfile} className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6">
-        <h2 className="text-lg font-bold text-white border-b border-slate-800 pb-3">Dados Biométricos</h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Nome</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Sexo Biológico</label>
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
-            >
-              <option value="MALE">Masculino</option>
-              <option value="FEMALE">Feminino</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Idade (anos)</label>
-            <input
-              type="number"
-              min={10}
-              max={120}
-              value={age}
-              onChange={(e) => setAge(e.target.value === '' ? '' : Number(e.target.value))}
-              placeholder="Ex: 25"
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Peso Corporal (kg)</label>
-            <input
-              type="number"
-              step="0.1"
-              min={20}
-              max={350}
-              value={weight}
-              onChange={(e) => setWeight(e.target.value === '' ? '' : Number(e.target.value))}
-              placeholder="Ex: 75.5"
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Altura (cm)</label>
-            <input
-              type="number"
-              min={50}
-              max={250}
-              value={height}
-              onChange={(e) => setHeight(e.target.value === '' ? '' : Number(e.target.value))}
-              placeholder="Ex: 178"
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Nível de Atividade</label>
-            <select
-              value={activityLevel}
-              onChange={(e) => setActivityLevel(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
-            >
-              <option value="SEDENTARY">Sedentário (pouco ou nenhum exercício)</option>
-              <option value="LIGHTLY_ACTIVE">Levemente Ativo (exercício 1 a 3 dias/sem)</option>
-              <option value="MODERATELY_ACTIVE">Moderadamente Ativo (exercício 3 a 5 dias/sem)</option>
-              <option value="VERY_ACTIVE">Muito Ativo (exercício 6 a 7 dias/sem)</option>
-              <option value="EXTRA_ACTIVE">Extremamente Ativo (treino intenso diário / atleta)</option>
-            </select>
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Objetivo Principal</label>
-            <select
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
-            >
-              <option value="LOSE_WEIGHT">Emagrecimento (Déficit Calórico de ~500 kcal)</option>
-              <option value="MAINTAIN">Manutenção do Peso Corporal</option>
-              <option value="GAIN_WEIGHT">Ganho de Massa Muscular / Hipertrofia (+350 kcal)</option>
-            </select>
-          </div>
+          <button
+            onClick={() => setIsContactModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-teal-500/15 text-teal-300 border border-teal-500/30 hover:bg-teal-500/25 font-bold text-xs transition flex items-center gap-1.5 self-start sm:self-auto"
+          >
+            <MessageSquare size={15} />
+            <span>Falar com Profissional</span>
+          </button>
         </div>
 
-        {/* Restrições Alimentares */}
-        <div className="pt-4 border-t border-slate-800 space-y-3">
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-            Alergias e Restrições Alimentares (RN12, RN17)
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {availableRestrictions.map((r) => {
-              const checked = selectedRestrictions.includes(r.id);
-              return (
-                <button
-                  type="button"
-                  key={r.id}
-                  onClick={() => toggleRestriction(r.id)}
-                  className={`p-3 rounded-xl border text-left text-sm flex items-start gap-2.5 transition ${
-                    checked
-                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
-                      : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <input type="checkbox" checked={checked} readOnly className="mt-1 accent-emerald-500 pointer-events-none" />
-                  <div>
-                    <div className="font-semibold text-xs sm:text-sm">{r.name}</div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">{r.description}</div>
-                  </div>
-                </button>
-              );
-            })}
+        {feedback && (
+          <div
+            className={`p-4 rounded-xl flex items-start gap-3 text-sm ${
+              feedback.type === 'success'
+                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
+                : 'bg-rose-500/10 border border-rose-500/20 text-rose-300'
+            }`}
+          >
+            {feedback.type === 'success' ? (
+              <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle size={18} className="shrink-0 mt-0.5" />
+            )}
+            <span>{feedback.message}</span>
           </div>
+        )}
+
+        {/* Navegação por Sub-Abas do Perfil */}
+        <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
+          <button
+            onClick={() => handleTabChange('personal')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition shrink-0 ${
+              activeTab === 'personal'
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+            }`}
+          >
+            Dados & Metas Antropométricas
+          </button>
+
+          <button
+            onClick={() => handleTabChange('evolution')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
+              activeTab === 'evolution'
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+            }`}
+          >
+            <TrendingUp size={14} />
+            <span>Evolução & Pesagens</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange('security')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
+              activeTab === 'security'
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+            }`}
+          >
+            <ShieldCheck size={14} />
+            <span>Segurança & Conta</span>
+          </button>
         </div>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition disabled:opacity-50"
-        >
-          {saving ? (
-            <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <>
-              <Save size={18} />
-              <span>Salvar Alterações do Perfil</span>
-            </>
-          )}
-        </button>
-      </form>
+        {/* ============================================================= */}
+        {/* SUB-ABA 1: DADOS & METAS ANTROPOMÉTRICAS */}
+        {/* ============================================================= */}
+        {activeTab === 'personal' && (
+          <form onSubmit={handleSaveProfile} className="space-y-6">
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-5">
+              <h3 className="font-bold text-white text-base">Informações Antropométricas</h3>
 
-      {/* Registro de Pesagem Rápida */}
-      <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <Scale size={20} className="text-emerald-400" />
-          <span>Registrar Nova Pesagem (Evolução Temporal)</span>
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Peso (kg)</label>
-            <input
-              type="number"
-              step="0.1"
-              value={newWeight}
-              onChange={(e) => setNewWeight(e.target.value === '' ? '' : Number(e.target.value))}
-              placeholder="Ex: 76.2"
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Observação</label>
-            <input
-              type="text"
-              value={weightNote}
-              onChange={(e) => setWeightNote(e.target.value)}
-              placeholder="Ex: Em jejum pela manhã"
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm"
-            />
-          </div>
-
-          <div className="flex items-end">
-            <button
-              type="button"
-              onClick={handleAddWeightRecord}
-              className="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 font-semibold py-2.5 rounded-xl border border-slate-700 text-sm flex items-center justify-center gap-1.5 transition"
-            >
-              <Plus size={16} />
-              <span>Registrar Pesagem</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Histórico Recente de Pesagens */}
-        {profileData?.recentWeightHistory && profileData.recentWeightHistory.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Últimas medições</span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {profileData.recentWeightHistory.slice(0, 6).map((item: any) => (
-                <div key={item.id} className="p-2.5 rounded-lg bg-slate-800/40 border border-slate-800 flex justify-between items-center text-xs">
-                  <div>
-                    <span className="font-bold text-white text-sm">{item.weight} kg</span>
-                    {item.notes && <span className="text-slate-400 block text-[11px]">{item.notes}</span>}
-                  </div>
-                  <span className="text-slate-500">{new Date(item.recordedAt).toLocaleDateString('pt-BR')}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Nome Completo</label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
                 </div>
-              ))}
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">E-mail</label>
+                  <input
+                    type="email"
+                    disabled
+                    value={profileData?.user?.email || ''}
+                    className="w-full bg-slate-800/40 border border-slate-800 rounded-xl px-4 py-2 text-slate-500 text-xs cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Idade (anos)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={120}
+                    value={age}
+                    onChange={(e) => setAge(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Sexo Biológico</label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="MALE">Masculino</option>
+                    <option value="FEMALE">Feminino</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Peso Atual (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min={20}
+                    max={350}
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Altura (cm)</label>
+                  <input
+                    type="number"
+                    min={50}
+                    max={250}
+                    value={height}
+                    onChange={(e) => setHeight(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Nível de Atividade</label>
+                  <select
+                    value={activityLevel}
+                    onChange={(e) => setActivityLevel(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="SEDENTARY">Sedentário (pouco exercício)</option>
+                    <option value="LIGHT">Leve (1-3 dias/semana)</option>
+                    <option value="MODERATE">Moderado (3-5 dias/semana)</option>
+                    <option value="INTENSE">Intenso (6-7 dias/semana)</option>
+                    <option value="VERY_INTENSE">Extremamente Ativo (atleta)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Objetivo Nutricional</label>
+                  <select
+                    value={goal}
+                    onChange={(e) => setGoal(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="LOSE_WEIGHT">Emagrecimento (Déficit)</option>
+                    <option value="MAINTAIN">Manutenção (Normocalórica)</option>
+                    <option value="GAIN_WEIGHT">Hipertrofia (Superávit)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Restrições Alimentares */}
+              <div className="space-y-3 pt-2">
+                <label className="block text-xs font-semibold text-slate-300 uppercase">Restrições Alimentares</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {availableRestrictions.map((r: any) => {
+                    const isChecked = selectedRestrictions.includes(r.id);
+                    return (
+                      <div
+                        key={r.id}
+                        onClick={() => {
+                          if (isChecked) {
+                            setSelectedRestrictions(selectedRestrictions.filter((id) => id !== r.id));
+                          } else {
+                            setSelectedRestrictions([...selectedRestrictions, r.id]);
+                          }
+                        }}
+                        className={`p-3 rounded-xl border text-xs cursor-pointer transition text-center ${
+                          isChecked
+                            ? 'bg-emerald-500/10 border-emerald-500/50 text-white font-semibold'
+                            : 'bg-slate-800/40 border-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {r.name}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Observações Alimentares */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
+                  Preferências & Alimentos a Evitar
+                </label>
+                <textarea
+                  rows={3}
+                  value={dietaryNotes}
+                  onChange={(e) => setDietaryNotes(e.target.value)}
+                  placeholder="Ex: Não gosto de peixe, prefiro frango e ovos; evito alimentos muito doces à noite."
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs focus:outline-none focus:border-emerald-500"
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Save size={14} />
+                <span>{saving ? 'Salvando...' : 'Salvar Alterações'}</span>
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* ============================================================= */}
+        {/* SUB-ABA 2: EVOLUÇÃO & PESAGENS */}
+        {/* ============================================================= */}
+        {activeTab === 'evolution' && (
+          <div className="space-y-6">
+            {/* Cards de Resumo Antropométrico */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800">
+                <span className="text-xs text-slate-400 uppercase font-semibold">Índice de Massa Corporal (IMC)</span>
+                <div className={`text-3xl font-extrabold mt-1 ${bmiColor}`}>
+                  {bmi !== null ? `${bmi} kg/m²` : '--'}
+                </div>
+                <span className="text-xs text-slate-400 mt-1 block">{bmiCategory || 'Informe peso e altura'}</span>
+              </div>
+
+              <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800">
+                <span className="text-xs text-slate-400 uppercase font-semibold">Variação Total (Delta)</span>
+                <div className="text-3xl font-extrabold text-white mt-1">
+                  {weightDelta !== null ? `${weightDelta > 0 ? `+${weightDelta}` : weightDelta} kg` : '--'}
+                </div>
+                <span className="text-xs text-slate-400 mt-1 block">Desde a primeira pesagem registrada</span>
+              </div>
+
+              <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800">
+                <span className="text-xs text-slate-400 uppercase font-semibold">Registros de Peso</span>
+                <div className="text-3xl font-extrabold text-teal-400 mt-1">{weightHistory.length}</div>
+                <span className="text-xs text-slate-400 mt-1 block">Histórico cronológico gravado</span>
+              </div>
+            </div>
+
+            {/* Formulário de Nova Pesagem */}
+            <form onSubmit={handleAddWeightRecord} className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+              <h3 className="font-bold text-white text-base flex items-center gap-2">
+                <Scale size={18} className="text-emerald-400" />
+                <span>Registrar Nova Pesagem</span>
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Peso (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min={20}
+                    max={350}
+                    required
+                    value={newWeight}
+                    onChange={(e) => setNewWeight(e.target.value === '' ? '' : Number(e.target.value))}
+                    placeholder="Ex: 75.5"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Observações (opcional)</label>
+                  <input
+                    type="text"
+                    value={weightNote}
+                    onChange={(e) => setWeightNote(e.target.value)}
+                    placeholder="Ex: Em jejum, pós-treino, etc."
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={savingWeight}
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs transition disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Plus size={14} />
+                <span>{savingWeight ? 'Registrando...' : 'Salvar Pesagem'}</span>
+              </button>
+            </form>
+
+            {/* Histórico Cronológico de Pesagens */}
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+              <h3 className="font-bold text-white text-base">Linha do Tempo de Pesagens</h3>
+
+              {weightHistory.length === 0 ? (
+                <div className="p-8 text-center text-slate-500 text-xs">
+                  Nenhuma pesagem adicional registrada além do peso inicial do perfil.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {weightHistory.map((item: any) => (
+                    <div
+                      key={item.id}
+                      className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800 flex items-center justify-between text-xs"
+                    >
+                      <div>
+                        <strong className="text-white text-sm block">{item.weight} kg</strong>
+                        {item.notes && <span className="text-slate-400 text-[11px]">{item.notes}</span>}
+                      </div>
+                      <span className="text-slate-500 text-xs font-mono">
+                        {new Date(item.recordedAt).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
+
+        {/* ============================================================= */}
+        {/* SUB-ABA 3: SEGURANÇA & CONTA */}
+        {/* ============================================================= */}
+        {activeTab === 'security' && (
+          <div className="space-y-6">
+            {/* Informações da Conta */}
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+              <h3 className="font-bold text-white text-base">Informações da Conta</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800">
+                  <span className="text-slate-400 block">Tipo de Perfil:</span>
+                  <strong className="text-emerald-400 text-sm mt-0.5 block">
+                    {user?.role === 'ADMIN'
+                      ? 'Administrador da Plataforma'
+                      : user?.role === 'PROFESSIONAL'
+                      ? 'Profissional de Saúde'
+                      : 'Aluno / Paciente'}
+                  </strong>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800">
+                  <span className="text-slate-400 block">Status da Conta:</span>
+                  <strong className="text-white text-sm mt-0.5 block">Ativa & Verificada</strong>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800">
+                  <span className="text-slate-400 block">Data de Cadastro:</span>
+                  <strong className="text-slate-300 text-sm mt-0.5 block">
+                    {profileData?.user?.createdAt
+                      ? new Date(profileData.user.createdAt).toLocaleDateString('pt-BR')
+                      : '--'}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Alteração de Senha */}
+            <form onSubmit={handleChangePassword} className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+              <h3 className="font-bold text-white text-base flex items-center gap-2">
+                <Lock size={18} className="text-emerald-400" />
+                <span>Alterar Senha de Acesso</span>
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Senha Atual</label>
+                  <input
+                    type="password"
+                    required
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Nova Senha</label>
+                  <input
+                    type="password"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Mínimo 8 caracteres"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Confirmar Nova Senha</label>
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repita a nova senha"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={savingPassword}
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs transition disabled:opacity-50"
+              >
+                {savingPassword ? 'Alterando...' : 'Salvar Nova Senha'}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
-    </div>
+
+      <ProfessionalContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+      />
+    </>
   );
 };

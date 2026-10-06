@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/commo
 import { DatabaseSync } from 'node:sqlite';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as bcrypt from 'bcryptjs';
 
 export interface RunResult {
   changes: number;
@@ -63,6 +64,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     this.seedRestrictions();
     this.seedFoods();
     this.seedExercises();
+    this.seedUsersAndProfessionals();
   }
 
   private seedRestrictions() {
@@ -202,6 +204,90 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.logger.log(`Concluída semente de ${exercisesData.length} exercícios.`);
+  }
+
+  private seedUsersAndProfessionals() {
+    const adminCount = this.queryOne<{ count: number }>("SELECT COUNT(*) as count FROM users WHERE role = 'ADMIN'");
+    if (adminCount && adminCount.count > 0) return;
+
+    this.logger.log('Semeando usuários padrão (Administrador e Profissionais credenciados)...');
+    const now = new Date().toISOString();
+    const saltRounds = 10;
+
+    // 1. Administrador: admin@nutriplan.com / admin123
+    const adminId = 'user-admin-01';
+    const adminHash = bcrypt.hashSync('admin123', saltRounds);
+    this.run(
+      `INSERT OR IGNORE INTO users (id, email, password_hash, name, role, status, created_at, updated_at)
+       VALUES (?, 'admin@nutriplan.com', ?, 'Administrador do Sistema', 'ADMIN', 'ACTIVE', ?, ?)`,
+      [adminId, adminHash, now, now]
+    );
+
+    // 2. Nutricionista Aprovada: nutri@nutriplan.com / nutri123
+    const nutriId = 'user-nutri-01';
+    const nutriHash = bcrypt.hashSync('nutri123', saltRounds);
+    this.run(
+      `INSERT OR IGNORE INTO users (id, email, password_hash, name, role, status, created_at, updated_at)
+       VALUES (?, 'nutri@nutriplan.com', ?, 'Dra. Camila Nutricionista', 'PROFESSIONAL', 'ACTIVE', ?, ?)`,
+      [nutriId, nutriHash, now, now]
+    );
+    this.run(
+      `INSERT OR IGNORE INTO professional_profiles (id, user_id, profession, specialty, registry_type, registry_number, experience_years, bio, phone, status, documents_json, created_at, updated_at)
+       VALUES (?, ?, 'NUTRITIONIST', 'Nutrição Esportiva e Clínica', 'CRN', 'CRN-3 45892', 7, 'Especialista em planejamento dietético esportivo para atletas e praticantes de musculação.', '(11) 98765-4321', 'APPROVED', ?, ?, ?)`,
+      [
+        'prof-01',
+        nutriId,
+        JSON.stringify([
+          { id: 'doc-1', name: 'Diploma_Nutricao_USP.pdf', type: 'application/pdf', size: 1048576, url: '/docs/diploma.pdf', uploadedAt: now },
+        ]),
+        now,
+        now,
+      ]
+    );
+
+    // 3. Treinador Físico Aprovado: treinador@nutriplan.com / treinador123
+    const trainerId = 'user-trainer-01';
+    const trainerHash = bcrypt.hashSync('treinador123', saltRounds);
+    this.run(
+      `INSERT OR IGNORE INTO users (id, email, password_hash, name, role, status, created_at, updated_at)
+       VALUES (?, 'treinador@nutriplan.com', ?, 'Prof. Rodrigo Treinador', 'PROFESSIONAL', 'ACTIVE', ?, ?)`,
+      [trainerId, trainerHash, now, now]
+    );
+    this.run(
+      `INSERT OR IGNORE INTO professional_profiles (id, user_id, profession, specialty, registry_type, registry_number, experience_years, bio, phone, status, documents_json, created_at, updated_at)
+       VALUES (?, ?, 'TRAINER', 'Hipertrofia e Biomecânica', 'CREF', 'CREF 089412-G/SP', 10, 'Treinador de força, periodização de treino resistido e prevenção de lesões.', '(11) 91234-5678', 'APPROVED', ?, ?, ?)`,
+      [
+        'prof-02',
+        trainerId,
+        JSON.stringify([
+          { id: 'doc-2', name: 'Registro_CREF_Ativo.pdf', type: 'application/pdf', size: 524288, url: '/docs/cref.pdf', uploadedAt: now },
+        ]),
+        now,
+        now,
+      ]
+    );
+
+    // 4. Profissional Pendente: pendente@nutriplan.com / pendente123
+    const pendingId = 'user-pending-01';
+    const pendingHash = bcrypt.hashSync('pendente123', saltRounds);
+    this.run(
+      `INSERT OR IGNORE INTO users (id, email, password_hash, name, role, status, created_at, updated_at)
+       VALUES (?, 'pendente@nutriplan.com', ?, 'Dr. Marcos Fisiologista', 'PROFESSIONAL', 'ACTIVE', ?, ?)`,
+      [pendingId, pendingHash, now, now]
+    );
+    this.run(
+      `INSERT OR IGNORE INTO professional_profiles (id, user_id, profession, specialty, registry_type, registry_number, experience_years, bio, phone, status, documents_json, created_at, updated_at)
+       VALUES (?, ?, 'NUTRITIONIST', 'Fisiologia do Exercício', 'CRN', 'CRN-3 99881', 3, 'Atuação em modulação de macronutrientes para endurance.', '(21) 99887-1122', 'PENDING', ?, ?, ?)`,
+      [
+        'prof-03',
+        pendingId,
+        JSON.stringify([
+          { id: 'doc-3', name: 'Comprovante_CRN_Provisorio.pdf', type: 'application/pdf', size: 786432, url: '/docs/crn.pdf', uploadedAt: now },
+        ]),
+        now,
+        now,
+      ]
+    );
   }
 
   exec(sql: string): void {

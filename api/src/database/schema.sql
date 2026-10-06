@@ -224,6 +224,53 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- 18. PROFESSIONAL_PROFILES
+CREATE TABLE IF NOT EXISTS professional_profiles (
+    id TEXT PRIMARY KEY,
+    user_id TEXT UNIQUE NOT NULL,
+    profession TEXT NOT NULL,
+    specialty TEXT,
+    registry_type TEXT,
+    registry_number TEXT,
+    experience_years INTEGER DEFAULT 0,
+    bio TEXT,
+    phone TEXT,
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    reviewed_by TEXT,
+    reviewed_at TEXT,
+    review_notes TEXT,
+    documents_json TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- 19. PROFESSIONAL_CLIENTS
+CREATE TABLE IF NOT EXISTS professional_clients (
+    id TEXT PRIMARY KEY,
+    professional_id TEXT NOT NULL,
+    client_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'ACTIVE',
+    notes TEXT,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (professional_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(professional_id, client_id)
+);
+
+-- 20. MESSAGES
+CREATE TABLE IF NOT EXISTS messages (
+    id TEXT PRIMARY KEY,
+    sender_id TEXT NOT NULL,
+    receiver_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    is_read INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- ÍNDICES DE PERFORMANCE E INTEGRIDADE
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
@@ -237,3 +284,10 @@ CREATE INDEX IF NOT EXISTS idx_workouts_user ON workouts(user_id);
 CREATE INDEX IF NOT EXISTS idx_wo_exercises_wo ON workout_exercises(workout_id);
 CREATE INDEX IF NOT EXISTS idx_wo_logs_user ON workout_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_weight_hist_user ON weight_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_prof_user ON professional_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_prof_status ON professional_profiles(status);
+CREATE INDEX IF NOT EXISTS idx_pc_prof ON professional_clients(professional_id);
+CREATE INDEX IF NOT EXISTS idx_pc_client ON professional_clients(client_id);
+CREATE INDEX IF NOT EXISTS idx_msg_sender ON messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_msg_receiver ON messages(receiver_id);
+
