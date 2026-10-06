@@ -25,8 +25,8 @@ Para assegurar a confiabilidade, robustez e conformidade acadêmica com a Engenh
 
 ### 2.1. Status da Execução
 * **Arquivos de Teste:** 12 arquivos (`*.spec.ts`)
-* **Total de Testes:** 60 testes aprovados (100% de sucesso)
-* **Tempo Total de Execução:** ~15.4 segundos
+* **Total de Testes:** 61 testes aprovados (100% de sucesso)
+* **Tempo Total de Execução:** ~27.0 segundos
 * **Falhas / Erros:** 0 falhas
 
 ### 2.2. Cobertura de Código Global (`Vitest Coverage`)
@@ -103,6 +103,7 @@ Testa isoladamente as regras matemáticas e biomédicas:
 * **TEST-LOG-002**: **Teste Crítico RN24 (Imutabilidade do Histórico)**: Ao excluir ou alterar a rotina de treino original, o log histórico de execução permanece intacto e acessível.
 * **TEST-SEC-004**: Proteção IDOR em rotinas de treino e registros de execução (RN14).
 * **TEST-WORK-006**: Geração de proposta assistida de treino com exercícios reais do catálogo oficial e status ativo.
+* **TEST-WORK-007**: Geração de múltiplas opções de treino completo (Treino A, Treino B, Treino C) a partir dos grupamentos musculares selecionados e aplicação da sugestão escolhida pelo usuário.
 
 ---
 

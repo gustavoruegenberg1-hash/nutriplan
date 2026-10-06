@@ -279,4 +279,47 @@ describe('WorkoutsService (Módulo de Treinos, Exercícios e Logs Históricos)',
     expect(suggestion.exercises[0].exercise).toBeDefined();
     expect(suggestion.exercises[0].exercise?.name).toBe(suggestion.exercises[0].name);
   });
+
+  it('TEST-WORK-007: deve gerar múltiplas opções de treino completo (Treino A, B, C) e aplicar a sugestão escolhida pelo usuário', async () => {
+    // 1. Gera múltiplas opções com Peito e Tríceps
+    const res = await workoutsService.generateMultipleSuggestions(userAId, {
+      muscleGroups: ['Peito', 'Tríceps'],
+      goal: 'Hipertrofia',
+      level: 'INTERMEDIATE',
+      durationMin: 50,
+    });
+
+    expect(res.suggestions).toBeDefined();
+    expect(res.suggestions.length).toBe(3); // Treino A, Treino B, Treino C
+    expect(res.suggestions[0].name).toContain('Treino A');
+    expect(res.suggestions[1].name).toContain('Treino B');
+    expect(res.suggestions[2].name).toContain('Treino C');
+
+    // Cada opção deve conter exercícios reais do catálogo
+    for (const opt of res.suggestions) {
+      expect(opt.exercises.length).toBeGreaterThanOrEqual(4);
+      expect(opt.exercises.every((e) => ['CHEST', 'TRICEPS'].includes(e.muscleGroup))).toBe(true);
+      expect(opt.splitName).toBeDefined();
+    }
+
+    // 2. Usuário escolhe especificamente a Opção B
+    const chosen = res.suggestions[1];
+    const activated = await workoutsService.applyChosenSuggestion(userAId, {
+      name: chosen.name,
+      splitName: chosen.splitName,
+      estimatedDurationMin: chosen.estimatedDurationMin,
+      description: chosen.description,
+      exercises: chosen.exercises,
+    });
+
+    expect(activated).toBeDefined();
+    expect(activated.name).toBe(chosen.name);
+    expect(activated.isActive).toBe(true);
+    expect(activated.exercises.length).toBe(chosen.exercises.length);
+
+    // Confirma que a nova rotina está ativa no banco
+    const userWorkouts = await workoutsService.listUserWorkouts(userAId);
+    const activeOne = userWorkouts.find((w) => w.isActive);
+    expect(activeOne?.id).toBe(activated.id);
+  });
 });

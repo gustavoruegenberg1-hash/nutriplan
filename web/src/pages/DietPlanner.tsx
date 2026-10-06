@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { foodService } from '../services/foodService';
 import type { FoodItem } from '../types';
+import { formatFriendlyName } from '../utils/formatters';
 import {
   UtensilsCrossed,
   Plus,
@@ -640,7 +641,7 @@ export const DietPlanner: React.FC = () => {
                       : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
                   }`}
                 >
-                  {d.name} {d.isActive && '• Ativa'}
+                  {formatFriendlyName(d.name)} {d.isActive && '• Ativa'}
                 </button>
               ))}
             </div>
@@ -674,7 +675,7 @@ export const DietPlanner: React.FC = () => {
               <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                   <div>
-                    <h2 className="text-xl font-bold text-white">{activeDiet.name}</h2>
+                    <h2 className="text-xl font-bold text-white">{formatFriendlyName(activeDiet.name)}</h2>
                     <p className="text-xs text-slate-400">{activeDiet.description || 'Plano nutricional diário'}</p>
                   </div>
                   <div className="text-sm font-extrabold text-emerald-400 flex items-center gap-1.5">
@@ -749,7 +750,7 @@ export const DietPlanner: React.FC = () => {
                   <div key={meal.id} className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="font-bold text-white text-base">{meal.name}</h4>
+                        <h4 className="font-bold text-white text-base">{formatFriendlyName(meal.name)}</h4>
                         <span className="text-xs text-slate-300 bg-slate-800 px-3 py-1 rounded-full font-medium">
                           {meal.totals.calories} kcal • {meal.totals.protein}g P • {meal.totals.carbs}g C • {meal.totals.fat}g G
                         </span>
@@ -1667,13 +1668,15 @@ export const DietPlanner: React.FC = () => {
                       <div className="shrink-0 pl-1">
                         <button
                           type="button"
-                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
+                          aria-label={isSelected ? 'Alimento selecionado' : 'Selecionar alimento'}
+                          title={isSelected ? 'Alimento selecionado' : 'Selecionar alimento'}
+                          className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl font-extrabold text-base flex items-center justify-center transition shadow-sm ${
                             isSelected
-                              ? 'bg-emerald-500 text-slate-950'
-                              : 'bg-slate-700 hover:bg-emerald-600 hover:text-slate-950 text-slate-200'
+                              ? 'bg-emerald-500 text-slate-950 shadow-emerald-500/20'
+                              : 'bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-slate-200 border border-slate-700'
                           }`}
                         >
-                          {isSelected ? 'Selecionado' : 'Selecionar'}
+                          {isSelected ? '✓' : '+'}
                         </button>
                       </div>
                     </div>

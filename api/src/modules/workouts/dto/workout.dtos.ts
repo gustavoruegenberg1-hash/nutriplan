@@ -134,3 +134,68 @@ export class CreateWorkoutLogDto {
   @IsArray()
   exercises!: LogExerciseItemDto[];
 }
+
+export class GenerateMultipleSuggestionsDto {
+  @IsOptional()
+  @IsArray()
+  muscleGroups?: string[];
+
+  @IsOptional()
+  @IsString()
+  goal?: string;
+
+  @IsOptional()
+  @IsString()
+  level?: string;
+
+  @IsOptional()
+  @IsInt()
+  durationMin?: number;
+}
+
+export class ApplySuggestionExerciseDto {
+  @IsNotEmpty()
+  @IsString()
+  exerciseId!: string;
+
+  @IsOptional()
+  @IsInt()
+  sets?: number;
+
+  @IsOptional()
+  @IsInt()
+  reps?: number;
+
+  @IsOptional()
+  @IsNumber()
+  weightKg?: number;
+
+  @IsOptional()
+  @IsInt()
+  restSeconds?: number;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+export class ApplyChosenSuggestionDto {
+  @IsNotEmpty()
+  @IsString()
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  splitName?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsInt()
+  estimatedDurationMin?: number;
+
+  @IsArray()
+  exercises!: ApplySuggestionExerciseDto[];
+}

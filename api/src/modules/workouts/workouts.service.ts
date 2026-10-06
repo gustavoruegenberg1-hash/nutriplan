@@ -72,6 +72,70 @@ export interface WorkoutLogEntity {
   createdAt: string;
 }
 
+export const normalizeMuscleGroup = (m: string): string => {
+  const norm = m.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const map: Record<string, string> = {
+    PEITO: 'CHEST',
+    COSTAS: 'BACK',
+    OMBROS: 'SHOULDERS',
+    OMBRO: 'SHOULDERS',
+    BICEPS: 'BICEPS',
+    TRICEPS: 'TRICEPS',
+    ABDOMEN: 'ABS',
+    ABDOMINAL: 'ABS',
+    QUADRICEPS: 'QUADRICEPS',
+    POSTERIOR: 'HAMSTRINGS',
+    'POSTERIOR DE COXA': 'HAMSTRINGS',
+    GLUTEOS: 'GLUTES',
+    GLUTEO: 'GLUTES',
+    PANTURRILHAS: 'CALVES',
+    PANTURRILHA: 'CALVES',
+    ANTEBRACOS: 'FOREARMS',
+    ANTEBRACO: 'FOREARMS',
+    'CORPO INTEIRO': 'FULL_BODY',
+  };
+  return map[norm] || norm;
+};
+
+export const MUSCLE_PT_MAP: Record<string, string> = {
+  CHEST: 'Peito',
+  BACK: 'Costas',
+  SHOULDERS: 'Ombros',
+  BICEPS: 'Bíceps',
+  TRICEPS: 'Tríceps',
+  ABS: 'Abdômen',
+  QUADRICEPS: 'Quadríceps',
+  HAMSTRINGS: 'Posterior de Coxa',
+  GLUTES: 'Glúteos',
+  CALVES: 'Panturrilhas',
+  FOREARMS: 'Antebraços',
+  FULL_BODY: 'Corpo Inteiro',
+  CARDIO: 'Cardio',
+};
+
+export interface WorkoutSuggestionItem {
+  exerciseId: string;
+  exerciseName: string;
+  muscleGroup: string;
+  equipment: string | null;
+  sets: number;
+  reps: number;
+  weightKg: number;
+  restSeconds: number;
+  notes: string;
+}
+
+export interface WorkoutSuggestionOption {
+  id: string;
+  name: string;
+  splitName: string;
+  subtitle: string;
+  description: string;
+  estimatedDurationMin: number;
+  muscleGroups: string[];
+  exercises: WorkoutSuggestionItem[];
+}
+
 @Injectable()
 export class WorkoutsService {
   constructor(private readonly db: DatabaseService) {}
@@ -97,31 +161,6 @@ export class WorkoutsService {
       sqlParams.push(q, q);
     }
 
-    const normalizeMuscle = (m: string): string => {
-      const norm = m.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      const map: Record<string, string> = {
-        PEITO: 'CHEST',
-        COSTAS: 'BACK',
-        OMBROS: 'SHOULDERS',
-        OMBRO: 'SHOULDERS',
-        BICEPS: 'BICEPS',
-        TRICEPS: 'TRICEPS',
-        ABDOMEN: 'ABS',
-        ABDOMINAL: 'ABS',
-        QUADRICEPS: 'QUADRICEPS',
-        POSTERIOR: 'HAMSTRINGS',
-        'POSTERIOR DE COXA': 'HAMSTRINGS',
-        GLUTEOS: 'GLUTES',
-        GLUTEO: 'GLUTES',
-        PANTURRILHAS: 'CALVES',
-        PANTURRILHA: 'CALVES',
-        ANTEBRACOS: 'FOREARMS',
-        ANTEBRACO: 'FOREARMS',
-        'CORPO INTEIRO': 'FULL_BODY',
-      };
-      return map[norm] || norm;
-    };
-
     const rawGroups: string[] = [];
     if (params.muscleGroups && Array.isArray(params.muscleGroups)) {
       rawGroups.push(...params.muscleGroups);
@@ -130,7 +169,7 @@ export class WorkoutsService {
     }
 
     const cleanGroups = rawGroups
-      .map((g) => normalizeMuscle(g))
+      .map((g) => normalizeMuscleGroup(g))
       .filter((g) => g && g !== 'ALL');
 
     if (cleanGroups.length > 0) {
@@ -623,6 +662,235 @@ export class WorkoutsService {
         weightKg: dto.level === 'BEGINNER' ? 10 : 25,
         restSeconds: dto.goal === 'Força' ? 90 : 60,
         notes: `Foco em execução controlada.`,
+      });
+    }
+
+    return this.getWorkoutById(userId, workout.id);
+  }
+
+  // 5. Geração de Múltiplas Sugestões de Treino Completo (Treino A, B, C)
+  async generateMultipleSuggestions(
+    userId: string,
+    dto: {
+      muscleGroups?: string[];
+      goal?: string;
+      level?: string;
+      durationMin?: number;
+    },
+  ): Promise<{ suggestions: WorkoutSuggestionOption[] }> {
+    const rawGroups: string[] = dto.muscleGroups && Array.isArray(dto.muscleGroups) ? dto.muscleGroups : [];
+    const normalized = rawGroups.map(normalizeMuscleGroup).filter((g) => g && g !== 'ALL');
+
+    let targetMuscles: string[] = [];
+    if (normalized.length === 0 || normalized.includes('FULL_BODY')) {
+      targetMuscles = ['CHEST', 'BACK', 'QUADRICEPS', 'SHOULDERS', 'ABS'];
+    } else {
+      targetMuscles = Array.from(new Set(normalized));
+    }
+
+    const muscleLabels = targetMuscles.map((m) => MUSCLE_PT_MAP[m] || m);
+    const muscleTitle = muscleLabels.join(' + ');
+
+    // Consulta exercícios ativos no catálogo SQLite para cada grupamento alvo
+    const exercisesByMuscle: Record<string, any[]> = {};
+    for (const m of targetMuscles) {
+      const list = this.db.query(
+        'SELECT * FROM exercises WHERE muscle_group = ? AND is_active = 1 ORDER BY rowid ASC',
+        [m]
+      );
+      exercisesByMuscle[m] = list;
+    }
+
+    const duration = dto.durationMin || 50;
+    const sets = dto.level === 'ADVANCED' ? 4 : 3;
+    const reps = dto.goal === 'Força' ? 6 : dto.goal === 'Resistência' ? 15 : 10;
+    const weight = dto.level === 'BEGINNER' ? 10 : 20;
+
+    const optionsMeta = [
+      {
+        id: 'TREINO_A',
+        splitName: 'Treino A',
+        name: `Treino A — ${muscleTitle}`,
+        subtitle: 'Foco em Força e Movimentos Compostos',
+        description: `Rotina equilibrada priorizando exercícios multiarticulares clássicos para ${muscleTitle}.`,
+        offset: 0,
+      },
+      {
+        id: 'TREINO_B',
+        splitName: 'Treino B',
+        name: `Treino B — ${muscleTitle}`,
+        subtitle: 'Foco em Volume e Variação de Ângulos',
+        description: `Combinação variada com foco em amplitude articular e estímulo progressivo para ${muscleTitle}.`,
+        offset: 2,
+      },
+      {
+        id: 'TREINO_C',
+        splitName: 'Treino C',
+        name: `Treino C — ${muscleTitle}`,
+        subtitle: 'Foco em Isolamento e Tensão Mecânica',
+        description: `Estrutura voltada para estresse metabólico, máquinas e exercícios de isolamento para ${muscleTitle}.`,
+        offset: 4,
+      },
+    ];
+
+    const suggestions: WorkoutSuggestionOption[] = [];
+
+    for (const opt of optionsMeta) {
+      const selectedExercises: WorkoutSuggestionItem[] = [];
+
+      if (targetMuscles.length === 1) {
+        const m = targetMuscles[0];
+        const list = exercisesByMuscle[m] || [];
+        const count = Math.min(5, list.length);
+        for (let i = 0; i < count; i++) {
+          const ex = list[(i + opt.offset) % list.length];
+          selectedExercises.push({
+            exerciseId: ex.id,
+            exerciseName: ex.name,
+            muscleGroup: ex.muscle_group,
+            equipment: ex.equipment,
+            sets,
+            reps,
+            weightKg: ex.equipment === 'Peso Corporal' ? 0 : weight,
+            restSeconds: 60,
+            notes: 'Foco em execução controlada e postura correta.',
+          });
+        }
+      } else if (targetMuscles.length === 2) {
+        // 3 exercícios para o primeiro músculo, 2 para o segundo (total 5)
+        const counts = [3, 2];
+        targetMuscles.forEach((m, mIdx) => {
+          const list = exercisesByMuscle[m] || [];
+          const needed = counts[mIdx] || 2;
+          for (let i = 0; i < needed; i++) {
+            if (list.length > 0) {
+              const ex = list[(i + opt.offset) % list.length];
+              selectedExercises.push({
+                exerciseId: ex.id,
+                exerciseName: ex.name,
+                muscleGroup: ex.muscle_group,
+                equipment: ex.equipment,
+                sets,
+                reps,
+                weightKg: ex.equipment === 'Peso Corporal' ? 0 : weight,
+                restSeconds: 60,
+                notes: 'Foco em execução controlada e postura correta.',
+              });
+            }
+          }
+        });
+      } else {
+        // 3 ou mais músculos: 1 a 2 por músculo (total 5-6)
+        const perMuscle = targetMuscles.length <= 4 ? 2 : 1;
+        targetMuscles.forEach((m) => {
+          const list = exercisesByMuscle[m] || [];
+          for (let i = 0; i < perMuscle; i++) {
+            if (list.length > 0) {
+              const ex = list[(i + opt.offset) % list.length];
+              selectedExercises.push({
+                exerciseId: ex.id,
+                exerciseName: ex.name,
+                muscleGroup: ex.muscle_group,
+                equipment: ex.equipment,
+                sets,
+                reps,
+                weightKg: ex.equipment === 'Peso Corporal' ? 0 : weight,
+                restSeconds: 60,
+                notes: 'Foco em execução controlada e postura correta.',
+              });
+            }
+          }
+        });
+      }
+
+      // Se nenhum exercício foi encontrado, seleciona do catálogo ativo
+      if (selectedExercises.length === 0) {
+        const fallback = this.db.query('SELECT * FROM exercises WHERE is_active = 1 LIMIT 5');
+        for (const ex of fallback) {
+          selectedExercises.push({
+            exerciseId: ex.id,
+            exerciseName: ex.name,
+            muscleGroup: ex.muscle_group,
+            equipment: ex.equipment,
+            sets,
+            reps,
+            weightKg: 15,
+            restSeconds: 60,
+            notes: 'Foco em execução controlada e postura correta.',
+          });
+        }
+      }
+
+      // Remove eventuais duplicidades na mesma opção
+      const uniqueExercises: WorkoutSuggestionItem[] = [];
+      const seenIds = new Set<string>();
+      for (const ex of selectedExercises) {
+        if (!seenIds.has(ex.exerciseId)) {
+          seenIds.add(ex.exerciseId);
+          uniqueExercises.push(ex);
+        }
+      }
+
+      suggestions.push({
+        id: opt.id,
+        name: opt.name,
+        splitName: opt.splitName,
+        subtitle: opt.subtitle,
+        description: opt.description,
+        estimatedDurationMin: duration,
+        muscleGroups: targetMuscles,
+        exercises: uniqueExercises,
+      });
+    }
+
+    return { suggestions };
+  }
+
+  // 6. Aplicação da Sugestão Escolhida pelo Usuário
+  async applyChosenSuggestion(
+    userId: string,
+    dto: {
+      name: string;
+      splitName?: string;
+      description?: string;
+      estimatedDurationMin?: number;
+      exercises: Array<{
+        exerciseId: string;
+        sets?: number;
+        reps?: number;
+        weightKg?: number;
+        restSeconds?: number;
+        notes?: string;
+      }>;
+    },
+  ): Promise<DetailedWorkout> {
+    if (!dto.name || !dto.name.trim()) {
+      throw new BadRequestException('O nome do treino é obrigatório.');
+    }
+    if (!dto.exercises || dto.exercises.length === 0) {
+      throw new BadRequestException('A rotina de treino deve conter pelo menos um exercício.');
+    }
+
+    // Desativa outros treinos do usuário para ativar a sugestão escolhida
+    this.db.run('UPDATE workouts SET is_active = 0 WHERE user_id = ?', [userId]);
+
+    const workout = await this.createWorkout(userId, {
+      name: dto.name,
+      splitName: dto.splitName || 'Treino Personalizado',
+      estimatedDurationMin: dto.estimatedDurationMin || 50,
+      description: dto.description || 'Rotina selecionada e configurada pelo usuário.',
+    });
+
+    for (let i = 0; i < dto.exercises.length; i++) {
+      const ex = dto.exercises[i];
+      await this.addExerciseToWorkout(userId, workout.id, {
+        exerciseId: ex.exerciseId,
+        orderIndex: i,
+        sets: ex.sets || 3,
+        reps: ex.reps || 10,
+        weightKg: ex.weightKg !== undefined ? ex.weightKg : 15,
+        restSeconds: ex.restSeconds || 60,
+        notes: ex.notes || 'Foco em boa execução e amplitude.',
       });
     }
 

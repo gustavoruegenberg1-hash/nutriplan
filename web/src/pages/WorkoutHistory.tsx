@@ -10,6 +10,8 @@ import {
   ChevronUp,
   ShieldCheck,
   TrendingUp,
+  AlertTriangle,
+  RotateCcw,
 } from 'lucide-react';
 
 interface LogExercise {
@@ -36,22 +38,27 @@ interface WorkoutLog {
 export const WorkoutHistory: React.FC = () => {
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const res = await api.get('/workout-logs');
-        setLogs(res.data);
-        if (res.data.length > 0) {
-          setExpandedLogId(res.data[0].id);
-        }
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false);
+  const fetchLogs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get('/workout-logs');
+      const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+      setLogs(items);
+      if (items.length > 0) {
+        setExpandedLogId(items[0].id);
       }
-    };
+    } catch {
+      setError('Não foi possível carregar seu histórico de treinos. Verifique sua conexão e tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchLogs();
   }, []);
 
@@ -82,7 +89,7 @@ export const WorkoutHistory: React.FC = () => {
             </h1>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1">
               <ShieldCheck size={12} />
-              RN24: Imutabilidade
+              <span>Registro Seguro</span>
             </span>
           </div>
           <p className="text-sm text-slate-400 mt-1">
@@ -99,24 +106,41 @@ export const WorkoutHistory: React.FC = () => {
         </Link>
       </div>
 
-      {/* Informativo de Integridade RN24 */}
+      {/* Informativo */}
       <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3 text-xs text-slate-400">
         <ShieldCheck size={18} className="text-emerald-400 shrink-0 mt-0.5" />
         <div>
-          <span className="font-semibold text-slate-300">Garantia de Rastreabilidade Acadêmica (RN24):</span> Toda execução registrada gera um snapshot isolado. Mesmo que a rotina original seja modificada ou excluída no futuro, seu histórico de esforço real permanece preservado e inalterado.
+          <span className="font-semibold text-slate-300">Histórico de Sessões:</span> Cada treino registrado guarda com precisão suas repetições, séries e cargas reais para você acompanhar sua evolução com clareza.
         </div>
       </div>
 
+      {/* Estado de Erro com Tentar Novamente */}
+      {error && (
+        <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle size={20} className="shrink-0 text-rose-400" />
+            <span className="text-sm">{error}</span>
+          </div>
+          <button
+            onClick={fetchLogs}
+            className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 transition shrink-0"
+          >
+            <RotateCcw size={14} />
+            <span>Tentar novamente</span>
+          </button>
+        </div>
+      )}
+
       {/* Lista de Sessões Registradas */}
       {loading ? (
-        <div className="py-16 text-center text-slate-400">
-          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          Carregando histórico de treinos...
+        <div className="py-16 text-center text-slate-400 space-y-3">
+          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm font-medium">Carregando seu histórico de treinos...</p>
         </div>
-      ) : logs.length === 0 ? (
+      ) : !error && logs.length === 0 ? (
         <div className="py-16 text-center space-y-4 bg-slate-900/40 rounded-2xl border border-dashed border-slate-800 p-8">
           <Calendar size={48} className="mx-auto text-slate-600" />
-          <h2 className="text-lg font-bold text-slate-200">Nenhum treino realizado ainda</h2>
+          <h2 className="text-lg font-bold text-slate-200">Você ainda não possui treinos realizados</h2>
           <p className="text-sm text-slate-400 max-w-md mx-auto">
             Quando você concluir um treino, use o botão "Registrar Execução" dentro da sua ficha para gravar as repetições e cargas feitas.
           </p>
@@ -127,7 +151,7 @@ export const WorkoutHistory: React.FC = () => {
             Ir para Minhas Fichas
           </Link>
         </div>
-      ) : (
+      ) : !error && (
         <div className="space-y-4">
           <div className="flex items-center justify-between text-xs text-slate-400 px-1">
             <span>Total de {logs.length} sessões registradas</span>
@@ -178,9 +202,12 @@ export const WorkoutHistory: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
+                    <div className="flex items-center justify-between sm:justify-end gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
                       <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
                         {log.exercises.length} {log.exercises.length === 1 ? 'exercício' : 'exercícios'}
+                      </span>
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        {log.exercises.reduce((acc, ex) => acc + (ex.setsCompleted || 0), 0)} séries concluídas
                       </span>
                       <button className="text-slate-400 hover:text-white p-1">
                         {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}

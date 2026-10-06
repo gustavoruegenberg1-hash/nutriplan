@@ -2,7 +2,61 @@
 
 Todas as alterações notáveis, correções de bugs, melhorias arquiteturais e refatorações realizadas no projeto NutriPlan v2 são documentadas neste arquivo.
 
-## [2026-10-06] - Refatoração: Otimização Numérica de Macros, Seleção Multimuscular de Treino, Taxonomia TACO em 2 Níveis e Navegação de Perfil
+## [2026-10-06] - Refatoração Completa: Montagem de Treino com Múltiplas Sugestões, Timer de Execução e Descanso em Tempo Real, Correção do Histórico e Limpeza de Termos Técnicos
+
+### Tipo
+Novas Funcionalidades / Correção Crítica de Interface / UX / Acessibilidade
+
+### Alterações Principais
+1. **Montagem de Treino por Grupo Muscular e Múltiplas Sugestões**:
+   - Pergunta inicial destacada: *"Qual grupo muscular você deseja treinar?"* com 12 chips interativos multisseleção (Peito, Costas, Ombros, Bíceps, Tríceps, Abdômen, Quadríceps, Posterior de coxa, Glúteos, Panturrilhas, Antebraços, Corpo inteiro).
+   - Geração de 3 rotinas completas e distintas (Treino A, Treino B, Treino C) com exercícios reais do banco de dados SQLite (`/workouts/generate-suggestions`).
+   - Visualização em cards estilo sanfona com detalhes dos exercícios (séries, repetições, carga, descanso) e escolha explícita via botão `[ ESCOLHER ESTE TREINO ]` (`/workouts/apply-suggestion`), sem auto-seleção arbitrária da primeira opção.
+   - Novo teste automatizado `TEST-WORK-007` adicionado à suíte de testes com 100% de sucesso.
+
+2. **Cronômetro e Controle de Execução de Treino em Tempo Real**:
+   - Cada exercício da rotina ativa possui rastreador de séries dedicado (ex: Série 1 de 4).
+   - Cronômetro dinâmico em tempo real rodando no card ao clicar em `[ INICIAR ]` (`Tempo de Execução: MM:SS`).
+   - Ao clicar em `[ FINALIZAR SÉRIE ]`, o tempo de execução para e o cronômetro de descanso inicia imediatamente (`Descanso: MM:SS`).
+   - Botão para avançar para a próxima série (`[ Iniciar Série X ]`).
+   - O card do exercício só muda de cor e recebe o badge `✓ Concluído` após todas as séries prescritas serem finalizadas.
+   - Gerenciamento único e centralizado de intervalo via `useEffect`, impedindo timers duplicados ou ocultos.
+   - Persistência contínua do estado da sessão no `localStorage` (`nutriplan_workout_session_{workoutId}`), sobrevivendo a recargas da página.
+
+3. **Correção Definitiva da Página e Aba de Histórico de Treinos**:
+   - Correção da causa raiz da tela em branco (`logs.map is not a function`), desempacotando de forma resiliente tanto arrays diretos quanto objetos paginados `{ items: [...], total }`.
+   - Implementação dos 4 estados obrigatórios: Carregando, Histórico Encontrado, Histórico Vazio e Erro com botão `[ TENTAR NOVAMENTE ]`.
+   - Remoção de códigos técnicos da interface do histórico.
+
+4. **Remoção de Termos Técnicos e Códigos Internos (RN20-RN24)**:
+   - Substituição do card `RN20–RN24 em vigor` pelo indicador intuitivo `Volume Total` (total de séries somadas da rotina).
+   - Remoção de menções a `(RN20)` e `(RN24)` nos títulos, cabeçalhos, formulários de registro e feedbacks ao usuário.
+
+5. **Apresentação Amigável de Nomes e Tradução na Dieta**:
+   - Criação do utilitário `formatFriendlyName` que traduz termos em inglês (`high_protein`, `meal_plan`, `breakfast_option`, `LOSE_WEIGHT`) e remove *underscores* (`_`), substituindo-os por espaços e nomes amigáveis em português.
+   - Localização no backend de nomes de dietas padrão geradas automaticamente (*"Sugestão NutriPlan — Emagrecimento/Hipertrofia/Manutenção"*).
+
+6. **Botões Compactos de Ação (+) Touch-Friendly**:
+   - Substituição de botões textuais repetitivos ("Adicionar" / "Selecionar") por botões compactos circulares/arredondados com símbolo `+` e feedback imediato `✓`.
+   - Alvo tátil conforme diretrizes de acessibilidade ($\ge 40\times 40$px) com atributo `aria-label` descritivo para leitores de tela em adição de exercícios e alimentos.
+
+### Arquivos Modificados
+- `api/src/modules/workouts/dto/workout.dtos.ts`
+- `api/src/modules/workouts/workouts.service.ts`
+- `api/src/modules/workouts/workouts.controller.ts`
+- `api/src/modules/workouts/workouts.service.spec.ts`
+- `api/src/modules/diets/diets.service.ts`
+- `web/src/utils/formatters.ts`
+- `web/src/pages/WorkoutPlanner.tsx`
+- `web/src/pages/WorkoutHistory.tsx`
+- `web/src/pages/DietPlanner.tsx`
+- `web/src/App.tsx`
+- `TESTES.md`
+- `CHANGELOG.md`
+
+---
+
+
 
 ### Tipo
 Melhoria de Usabilidade / Precisão Numérica / Refatoração Arquitetural / Mobile UX

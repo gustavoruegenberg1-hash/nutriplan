@@ -5,6 +5,8 @@ import {
   AddWorkoutExerciseDto,
   UpdateWorkoutExerciseDto,
   CreateWorkoutLogDto,
+  GenerateMultipleSuggestionsDto,
+  ApplyChosenSuggestionDto,
 } from './dto/workout.dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, CurrentUserPayload } from '../auth/decorators/current-user.decorator';
@@ -67,6 +69,24 @@ export class WorkoutsController {
     },
   ) {
     return this.workoutsService.generateSuggestion(user.userId, dto);
+  }
+
+  @Post('workouts/generate-suggestions')
+  @UseGuards(JwtAuthGuard)
+  async generateSuggestions(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() dto: GenerateMultipleSuggestionsDto,
+  ) {
+    return this.workoutsService.generateMultipleSuggestions(user.userId, dto);
+  }
+
+  @Post('workouts/apply-suggestion')
+  @UseGuards(JwtAuthGuard)
+  async applySuggestion(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() dto: ApplyChosenSuggestionDto,
+  ) {
+    return this.workoutsService.applyChosenSuggestion(user.userId, dto);
   }
 
   @Get('workouts/:id')

@@ -10,6 +10,7 @@ import { RegisterProfessional } from './pages/RegisterProfessional';
 import { Dashboard } from './pages/Dashboard';
 import { DietPlanner } from './pages/DietPlanner';
 import { WorkoutPlanner } from './pages/WorkoutPlanner';
+import { WorkoutHistory } from './pages/WorkoutHistory';
 import { Profile } from './pages/Profile';
 import { ProfessionalDashboard } from './pages/ProfessionalDashboard';
 import { ProfessionalClients } from './pages/ProfessionalClients';
@@ -50,7 +51,7 @@ export default function App() {
               {/* Redirecionamentos semânticos retrocompatíveis para as abas condensadas */}
               <Route path="/foods" element={<Navigate to="/diet?tab=taco" replace />} />
               <Route path="/exercises" element={<Navigate to="/workouts?tab=exercises" replace />} />
-              <Route path="/history" element={<Navigate to="/workouts?tab=history" replace />} />
+              <Route path="/history" element={<WorkoutHistory />} />
               <Route path="/evolution" element={<Navigate to="/profile?tab=evolution" replace />} />
 
               {/* Rotas de Profissionais */}

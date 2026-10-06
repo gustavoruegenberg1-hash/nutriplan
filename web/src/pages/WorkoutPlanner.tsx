@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   Search,
   X,
-  ShieldCheck,
   Sparkles,
   ArrowRight,
   ArrowLeft,
@@ -24,8 +23,13 @@ import {
   UserCheck,
   Users,
   PhoneCall,
+  Clock,
+  Play,
+  Square,
+  RotateCcw,
 } from 'lucide-react';
 import { ProfessionalContactModal } from '../components/ProfessionalContactModal';
+import { formatFriendlyName, formatTimer } from '../utils/formatters';
 
 interface ExerciseItem {
   id: string;
@@ -122,17 +126,35 @@ export const WorkoutPlanner: React.FC = () => {
   const [trainerContactId, setTrainerContactId] = useState<string | null>(null);
 
   // -------------------------------------------------------------
-  // ESTADOS DO WIZARD DE MONTAGEM (8 ETAPAS)
   // -------------------------------------------------------------
-  const [wizardStarted, setWizardStarted] = useState(false);
-  const [wizardStep, setWizardStep] = useState(1);
+  // ESTADOS DO WIZARD DE MONTAGEM E SUGESTÕES
+  // -------------------------------------------------------------
+  const [wizardMuscleGroups, setWizardMuscleGroups] = useState<string[]>(['Peito', 'Tríceps']);
+  const [wizardSuggestions, setWizardSuggestions] = useState<any[]>([]);
+  const [expandedSuggestionId, setExpandedSuggestionId] = useState<string | null>(null);
+  const [applyingSuggestionId, setApplyingSuggestionId] = useState<string | null>(null);
   const [wizardGoal, setWizardGoal] = useState<'HYPERTROPHY' | 'STRENGTH' | 'WEIGHT_LOSS' | 'ENDURANCE'>('HYPERTROPHY');
   const [wizardLevel, setWizardLevel] = useState<'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'>('INTERMEDIATE');
-  const [wizardFrequency, setWizardFrequency] = useState<number>(4);
-  const [wizardDuration, setWizardDuration] = useState<number>(60);
+  const [wizardDuration, setWizardDuration] = useState<number>(50);
   const [wizardEquipment, setWizardEquipment] = useState<'FULL_GYM' | 'BASIC' | 'BODYWEIGHT'>('FULL_GYM');
-  const [wizardLimitation, setWizardLimitation] = useState<'NONE' | 'LOWER_BACK' | 'KNEE' | 'SHOULDER'>('NONE');
   const [wizardGenerating, setWizardGenerating] = useState(false);
+
+  // -------------------------------------------------------------
+  // ESTADOS DO CONTROLE DE EXECUÇÃO COM TIMER E SÉRIES
+  // -------------------------------------------------------------
+  const [executionMap, setExecutionMap] = useState<
+    Record<
+      string,
+      {
+        currentSet: number;
+        status: 'idle' | 'running' | 'resting' | 'completed';
+        executionTimer: number;
+        restTimer: number;
+        completedSets: number;
+      }
+    >
+  >({});
+  const [activeTimerExerciseId, setActiveTimerExerciseId] = useState<string | null>(null);
 
   // -------------------------------------------------------------
   // ESTADOS DO REGISTRADOR DE TREINO (LOGGER)
@@ -157,6 +179,7 @@ export const WorkoutPlanner: React.FC = () => {
   // -------------------------------------------------------------
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
   // -------------------------------------------------------------
@@ -267,6 +290,232 @@ export const WorkoutPlanner: React.FC = () => {
       setAssociatedTrainer(null);
     } catch {
       setAssociatedTrainer(null);
+    }
+  };
+
+  // Sincronizar e recuperar sessão de execução do localStorage
+  useEffect(() => {
+    if (!activeWorkout) return;
+    const storageKey = `nutriplan_workout_session_${activeWorkout.id}`;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        setExecutionMap(JSON.parse(saved));
+        return;
+      }
+    } catch {}
+
+    const initialMap: Record<string, any> = {};
+    activeWorkout.exercises?.forEach((ex) => {
+      initialMap[ex.id] = {
+        currentSet: 1,
+        status: 'idle',
+        executionTimer: 0,
+        restTimer: 0,
+        completedSets: 0,
+      };
+    });
+    setExecutionMap(initialMap);
+  }, [activeWorkout?.id]);
+
+  useEffect(() => {
+    if (!activeWorkout || Object.keys(executionMap).length === 0) return;
+    const storageKey = `nutriplan_workout_session_${activeWorkout.id}`;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(executionMap));
+    } catch {}
+  }, [executionMap, activeWorkout?.id]);
+
+  // Cronômetro centralizado único em tempo real (evita timers duplicados ou ocultos)
+  useEffect(() => {
+    if (!activeTimerExerciseId) return;
+
+    const interval = setInterval(() => {
+      setExecutionMap((prev) => {
+        const current = prev[activeTimerExerciseId];
+        if (!current) return prev;
+        if (current.status === 'running') {
+          return {
+            ...prev,
+            [activeTimerExerciseId]: {
+              ...current,
+              executionTimer: current.executionTimer + 1,
+            },
+          };
+        } else if (current.status === 'resting') {
+          return {
+            ...prev,
+            [activeTimerExerciseId]: {
+              ...current,
+              restTimer: current.restTimer + 1,
+            },
+          };
+        }
+        return prev;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeTimerExerciseId]);
+
+  const handleStartSet = (exerciseId: string) => {
+    setActiveTimerExerciseId(exerciseId);
+    setExecutionMap((prev) => {
+      const curr = prev[exerciseId] || {
+        currentSet: 1,
+        status: 'idle',
+        executionTimer: 0,
+        restTimer: 0,
+        completedSets: 0,
+      };
+      return {
+        ...prev,
+        [exerciseId]: {
+          ...curr,
+          status: 'running',
+          executionTimer: 0,
+        },
+      };
+    });
+  };
+
+  const handleFinishSet = (exerciseId: string, totalSets: number) => {
+    setExecutionMap((prev) => {
+      const curr = prev[exerciseId];
+      if (!curr) return prev;
+      const nextCompleted = curr.completedSets + 1;
+      const isCompleted = nextCompleted >= totalSets;
+
+      if (isCompleted) {
+        setActiveTimerExerciseId(null);
+        return {
+          ...prev,
+          [exerciseId]: {
+            ...curr,
+            completedSets: nextCompleted,
+            status: 'completed',
+            executionTimer: 0,
+            restTimer: 0,
+          },
+        };
+      }
+
+      return {
+        ...prev,
+        [exerciseId]: {
+          ...curr,
+          completedSets: nextCompleted,
+          currentSet: curr.currentSet + 1,
+          status: 'resting',
+          restTimer: 0,
+        },
+      };
+    });
+  };
+
+  const handleProceedNextSet = (exerciseId: string) => {
+    setActiveTimerExerciseId(exerciseId);
+    setExecutionMap((prev) => {
+      const curr = prev[exerciseId];
+      if (!curr) return prev;
+      return {
+        ...prev,
+        [exerciseId]: {
+          ...curr,
+          status: 'running',
+          executionTimer: 0,
+          restTimer: 0,
+        },
+      };
+    });
+  };
+
+  const handleResetExercise = (exerciseId: string) => {
+    if (activeTimerExerciseId === exerciseId) {
+      setActiveTimerExerciseId(null);
+    }
+    setExecutionMap((prev) => ({
+      ...prev,
+      [exerciseId]: {
+        currentSet: 1,
+        status: 'idle',
+        executionTimer: 0,
+        restTimer: 0,
+        completedSets: 0,
+      },
+    }));
+  };
+
+  const handleToggleWizardMuscle = (muscleName: string) => {
+    setWizardMuscleGroups((prev) => {
+      if (muscleName === 'Corpo inteiro') {
+        return prev.includes('Corpo inteiro') ? [] : ['Corpo inteiro'];
+      }
+      const withoutFullBody = prev.filter((m) => m !== 'Corpo inteiro');
+      if (withoutFullBody.includes(muscleName)) {
+        return withoutFullBody.filter((m) => m !== muscleName);
+      } else {
+        return [...withoutFullBody, muscleName];
+      }
+    });
+    setWizardWorkoutError(null);
+  };
+
+  const handleGenerateSuggestions = async () => {
+    if (wizardMuscleGroups.length === 0) {
+      setWizardWorkoutError('Selecione pelo menos um grupo muscular para gerar opções de treino.');
+      return;
+    }
+    setWizardGenerating(true);
+    setWizardWorkoutError(null);
+    try {
+      const res = await api.post('/workouts/generate-suggestions', {
+        muscleGroups: wizardMuscleGroups,
+        goal: wizardGoal,
+        level: wizardLevel,
+        availableTimeMin: wizardDuration,
+        equipment: wizardEquipment,
+      });
+      const suggestions = res.data?.suggestions || [];
+      setWizardSuggestions(suggestions);
+      if (suggestions.length > 0) {
+        setExpandedSuggestionId(suggestions[0].suggestionId);
+      }
+    } catch (err: any) {
+      setWizardWorkoutError(
+        err.response?.data?.message || 'Falha ao gerar sugestões de treino. Tente novamente.'
+      );
+    } finally {
+      setWizardGenerating(false);
+    }
+  };
+
+  const handleApplyChosenSuggestion = async (suggestion: any) => {
+    setApplyingSuggestionId(suggestion.suggestionId);
+    try {
+      const res = await api.post('/workouts/apply-suggestion', {
+        suggestionId: suggestion.suggestionId,
+        name: suggestion.name,
+        splitName: suggestion.splitName,
+        estimatedDurationMin: suggestion.estimatedDurationMin,
+        description: suggestion.description,
+        exercises: suggestion.exercises,
+      });
+      await loadWorkouts();
+      setActiveWorkout(res.data);
+      setActiveTab('current');
+      setWizardSuggestions([]);
+      setFeedback({
+        type: 'success',
+        message: `Treino "${suggestion.name}" ativado com sucesso como sua rotina atual!`,
+      });
+    } catch (err: any) {
+      setFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Falha ao aplicar treino selecionado.',
+      });
+    } finally {
+      setApplyingSuggestionId(null);
     }
   };
 
@@ -445,62 +694,7 @@ export const WorkoutPlanner: React.FC = () => {
   };
 
   // -------------------------------------------------------------
-  // LÓGICA DO WIZARD DE TREINO (GERAÇÃO ASSISTIDA)
-  // -------------------------------------------------------------
-  const validateWorkoutWizardData = (): string | null => {
-    if (!wizardGoal) return 'O objetivo de treinamento deve ser selecionado.';
-    if (!wizardLevel) return 'O nível de experiência deve ser selecionado.';
-    if (!wizardFrequency || wizardFrequency < 1 || wizardFrequency > 7) {
-      return 'A frequência semanal de treinos deve ser entre 1 e 7 dias.';
-    }
-    if (!wizardDuration || wizardDuration < 15 || wizardDuration > 180) {
-      return 'A duração estimada por sessão deve ser entre 15 e 180 minutos.';
-    }
-    return null;
-  };
-
-  const handleFinishWizard = async () => {
-    const valError = validateWorkoutWizardData();
-    if (valError) {
-      setWizardWorkoutError(valError);
-      setFeedback({ type: 'error', message: valError });
-      return;
-    }
-
-    setWizardGenerating(true);
-    setWizardWorkoutError(null);
-    setFeedback(null);
-    try {
-      const res = await api.post('/workouts/generate-suggestion', {
-        goal: wizardGoal,
-        daysPerWeek: wizardFrequency,
-        level: wizardLevel,
-        durationMin: wizardDuration,
-        availableTimeMin: wizardDuration,
-        equipment: wizardEquipment,
-      });
-      await loadWorkouts();
-      setActiveWorkout(res.data);
-      setActiveTab('current');
-      setWizardStarted(false);
-      setWizardStep(1);
-      setFeedback({
-        type: 'success',
-        message: 'Seu treino foi criado com sucesso! Exercícios organizados com base no seu objetivo.',
-      });
-    } catch (err: any) {
-      const msg =
-        err.response?.data?.message ||
-        'Não foi possível gerar seu treino. Verifique os dados e tente novamente.';
-      setWizardWorkoutError(msg);
-      setFeedback({ type: 'error', message: msg });
-    } finally {
-      setWizardGenerating(false);
-    }
-  };
-
-  // -------------------------------------------------------------
-  // LÓGICA DO LOGGER DE EXECUÇÃO (RN24)
+  // LÓGICA DO LOGGER DE EXECUÇÃO
   // -------------------------------------------------------------
   const prepareLoggerFromActiveWorkout = () => {
     if (!activeWorkout || !activeWorkout.exercises) return;
@@ -541,7 +735,7 @@ export const WorkoutPlanner: React.FC = () => {
         })),
       });
 
-      setFeedback({ type: 'success', message: 'Treino registrado no histórico com sucesso (RN24)!' });
+      setFeedback({ type: 'success', message: 'Treino registrado no histórico com sucesso!' });
       setActiveTab('history');
       loadHistory();
     } catch {
@@ -556,12 +750,16 @@ export const WorkoutPlanner: React.FC = () => {
   // -------------------------------------------------------------
   const loadHistory = async () => {
     setLoadingHistory(true);
+    setHistoryError(null);
     try {
       const res = await api.get('/workout-logs');
-      setHistoryLogs(res.data);
-      if (res.data.length > 0) setExpandedLogId(res.data[0].id);
-    } catch {
-      // ignore
+      const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+      setHistoryLogs(items);
+      if (items.length > 0) setExpandedLogId(items[0].id);
+    } catch (err: any) {
+      setHistoryError(
+        err.response?.data?.message || 'Não foi possível carregar o histórico de treinos. Tente novamente.'
+      );
     } finally {
       setLoadingHistory(false);
     }
@@ -640,7 +838,7 @@ export const WorkoutPlanner: React.FC = () => {
             <span>Treinamento & Prescrição de Exercícios</span>
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Programação de treinos, controle de sobrecarga progressiva e histórico de execução (RN24).
+            Programação de treinos, controle de sobrecarga progressiva e histórico de execução.
           </p>
         </div>
 
@@ -825,7 +1023,7 @@ export const WorkoutPlanner: React.FC = () => {
                       : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
                   }`}
                 >
-                  {w.name} {w.splitName && `(${w.splitName})`}
+                  {formatFriendlyName(w.name)} {w.splitName && `(${formatFriendlyName(w.splitName)})`}
                 </button>
               ))}
             </div>
@@ -860,10 +1058,10 @@ export const WorkoutPlanner: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-bold text-white">{activeWorkout.name}</h2>
+                      <h2 className="text-xl font-bold text-white">{formatFriendlyName(activeWorkout.name)}</h2>
                       {activeWorkout.splitName && (
                         <span className="text-xs px-2.5 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20 font-bold">
-                          {activeWorkout.splitName}
+                          {formatFriendlyName(activeWorkout.splitName)}
                         </span>
                       )}
                     </div>
@@ -906,10 +1104,9 @@ export const WorkoutPlanner: React.FC = () => {
                   </div>
 
                   <div className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800">
-                    <span className="text-[11px] text-slate-400 uppercase font-semibold">Segurança & Regras</span>
-                    <div className="text-sm font-bold text-emerald-400 mt-1 flex items-center gap-1">
-                      <ShieldCheck size={16} />
-                      <span>RN20–RN24 em vigor</span>
+                    <span className="text-[11px] text-slate-400 uppercase font-semibold">Volume Total</span>
+                    <div className="text-xl font-extrabold text-white mt-1">
+                      {activeWorkout.exercises.reduce((acc, ex) => acc + (ex.sets || 0), 0)} séries
                     </div>
                   </div>
                 </div>
@@ -934,103 +1131,220 @@ export const WorkoutPlanner: React.FC = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {activeWorkout.exercises.map((item, idx) => (
-                      <div
-                        key={item.id}
-                        className="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs hover:border-slate-700 transition shadow-sm"
-                      >
-                        {/* Identificador, Reordenação e Nome */}
-                        <div className="flex items-start sm:items-center gap-3">
-                          {/* Controles de Reordenação (Requisito 7) */}
-                          <div className="flex flex-col items-center gap-0.5 shrink-0 bg-slate-800/80 p-1 rounded-xl border border-slate-700/60">
-                            <button
-                              onClick={() => handleMoveExercise(idx, 'up')}
-                              disabled={idx === 0}
-                              className="p-1 rounded text-slate-400 hover:text-emerald-400 disabled:opacity-25 disabled:cursor-not-allowed transition"
-                              title="Subir posição do exercício"
-                            >
-                              <ChevronUp size={15} />
-                            </button>
-                            <span className="text-[11px] font-black text-white px-1">{idx + 1}</span>
-                            <button
-                              onClick={() => handleMoveExercise(idx, 'down')}
-                              disabled={idx === activeWorkout.exercises.length - 1}
-                              className="p-1 rounded text-slate-400 hover:text-emerald-400 disabled:opacity-25 disabled:cursor-not-allowed transition"
-                              title="Descer posição do exercício"
-                            >
-                              <ChevronDown size={15} />
-                            </button>
+                    {activeWorkout.exercises.map((item, idx) => {
+                      const exExec = executionMap[item.id] || {
+                        currentSet: 1,
+                        status: 'idle',
+                        executionTimer: 0,
+                        restTimer: 0,
+                        completedSets: 0,
+                      };
+                      const isCompleted = exExec.status === 'completed' || exExec.completedSets >= item.sets;
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={`p-4 sm:p-5 rounded-3xl border transition shadow-sm space-y-3 ${
+                            isCompleted
+                              ? 'bg-emerald-950/25 border-emerald-500/50'
+                              : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
+                            {/* Identificador, Reordenação e Nome */}
+                            <div className="flex items-start sm:items-center gap-3">
+                              {/* Controles de Reordenação */}
+                              <div className="flex flex-col items-center gap-0.5 shrink-0 bg-slate-800/80 p-1 rounded-xl border border-slate-700/60">
+                                <button
+                                  onClick={() => handleMoveExercise(idx, 'up')}
+                                  disabled={idx === 0}
+                                  className="p-1 rounded text-slate-400 hover:text-emerald-400 disabled:opacity-25 disabled:cursor-not-allowed transition"
+                                  title="Subir posição do exercício"
+                                >
+                                  <ChevronUp size={15} />
+                                </button>
+                                <span className="text-[11px] font-black text-white px-1">{idx + 1}</span>
+                                <button
+                                  onClick={() => handleMoveExercise(idx, 'down')}
+                                  disabled={idx === activeWorkout.exercises.length - 1}
+                                  className="p-1 rounded text-slate-400 hover:text-emerald-400 disabled:opacity-25 disabled:cursor-not-allowed transition"
+                                  title="Descer posição do exercício"
+                                >
+                                  <ChevronDown size={15} />
+                                </button>
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-sm text-white flex flex-wrap items-center gap-2">
+                                  <span>{item.name || item.exercise?.name || 'Exercício'}</span>
+                                  {(item.muscleGroup || item.exercise?.muscleGroup) && (
+                                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                                      {item.muscleGroup || item.exercise?.muscleGroup}
+                                    </span>
+                                  )}
+                                  {isCompleted && (
+                                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center gap-1">
+                                      <CheckCircle2 size={12} />
+                                      <span>✓ Concluído</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-slate-400 text-[11px] mt-1 flex flex-wrap items-center gap-2">
+                                  <span>Equipamento: <strong className="text-slate-300">{item.equipment || item.exercise?.equipment || 'Livre'}</strong></span>
+                                  {item.notes && (
+                                    <span className="text-slate-400 italic bg-slate-800/60 px-2 py-0.5 rounded-md">
+                                      "{item.notes}"
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Parâmetros Prescritos e Botões de Ação */}
+                            <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-800">
+                              <div className="flex items-center gap-2">
+                                <div className="p-2 rounded-xl bg-slate-800/70 border border-slate-700/50 text-center min-w-[90px]">
+                                  <span className="font-extrabold text-white text-xs block">
+                                    {item.sets} × {item.reps}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400">séries × reps</span>
+                                </div>
+
+                                <div className="p-2 rounded-xl bg-slate-800/70 border border-slate-700/50 text-center min-w-[95px]">
+                                  <span className="font-extrabold text-teal-400 text-xs block">
+                                    {item.weightKg > 0 ? `${item.weightKg} kg` : 'Corporal'}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400">{item.restSeconds}s desc.</span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  onClick={() =>
+                                    setEditingExercise({
+                                      id: item.id,
+                                      exerciseName: item.name || item.exercise?.name || 'Exercício',
+                                      sets: item.sets,
+                                      reps: item.reps,
+                                      weightKg: item.weightKg,
+                                      restSeconds: item.restSeconds,
+                                      notes: item.notes || '',
+                                    })
+                                  }
+                                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5"
+                                  title="Editar séries, repetições e carga"
+                                >
+                                  <Edit2 size={13} />
+                                  <span>Editar</span>
+                                </button>
+
+                                <button
+                                  onClick={() => handleRemoveExercise(item.id)}
+                                  className="p-2 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                                  title="Remover exercício da rotina"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="flex-1 min-w-0">
-                            <div className="font-bold text-sm text-white flex flex-wrap items-center gap-2">
-                              <span>{item.name || item.exercise?.name || 'Exercício'}</span>
-                              {(item.muscleGroup || item.exercise?.muscleGroup) && (
-                                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">
-                                  {item.muscleGroup || item.exercise?.muscleGroup}
-                                </span>
+                          {/* Painel de Controle de Execução, Séries e Cronômetro em Tempo Real */}
+                          <div
+                            className={`p-3 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition ${
+                              isCompleted
+                                ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-200'
+                                : exExec.status === 'running'
+                                ? 'bg-teal-950/40 border-teal-500/40 text-teal-200'
+                                : exExec.status === 'resting'
+                                ? 'bg-amber-950/40 border-amber-500/40 text-amber-200'
+                                : 'bg-slate-800/40 border-slate-800/80 text-slate-300'
+                            }`}
+                          >
+                            <div className="flex flex-wrap items-center gap-3">
+                              {/* Contador de Séries */}
+                              <div className="flex items-center gap-1.5">
+                                {isCompleted ? (
+                                  <span className="font-extrabold text-emerald-400 flex items-center gap-1">
+                                    <CheckCircle2 size={15} />
+                                    <span>Todas as {item.sets} séries concluídas</span>
+                                  </span>
+                                ) : (
+                                  <span className="font-bold text-white bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-700">
+                                    Série {exExec.completedSets + 1} de {item.sets}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Cronômetro Dinâmico em Tempo Real */}
+                              {!isCompleted && (
+                                <div className="flex items-center gap-2 font-mono font-bold">
+                                  {exExec.status === 'running' && (
+                                    <span className="flex items-center gap-1.5 text-teal-300 bg-teal-500/10 px-2.5 py-1 rounded-xl border border-teal-500/30 animate-pulse">
+                                      <Clock size={14} />
+                                      <span>Tempo de Execução: {formatTimer(exExec.executionTimer)}</span>
+                                    </span>
+                                  )}
+                                  {exExec.status === 'resting' && (
+                                    <span className="flex items-center gap-1.5 text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/30">
+                                      <Clock size={14} />
+                                      <span>Descanso: {formatTimer(exExec.restTimer)} (Meta: {item.restSeconds}s)</span>
+                                    </span>
+                                  )}
+                                  {exExec.status === 'idle' && (
+                                    <span className="text-slate-400 text-[11px] font-sans">
+                                      Pronto para iniciar série {exExec.completedSets + 1}
+                                    </span>
+                                  )}
+                                </div>
                               )}
                             </div>
-                            <div className="text-slate-400 text-[11px] mt-1 flex flex-wrap items-center gap-2">
-                              <span>Equipamento: <strong className="text-slate-300">{item.equipment || item.exercise?.equipment || 'Livre'}</strong></span>
-                              {item.notes && (
-                                <span className="text-slate-400 italic bg-slate-800/60 px-2 py-0.5 rounded-md">
-                                  "{item.notes}"
-                                </span>
+
+                            {/* Controles de Ação do Cronômetro */}
+                            <div className="flex items-center gap-2 shrink-0">
+                              {isCompleted ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleResetExercise(item.id)}
+                                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition"
+                                  title="Reiniciar execução das séries"
+                                >
+                                  <RotateCcw size={13} />
+                                  <span>Reiniciar</span>
+                                </button>
+                              ) : exExec.status === 'running' ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleFinishSet(item.id, item.sets)}
+                                  className="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition active:scale-95"
+                                >
+                                  <Square size={13} fill="currentColor" />
+                                  <span>FINALIZAR</span>
+                                </button>
+                              ) : exExec.status === 'resting' ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleProceedNextSet(item.id)}
+                                  className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition active:scale-95"
+                                >
+                                  <Play size={13} fill="currentColor" />
+                                  <span>Iniciar Série {exExec.completedSets + 1}</span>
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartSet(item.id)}
+                                  className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition active:scale-95"
+                                >
+                                  <Play size={13} fill="currentColor" />
+                                  <span>INICIAR</span>
+                                </button>
                               )}
                             </div>
                           </div>
                         </div>
-
-                        {/* Parâmetros Prescritos e Botões de Ação */}
-                        <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-800">
-                          <div className="flex items-center gap-2">
-                            <div className="p-2 rounded-xl bg-slate-800/70 border border-slate-700/50 text-center min-w-[90px]">
-                              <span className="font-extrabold text-white text-xs block">
-                                {item.sets} × {item.reps}
-                              </span>
-                              <span className="text-[10px] text-slate-400">séries × reps</span>
-                            </div>
-
-                            <div className="p-2 rounded-xl bg-slate-800/70 border border-slate-700/50 text-center min-w-[95px]">
-                              <span className="font-extrabold text-teal-400 text-xs block">
-                                {item.weightKg > 0 ? `${item.weightKg} kg` : 'Corporal'}
-                              </span>
-                              <span className="text-[10px] text-slate-400">{item.restSeconds}s desc.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <button
-                              onClick={() =>
-                                setEditingExercise({
-                                  id: item.id,
-                                  exerciseName: item.name || item.exercise?.name || 'Exercício',
-                                  sets: item.sets,
-                                  reps: item.reps,
-                                  weightKg: item.weightKg,
-                                  restSeconds: item.restSeconds,
-                                  notes: item.notes || '',
-                                })
-                              }
-                              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5"
-                              title="Editar séries, repetições e carga"
-                            >
-                              <Edit2 size={13} />
-                              <span>Editar</span>
-                            </button>
-
-                            <button
-                              onClick={() => handleRemoveExercise(item.id)}
-                              className="p-2 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
-                              title="Remover exercício da rotina"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -1040,316 +1354,325 @@ export const WorkoutPlanner: React.FC = () => {
       )}
 
       {/* ============================================================= */}
-      {/* ABA 2: WIZARD DE MONTAGEM DE TREINO (8 ETAPAS) */}
+      {/* ABA 2: WIZARD DE MONTAGEM DE TREINO E SUGESTÕES */}
       {/* ============================================================= */}
       {activeTab === 'wizard' && (
-        <div className="max-w-3xl mx-auto space-y-6">
-          {!wizardStarted ? (
-            /* Tela Inicial do Assistente (conforme especificação) */
-            <div className="p-8 sm:p-12 text-center rounded-3xl bg-slate-900 border border-slate-800 space-y-6 shadow-2xl">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-slate-950 font-black text-2xl mx-auto shadow-lg shadow-emerald-500/20">
-                <Dumbbell size={32} />
-              </div>
+        <div className="max-w-4xl mx-auto space-y-6">
+          {wizardSuggestions.length > 0 ? (
+            /* VISUALIZAÇÃO E ESCOLHA DE SUGESTÕES DE TREINO GERADAS (Requisitos 2 e 3) */
+            <div className="space-y-6">
+              <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="text-teal-400" size={24} />
+                    <h2 className="text-xl sm:text-2xl font-black text-white">
+                      Sugestões de Treino Geradas
+                    </h2>
+                  </div>
+                  <p className="text-slate-400 text-xs sm:text-sm mt-1">
+                    Encontramos {wizardSuggestions.length} opções completas para seu treino de{' '}
+                    <strong className="text-teal-300">{wizardMuscleGroups.join(', ')}</strong>.
+                    Analise e escolha a sua rotina preferida.
+                  </p>
+                </div>
 
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                  MONTE SEU TREINO
-                </h2>
-                <p className="text-slate-400 text-sm max-w-lg mx-auto mt-2 leading-relaxed">
-                  Você irá montar seu programa de treinos passo a passo de acordo com seus objetivos, dias disponíveis e equipamentos.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left text-xs max-w-xl mx-auto">
-                <div className="p-3 rounded-xl bg-slate-800/40 border border-slate-800">
-                  <strong className="text-teal-400 block">1. Objetivo</strong>
-                  <span className="text-slate-400">Hipertrofia ou força</span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-800/40 border border-slate-800">
-                  <strong className="text-teal-400 block">2. Frequência</strong>
-                  <span className="text-slate-400">2 a 6 dias na semana</span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-800/40 border border-slate-800">
-                  <strong className="text-teal-400 block">3. Biomecânica</strong>
-                  <span className="text-slate-400">Volume e descanso</span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-800/40 border border-slate-800">
-                  <strong className="text-teal-400 block">4. 128 Exercícios</strong>
-                  <span className="text-slate-400">Catálogo anatômico</span>
-                </div>
-              </div>
-
-              <div>
                 <button
-                  onClick={() => setWizardStarted(true)}
-                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-extrabold text-base transition shadow-xl shadow-emerald-500/25 active:scale-95"
+                  type="button"
+                  onClick={() => setWizardSuggestions([])}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 shrink-0"
                 >
-                  [ INICIAR MONTAGEM ]
+                  <ArrowLeft size={14} />
+                  <span>Alterar Músculos</span>
                 </button>
+              </div>
+
+              {/* Cards das Sugestões Geradas */}
+              <div className="space-y-4">
+                {wizardSuggestions.map((sug, sIdx) => {
+                  const isExpanded = expandedSuggestionId === sug.suggestionId;
+                  const isApplying = applyingSuggestionId === sug.suggestionId;
+
+                  return (
+                    <div
+                      key={sug.suggestionId || sIdx}
+                      className="rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition overflow-hidden shadow-lg"
+                    >
+                      {/* Header do Treino Sugerido */}
+                      <div className="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-950/40">
+                        <div
+                          onClick={() =>
+                            setExpandedSuggestionId(isExpanded ? null : sug.suggestionId)
+                          }
+                          className="flex-1 cursor-pointer"
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-lg font-black text-white">{sug.name}</h3>
+                            <span className="text-xs px-2.5 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30 font-bold">
+                              {sug.splitName}
+                            </span>
+                            <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                              {sug.estimatedDurationMin} min
+                            </span>
+                            <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                              {sug.exercises?.length || 0} exercícios
+                            </span>
+                          </div>
+                          {sug.description && (
+                            <p className="text-xs text-slate-400 mt-1">{sug.description}</p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleApplyChosenSuggestion(sug)}
+                            disabled={applyingSuggestionId !== null}
+                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-50 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center gap-2 active:scale-95"
+                          >
+                            {isApplying ? (
+                              <>
+                                <Loader2 size={15} className="animate-spin" />
+                                <span>Aplicando Treino...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Check size={16} strokeWidth={2.5} />
+                                <span>[ ESCOLHER ESTE TREINO ]</span>
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedSuggestionId(isExpanded ? null : sug.suggestionId)
+                            }
+                            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+                            title={isExpanded ? 'Recolher detalhes' : 'Ver exercícios'}
+                          >
+                            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Lista de Exercícios da Sugestão */}
+                      {isExpanded && (
+                        <div className="p-5 sm:p-6 border-t border-slate-800/80 space-y-4">
+                          <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                            Exercícios Selecionados ({sug.exercises?.length || 0})
+                          </h4>
+
+                          <div className="grid grid-cols-1 gap-2.5">
+                            {sug.exercises?.map((ex: any, eIdx: number) => (
+                              <div
+                                key={ex.exerciseId || eIdx}
+                                className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="w-6 h-6 rounded-lg bg-slate-800 text-teal-400 font-black flex items-center justify-center text-[11px] shrink-0 border border-slate-700">
+                                    {eIdx + 1}
+                                  </span>
+                                  <div>
+                                    <strong className="text-white text-sm block">
+                                      {ex.name}
+                                    </strong>
+                                    <span className="text-[11px] text-slate-400">
+                                      {ex.muscleGroup} • Equipamento:{' '}
+                                      <span className="text-slate-300">{ex.equipment || 'Livre'}</span>
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 self-start sm:self-auto">
+                                  <span className="px-2.5 py-1 rounded-lg bg-slate-800 font-bold text-white border border-slate-700">
+                                    {ex.sets} × {ex.reps} reps
+                                  </span>
+                                  <span className="px-2.5 py-1 rounded-lg bg-slate-800 font-bold text-teal-400 border border-slate-700">
+                                    {ex.weightKg > 0 ? `${ex.weightKg} kg` : 'Corporal'}
+                                  </span>
+                                  <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 border border-slate-700">
+                                    {ex.restSeconds}s desc.
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="pt-2 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleApplyChosenSuggestion(sug)}
+                              disabled={applyingSuggestionId !== null}
+                              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-50 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+                            >
+                              {isApplying ? (
+                                <>
+                                  <Loader2 size={15} className="animate-spin" />
+                                  <span>Aplicando Treino...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Check size={16} strokeWidth={2.5} />
+                                  <span>[ ESCOLHER ESTE TREINO ]</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ) : (
-            /* Fluxo das 8 Etapas de Treino */
+            /* PERGUNTA INICIAL: QUAL GRUPO MUSCULAR VOCÊ DESEJA TREINAR? (Requisito 1) */
             <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 space-y-6 shadow-2xl">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <span className="text-teal-400">Etapa {wizardStep} de 8</span>
-                  <span className="text-slate-400">
-                    {wizardStep === 1 && 'Objetivo do Treinamento'}
-                    {wizardStep === 2 && 'Nível de Experiência'}
-                    {wizardStep === 3 && 'Frequência Semanal'}
-                    {wizardStep === 4 && 'Tempo Disponível por Treino'}
-                    {wizardStep === 5 && 'Equipamentos Disponíveis'}
-                    {wizardStep === 6 && 'Restrições Físicas ou Limitações'}
-                    {wizardStep === 7 && 'Proposta Inicial de Divisões'}
-                    {wizardStep === 8 && 'Detalhamento & Conclusão'}
-                  </span>
+              <div className="text-center space-y-2">
+                <div className="w-14 h-14 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 mx-auto">
+                  <Dumbbell size={28} />
                 </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all duration-300"
-                    style={{ width: `${(wizardStep / 8) * 100}%` }}
-                  ></div>
+                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  Qual grupo muscular você deseja treinar?
+                </h2>
+                <p className="text-slate-400 text-xs sm:text-sm max-w-lg mx-auto">
+                  Selecione um ou mais grupos musculares. O sistema irá gerar múltiplas opções de treino completo (Treino A, Treino B, Treino C) com exercícios reais para sua escolha.
+                </p>
+              </div>
+
+              {/* 12 Chips Interativos de Grupos Musculares */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                {TARGET_MUSCLE_OPTIONS.map((m) => {
+                  const muscleKey = m.id === 'Posterior' ? 'Posterior de coxa' : m.id;
+                  const isSelected = wizardMuscleGroups.includes(muscleKey) || wizardMuscleGroups.includes(m.id);
+
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => handleToggleWizardMuscle(muscleKey)}
+                      className={`p-3.5 rounded-2xl border text-left transition relative flex flex-col justify-between gap-1.5 active:scale-[0.98] ${
+                        isSelected
+                          ? 'bg-gradient-to-br from-teal-500/20 to-emerald-500/10 border-teal-500 shadow-md shadow-teal-500/10'
+                          : 'bg-slate-800/40 border-slate-800 hover:bg-slate-800/80 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <span className="font-bold text-sm text-white">{m.label}</span>
+                        <div
+                          className={`w-5 h-5 rounded-lg flex items-center justify-center text-xs transition ${
+                            isSelected
+                              ? 'bg-teal-500 text-slate-950 font-black'
+                              : 'border border-slate-700 text-transparent'
+                          }`}
+                        >
+                          <Check size={13} strokeWidth={3} />
+                        </div>
+                      </div>
+                      <span className="text-[11px] text-slate-400 line-clamp-1">{m.desc}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Parâmetros Complementares do Treino */}
+              <div className="p-5 rounded-2xl bg-slate-800/30 border border-slate-800 space-y-4 text-xs">
+                <span className="font-extrabold uppercase text-slate-400 block tracking-wider">
+                  Preferências do Treino
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">Objetivo:</label>
+                    <select
+                      value={wizardGoal}
+                      onChange={(e) => setWizardGoal(e.target.value as any)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-teal-500"
+                    >
+                      <option value="HYPERTROPHY">Hipertrofia Muscular</option>
+                      <option value="STRENGTH">Ganho de Força</option>
+                      <option value="WEIGHT_LOSS">Emagrecimento & Definição</option>
+                      <option value="ENDURANCE">Resistência</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">Nível de Experiência:</label>
+                    <select
+                      value={wizardLevel}
+                      onChange={(e) => setWizardLevel(e.target.value as any)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-teal-500"
+                    >
+                      <option value="BEGINNER">Iniciante</option>
+                      <option value="INTERMEDIATE">Intermediário</option>
+                      <option value="ADVANCED">Avançado</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">Duração da Sessão:</label>
+                    <select
+                      value={wizardDuration}
+                      onChange={(e) => setWizardDuration(Number(e.target.value))}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-teal-500"
+                    >
+                      <option value={30}>30 minutos</option>
+                      <option value={45}>45 minutos</option>
+                      <option value={50}>50 minutos</option>
+                      <option value={60}>60 minutos</option>
+                      <option value={90}>90 minutos</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">Equipamentos:</label>
+                    <select
+                      value={wizardEquipment}
+                      onChange={(e) => setWizardEquipment(e.target.value as any)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-teal-500"
+                    >
+                      <option value="FULL_GYM">Academia Completa</option>
+                      <option value="BASIC">Halteres & Casa</option>
+                      <option value="BODYWEIGHT">Peso Corporal</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              {wizardStep === 1 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-white">Etapa 1: Qual é o seu objetivo de treino?</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {[
-                      { id: 'HYPERTROPHY', title: 'Hipertrofia Muscular', desc: 'Foco em volume de séries (8-12 reps) para ganho de massa magra' },
-                      { id: 'STRENGTH', title: 'Ganho de Força', desc: 'Sobrecargas maiores e intervalos maiores de recuperação (4-6 reps)' },
-                      { id: 'WEIGHT_LOSS', title: 'Emagrecimento & Definição', desc: 'Densidade alta com intervalos controlados' },
-                      { id: 'ENDURANCE', title: 'Resistência & Condicionamento', desc: 'Séries mais longas e circuitos' },
-                    ].map((item) => (
-                      <div
-                        key={item.id}
-                        onClick={() => setWizardGoal(item.id as any)}
-                        className={`p-4 rounded-2xl border cursor-pointer transition flex flex-col justify-between gap-2 ${
-                          wizardGoal === item.id
-                            ? 'bg-emerald-500/10 border-emerald-500 text-white'
-                            : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        }`}
-                      >
-                        <div className="font-bold text-sm">{item.title}</div>
-                        <div className="text-xs text-slate-400">{item.desc}</div>
-                      </div>
-                    ))}
-                  </div>
+              {wizardWorkoutError && (
+                <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertTriangle size={16} className="shrink-0 text-rose-400" />
+                  <span>{wizardWorkoutError}</span>
                 </div>
               )}
 
-              {wizardStep === 2 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-white">Etapa 2: Qual seu nível de experiência com musculação?</h3>
-                  <div className="space-y-2">
-                    {[
-                      { id: 'BEGINNER', title: 'Iniciante (menos de 6 meses)', desc: 'Prioridade para aprendizado motor, máquinas e exercícios básicos' },
-                      { id: 'INTERMEDIATE', title: 'Intermediário (6 meses a 2 anos)', desc: 'Treinos divididos, pesos livres e variação de estímulos' },
-                      { id: 'ADVANCED', title: 'Avançado (mais de 2 anos)', desc: 'Sobrecarga progressiva avançada e periodização densa' },
-                    ].map((lvl) => (
-                      <div
-                        key={lvl.id}
-                        onClick={() => setWizardLevel(lvl.id as any)}
-                        className={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center justify-between ${
-                          wizardLevel === lvl.id
-                            ? 'bg-emerald-500/10 border-emerald-500 text-white'
-                            : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        }`}
-                      >
-                        <div>
-                          <div className="font-bold text-sm">{lvl.title}</div>
-                          <div className="text-xs text-slate-400">{lvl.desc}</div>
-                        </div>
-                        {wizardLevel === lvl.id && <Check size={18} className="text-emerald-400" />}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {wizardStep === 3 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-white">Etapa 3: Quantos dias por semana você pode treinar?</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {[2, 3, 4, 5, 6].map((days) => (
-                      <div
-                        key={days}
-                        onClick={() => setWizardFrequency(days)}
-                        className={`p-5 rounded-2xl border text-center cursor-pointer transition ${
-                          wizardFrequency === days
-                            ? 'bg-emerald-500/10 border-emerald-500 text-white'
-                            : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        }`}
-                      >
-                        <span className="text-2xl font-black block">{days}x</span>
-                        <span className="text-xs text-slate-400">dias / semana</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {wizardStep === 4 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-white">Etapa 4: Tempo disponível por sessão de treino</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {[30, 45, 60, 90].map((mins) => (
-                      <div
-                        key={mins}
-                        onClick={() => setWizardDuration(mins)}
-                        className={`p-5 rounded-2xl border text-center cursor-pointer transition ${
-                          wizardDuration === mins
-                            ? 'bg-emerald-500/10 border-emerald-500 text-white'
-                            : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        }`}
-                      >
-                        <span className="text-2xl font-black block">{mins}</span>
-                        <span className="text-xs text-slate-400">minutos</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {wizardStep === 5 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-white">Etapa 5: Equipamentos disponíveis para seu treino</h3>
-                  <div className="space-y-2">
-                    {[
-                      { id: 'FULL_GYM', title: 'Academia Completa', desc: 'Acesso a barras, halteres, máquinas e polias' },
-                      { id: 'BASIC', title: 'Halteres & Básico em Casa', desc: 'Treino com halteres ajustáveis e banco simples' },
-                      { id: 'BODYWEIGHT', title: 'Peso Corporal (Calistenia)', desc: 'Exercícios sem equipamentos ou com barras fixas' },
-                    ].map((eq) => (
-                      <div
-                        key={eq.id}
-                        onClick={() => setWizardEquipment(eq.id as any)}
-                        className={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center justify-between ${
-                          wizardEquipment === eq.id
-                            ? 'bg-emerald-500/10 border-emerald-500 text-white'
-                            : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        }`}
-                      >
-                        <div>
-                          <div className="font-bold text-sm">{eq.title}</div>
-                          <div className="text-xs text-slate-400">{eq.desc}</div>
-                        </div>
-                        {wizardEquipment === eq.id && <Check size={18} className="text-emerald-400" />}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {wizardStep === 6 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-white">Etapa 6: Restrições físicas ou limitações articulares</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { id: 'NONE', title: 'Nenhuma limitação', desc: 'Apto para todos os exercícios' },
-                      { id: 'LOWER_BACK', title: 'Coluna / Lombar', desc: 'Evita compressão axial severa' },
-                      { id: 'KNEE', title: 'Joelho', desc: 'Ajusta amplitude de agachamentos' },
-                      { id: 'SHOULDER', title: 'Ombro', desc: 'Evita rotações lesivas' },
-                    ].map((lim) => (
-                      <div
-                        key={lim.id}
-                        onClick={() => setWizardLimitation(lim.id as any)}
-                        className={`p-3.5 rounded-2xl border cursor-pointer transition ${
-                          wizardLimitation === lim.id
-                            ? 'bg-emerald-500/10 border-emerald-500 text-white'
-                            : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        }`}
-                      >
-                        <strong className="block text-sm">{lim.title}</strong>
-                        <span className="text-[11px] text-slate-400">{lim.desc}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {wizardStep === 7 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-white">Etapa 7: Proposta Inicial de Divisão (Split)</h3>
-                  <div className="p-5 rounded-2xl bg-slate-800/40 border border-slate-800 space-y-3 text-xs">
-                    <div className="font-bold text-white text-sm">
-                      {wizardFrequency <= 3
-                        ? 'Divisão Sugerida: Full Body ou Treino A/B'
-                        : wizardFrequency === 4
-                        ? 'Divisão Sugerida: Treino A/B Upper & Lower'
-                        : 'Divisão Sugerida: Treino ABC Push / Pull / Legs'}
-                    </div>
-                    <p className="text-slate-300">
-                      Com base na sua frequência de {wizardFrequency} dias por semana e meta de {wizardDuration} minutos por sessão, o programa organizará os grupamentos musculares para garantir no mínimo 48h de recuperação entre estímulos (RN20).
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {wizardStep === 8 && (
-                <div className="space-y-4 text-center py-4">
-                  <div className="w-16 h-16 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 mx-auto">
-                    <CheckCircle2 size={36} />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">Etapa 8: Detalhamento dos Exercícios e Conclusão</h3>
-                  <p className="text-xs text-slate-400 max-w-md mx-auto">
-                    Ao confirmar, a rotina completa com exercícios selecionados do catálogo de 128 itens será gravada na sua conta.
-                  </p>
-
-                  {wizardWorkoutError && (
-                    <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 max-w-md mx-auto text-left">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle size={18} className="shrink-0 text-rose-400" />
-                        <span>{wizardWorkoutError}</span>
-                      </div>
-                      <button
-                        onClick={handleFinishWizard}
-                        className="px-3 py-1.5 rounded-xl bg-rose-600/30 hover:bg-rose-600 text-white font-bold text-xs shrink-0 transition"
-                      >
-                        Tentar Novamente
-                      </button>
-                    </div>
+              {/* Botão de Geração */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleGenerateSuggestions}
+                  disabled={wizardGenerating || wizardMuscleGroups.length === 0}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-40 text-slate-950 font-black text-sm transition shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 active:scale-[0.99]"
+                >
+                  {wizardGenerating ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      <span>Gerando Opções de Treino...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={18} />
+                      <span>
+                        [ GERAR SUGESTÕES DE TREINO{' '}
+                        {wizardMuscleGroups.length > 0 &&
+                          `(${wizardMuscleGroups.length} grupo${
+                            wizardMuscleGroups.length > 1 ? 's' : ''
+                          })`}
+                        ]
+                      </span>
+                    </>
                   )}
-
-                  <button
-                    onClick={handleFinishWizard}
-                    disabled={wizardGenerating}
-                    className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-extrabold text-sm transition shadow-xl shadow-emerald-500/25 disabled:opacity-50"
-                  >
-                    {wizardGenerating ? 'Gerando Rotina de Treino...' : '[ VER TREINO ]'}
-                  </button>
-                </div>
-              )}
-
-              {/* Botões de Avançar e Voltar */}
-              <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-                {wizardStep > 1 ? (
-                  <button
-                    onClick={() => setWizardStep(wizardStep - 1)}
-                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition flex items-center gap-1.5"
-                  >
-                    <ArrowLeft size={14} />
-                    <span>Voltar</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setWizardStarted(false)}
-                    className="text-xs text-slate-500 hover:text-slate-300 transition"
-                  >
-                    Cancelar
-                  </button>
-                )}
-
-                {wizardStep < 8 && (
-                  <button
-                    onClick={() => setWizardStep(wizardStep + 1)}
-                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 ml-auto"
-                  >
-                    <span>Próxima Etapa</span>
-                    <ArrowRight size={14} />
-                  </button>
-                )}
+                </button>
               </div>
             </div>
           )}
@@ -1365,7 +1688,7 @@ export const WorkoutPlanner: React.FC = () => {
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <PlayCircle className="text-emerald-400" size={20} />
-                <span>Registrar Sessão Executada (RN24: Imutabilidade)</span>
+                <span>Registrar Sessão Executada</span>
               </h2>
             </div>
 
@@ -1509,7 +1832,7 @@ export const WorkoutPlanner: React.FC = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <History size={20} className="text-teal-400" />
-              <span>Linha do Tempo Cronológica (RN24)</span>
+              <span>Linha do Tempo Cronológica</span>
             </h2>
             <button
               onClick={() => handleTabChange('logger')}
@@ -1521,8 +1844,22 @@ export const WorkoutPlanner: React.FC = () => {
           </div>
 
           {loadingHistory ? (
-            <div className="py-12 flex justify-center">
+            <div className="py-12 flex flex-col items-center justify-center space-y-3">
               <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-slate-400 text-xs">Carregando histórico de treinos...</p>
+            </div>
+          ) : historyError ? (
+            <div className="p-10 text-center rounded-3xl bg-slate-900 border border-rose-500/30 space-y-4">
+              <AlertTriangle size={36} className="text-rose-400 mx-auto" />
+              <h3 className="text-base font-bold text-white">Erro ao carregar histórico</h3>
+              <p className="text-xs text-rose-300 max-w-sm mx-auto">{historyError}</p>
+              <button
+                type="button"
+                onClick={loadHistory}
+                className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold text-xs transition"
+              >
+                [ TENTAR NOVAMENTE ]
+              </button>
             </div>
           ) : historyLogs.length === 0 ? (
             <div className="p-12 text-center rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
@@ -1938,28 +2275,25 @@ export const WorkoutPlanner: React.FC = () => {
                               <button
                                 type="button"
                                 disabled
-                                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center gap-1.5 cursor-default"
+                                aria-label={`${ex.name} já adicionado à rotina`}
+                                title="Já adicionado"
+                                className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm cursor-default"
                               >
-                                <Check size={14} strokeWidth={2.5} />
-                                <span>Adicionado</span>
+                                <Check size={18} strokeWidth={2.5} />
                               </button>
                             ) : (
                               <button
                                 type="button"
                                 onClick={() => handleQuickAddExercise(ex)}
                                 disabled={isAddingThis}
-                                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 flex items-center gap-1.5 shadow-md shadow-teal-500/20 active:scale-95 transition disabled:opacity-50"
+                                aria-label={`Adicionar ${ex.name} à rotina`}
+                                title={`Adicionar ${ex.name}`}
+                                className="w-10 h-10 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 flex items-center justify-center font-bold text-lg shadow-md shadow-teal-500/20 active:scale-95 transition disabled:opacity-50"
                               >
                                 {isAddingThis ? (
-                                  <>
-                                    <Loader2 size={14} className="animate-spin" />
-                                    <span>Adicionando...</span>
-                                  </>
+                                  <Loader2 size={18} className="animate-spin" />
                                 ) : (
-                                  <>
-                                    <Plus size={14} strokeWidth={2.5} />
-                                    <span>Adicionar</span>
-                                  </>
+                                  <Plus size={20} strokeWidth={2.5} />
                                 )}
                               </button>
                             )}

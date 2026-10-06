@@ -707,7 +707,14 @@ export class DietsService {
       }
     }
 
-    const dietName = `Sugestão NutriPlan — ${dto.goal || profile?.goal || 'Equilibrada'}`;
+    const goalMap: Record<string, string> = {
+      LOSE_WEIGHT: 'Emagrecimento',
+      GAIN_WEIGHT: 'Hipertrofia',
+      MAINTAIN: 'Manutenção',
+    };
+    const rawGoal = dto.goal || profile?.goal || 'Equilibrada';
+    const friendlyGoal = goalMap[rawGoal] || rawGoal;
+    const dietName = `Sugestão NutriPlan — ${friendlyGoal}`;
     const dietId = randomUUID();
     const now = new Date().toISOString();
 
