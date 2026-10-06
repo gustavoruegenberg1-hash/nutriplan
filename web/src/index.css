@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  /* === SUPERFÍCIES & FUNDOS === */
+  --color-canvas: #0C1117;
+  --color-surface: #151D28;
+  --color-surface-alt: #1A2332;
+  --color-surface-border: #243044;
+  --color-surface-hover: #1E2D3D;
+
+  /* === CORES PRIMÁRIAS === */
+  --color-primary: #14B8A6;
+  --color-primary-soft: #0D9488;
+  --color-primary-muted: #134E4A;
+  --color-secondary: #F59E0B;
+
+  /* === MACRONUTRIENTES === */
+  --color-calories: #F97316;
+  --color-protein: #F43F5E;
+  --color-carbs: #3B82F6;
+  --color-fat: #EAB308;
+  --color-fiber: #10B981;
+
+  /* === ESTADOS SEMÂNTICOS === */
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-danger: #FB7185;
+  --color-info: #38BDF8;
+  --color-science: #8B5CF6;
+
+  /* === TEXTO === */
+  --color-text: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-text-disabled: #475569;
+
+  /* === STATUS DE METAS === */
+  --color-status-below: #FBBF24;
+  --color-status-met: #34D399;
+  --color-status-excess: #FB7185;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-canvas);
+    color: #F8FAFC;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Remove setas de inputs numéricos */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
