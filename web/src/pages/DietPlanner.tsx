@@ -21,6 +21,7 @@ import {
   Database,
   Target,
   Check,
+  Loader2,
 } from 'lucide-react';
 
 export const DietPlanner: React.FC = () => {
@@ -52,6 +53,9 @@ export const DietPlanner: React.FC = () => {
   const [foodResults, setFoodResults] = useState<FoodItem[]>([]);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [portionGrams, setPortionGrams] = useState<number>(100);
+  const [isAddingFood, setIsAddingFood] = useState(false);
+  const [foodModalError, setFoodModalError] = useState<string | null>(null);
+  const [foodSearchLoading, setFoodSearchLoading] = useState(false);
 
   // Edição inline de gramagem
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -181,50 +185,96 @@ export const DietPlanner: React.FC = () => {
     }
   };
 
-  const openFoodSearch = (mealId: string) => {
+  const openFoodSearch = async (mealId: string) => {
     setTargetMealId(mealId);
     setSelectedFood(null);
     setPortionGrams(100);
     setSearchFoodQuery('');
-    setFoodResults(foodService.getPopularFoods(30) as any);
+    setFoodModalError(null);
     setIsFoodModalOpen(true);
+    setFoodSearchLoading(true);
+    try {
+      const popular = await foodService.getPopularFoods(30);
+      setFoodResults(Array.isArray(popular) ? popular : []);
+    } catch {
+      setFoodResults(foodService.searchLocal('', 30));
+    } finally {
+      setFoodSearchLoading(false);
+    }
   };
 
-  const handleFoodSearchChange = (query: string) => {
+  const handleFoodSearchChange = async (query: string) => {
     setSearchFoodQuery(query);
+    setFoodModalError(null);
     if (!query.trim()) {
-      setFoodResults(foodService.getPopularFoods(30) as any);
-    } else {
+      try {
+        const popular = await foodService.getPopularFoods(30);
+        setFoodResults(Array.isArray(popular) ? popular : []);
+      } catch {
+        setFoodResults(foodService.searchLocal('', 30));
+      }
+      return;
+    }
+    setFoodSearchLoading(true);
+    try {
+      const results = await foodService.searchFoods(query, 30);
+      setFoodResults(Array.isArray(results) ? results : []);
+    } catch {
       setFoodResults(foodService.searchLocal(query, 30));
+    } finally {
+      setFoodSearchLoading(false);
     }
   };
 
   const handleAddFoodToMeal = async () => {
-    if (!selectedFood || !targetMealId || !activeDiet || portionGrams <= 0) return;
+    if (!selectedFood || !targetMealId || !activeDiet) {
+      setFoodModalError('Selecione um alimento antes de adicionar.');
+      return;
+    }
+    const grams = Number(portionGrams);
+    if (isNaN(grams) || grams <= 0) {
+      setFoodModalError('A quantidade em gramas deve ser um número maior que zero (ex: 100g).');
+      return;
+    }
+    setIsAddingFood(true);
+    setFoodModalError(null);
     try {
       const res = await api.post(`/diets/${activeDiet.id}/meals/${targetMealId}/foods`, {
         foodId: selectedFood.id,
-        quantityGrams: portionGrams,
+        quantityGrams: grams,
       });
       setActiveDiet(res.data);
       setIsFoodModalOpen(false);
       setSelectedFood(null);
-      setFeedback({ type: 'success', message: `"${selectedFood.name}" (${portionGrams}g) adicionado à refeição!` });
+      setFeedback({
+        type: 'success',
+        message: `"${selectedFood.name}" (${grams}g) adicionado à refeição com sucesso! Totais calculados.`,
+      });
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err.response?.data?.message || 'Falha ao adicionar alimento.' });
+      setFoodModalError(
+        err.response?.data?.message || 'Falha ao adicionar alimento à refeição. Verifique a conexão e tente novamente.'
+      );
+    } finally {
+      setIsAddingFood(false);
     }
   };
 
   const handleSaveGramsEdit = async (mealId: string, mealFoodId: string) => {
-    if (!activeDiet || editGramsValue <= 0) return;
+    if (!activeDiet) return;
+    const grams = Number(editGramsValue);
+    if (isNaN(grams) || grams <= 0) {
+      setFeedback({ type: 'error', message: 'A quantidade de alimento deve ser maior que zero (ex: 100g).' });
+      return;
+    }
     try {
       const res = await api.put(`/diets/${activeDiet.id}/meals/${mealId}/foods/${mealFoodId}`, {
-        quantityGrams: editGramsValue,
+        quantityGrams: grams,
       });
       setActiveDiet(res.data);
       setEditingItemId(null);
+      setFeedback({ type: 'success', message: 'Quantidade atualizada e valores nutricionais recalculados!' });
     } catch {
-      setFeedback({ type: 'error', message: 'Falha ao atualizar quantidade.' });
+      setFeedback({ type: 'error', message: 'Falha ao atualizar quantidade do alimento.' });
     }
   };
 
@@ -600,25 +650,25 @@ export const DietPlanner: React.FC = () => {
 
                 {activeDiet.meals.map((meal: any) => (
                   <div key={meal.id} className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h4 className="font-bold text-white text-base">{meal.name}</h4>
-                        <span className="text-xs text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full">
+                        <span className="text-xs text-slate-300 bg-slate-800 px-3 py-1 rounded-full font-medium">
                           {meal.totals.calories} kcal • {meal.totals.protein}g P • {meal.totals.carbs}g C • {meal.totals.fat}g G
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 self-end sm:self-auto">
                         <button
                           onClick={() => openFoodSearch(meal.id)}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-semibold transition flex items-center gap-1"
+                          className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold transition flex items-center gap-1.5 border border-emerald-500/20"
                         >
                           <Plus size={14} />
                           <span>Adicionar Alimento</span>
                         </button>
                         <button
                           onClick={() => handleRemoveMeal(meal.id)}
-                          className="p-1.5 text-slate-500 hover:text-rose-400 transition"
+                          className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
                           title="Excluir refeição"
                         >
                           <Trash2 size={16} />
@@ -627,81 +677,89 @@ export const DietPlanner: React.FC = () => {
                     </div>
 
                     {meal.items.length === 0 ? (
-                      <p className="text-xs text-slate-500 py-3 text-center">
-                        Nenhum alimento nesta refeição. Clique em "Adicionar Alimento" para buscar na TACO.
-                      </p>
+                      <div className="p-6 text-center rounded-2xl bg-slate-800/20 border border-slate-800/60 text-slate-500 text-xs space-y-1">
+                        <p>Nenhum alimento nesta refeição.</p>
+                        <p className="text-[11px] text-slate-600">Clique em "+ Adicionar Alimento" para pesquisar na tabela TACO.</p>
+                      </div>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-2.5">
                         {meal.items.map((item: any) => (
                           <div
                             key={item.id}
-                            className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                            className="p-4 rounded-2xl bg-slate-800/40 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs hover:border-slate-700 transition"
                           >
-                            <div className="flex-1">
-                              <div className="font-semibold text-slate-200 text-sm flex items-center gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-white text-sm flex flex-wrap items-center gap-2">
                                 <span>{item.name}</span>
                                 {item.warnings && item.warnings.length > 0 && (
-                                  <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">
-                                    Restrição
+                                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30">
+                                    Atenção: Restrição
                                   </span>
                                 )}
                               </div>
-                              <span className="text-slate-400 text-[11px]">{item.category}</span>
+                              <span className="text-slate-400 text-[11px] block mt-0.5">{item.category}</span>
                             </div>
 
-                            {/* Edição de Quantidade em Gramas */}
-                            <div className="flex items-center gap-4">
+                            {/* Controles de Quantidade, Nutrientes e Ações */}
+                            <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800/80">
+                              {/* Edição de Quantidade em Gramas */}
                               {editingItemId === item.id ? (
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-emerald-500/50">
                                   <input
                                     type="number"
                                     min={1}
                                     max={2000}
-                                    value={editGramsValue}
+                                    value={editGramsValue || ''}
                                     onChange={(e) => setEditGramsValue(Number(e.target.value))}
-                                    className="w-20 bg-slate-800 border border-emerald-500 rounded px-2 py-1 text-white text-xs"
+                                    className="w-16 bg-slate-800 rounded px-2 py-1 text-white font-bold text-center text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                    autoFocus
                                   />
-                                  <span className="text-slate-400">g</span>
+                                  <span className="text-slate-400 text-xs">g</span>
                                   <button
                                     onClick={() => handleSaveGramsEdit(meal.id, item.id)}
-                                    className="px-2 py-1 bg-emerald-600 text-slate-950 font-bold rounded text-xs"
+                                    className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded text-xs transition"
                                   >
-                                    Ok
+                                    Salvar
                                   </button>
                                   <button
                                     onClick={() => setEditingItemId(null)}
-                                    className="px-2 py-1 bg-slate-700 text-slate-300 rounded text-xs"
+                                    className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded text-xs transition"
                                   >
-                                    X
+                                    Cancelar
                                   </button>
                                 </div>
                               ) : (
-                                <div
-                                  onClick={() => {
-                                    setEditingItemId(item.id);
-                                    setEditGramsValue(item.quantityGrams);
-                                  }}
-                                  className="cursor-pointer hover:bg-slate-700/60 px-2 py-1 rounded flex items-center gap-1 text-slate-300"
-                                  title="Clique para editar gramagem"
-                                >
-                                  <span className="font-bold">{item.quantityGrams}g</span>
-                                  <Edit2 size={12} className="text-slate-400" />
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-xl text-xs">
+                                    {item.quantityGrams}g
+                                  </span>
+                                  <button
+                                    onClick={() => {
+                                      setEditingItemId(item.id);
+                                      setEditGramsValue(item.quantityGrams);
+                                    }}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition flex items-center gap-1 text-[11px]"
+                                    title="Editar quantidade em gramas"
+                                  >
+                                    <Edit2 size={13} />
+                                    <span>Editar</span>
+                                  </button>
                                 </div>
                               )}
 
-                              <div className="text-right min-w-[120px]">
-                                <span className="font-bold text-white">{item.nutrients.calories} kcal</span>
-                                <div className="text-[11px] text-slate-400">
+                              <div className="text-right px-2 min-w-[130px]">
+                                <span className="font-extrabold text-white text-xs block">{item.nutrients.calories} kcal</span>
+                                <div className="text-[10px] text-slate-400 mt-0.5">
                                   {item.nutrients.protein}g P • {item.nutrients.carbs}g C • {item.nutrients.fat}g G
                                 </div>
                               </div>
 
                               <button
                                 onClick={() => handleRemoveFood(meal.id, item.id)}
-                                className="p-1.5 text-slate-500 hover:text-rose-400 transition"
-                                title="Remover alimento"
+                                className="p-2 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                                title="Remover alimento da refeição"
                               >
-                                <Trash2 size={15} />
+                                <Trash2 size={16} />
                               </button>
                             </div>
                           </div>
@@ -1314,83 +1372,187 @@ export const DietPlanner: React.FC = () => {
       {/* MODAL DE BUSCA DE ALIMENTOS TACO NA REFEIÇÃO */}
       {isFoodModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl max-h-[85vh] flex flex-col shadow-2xl">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
                 <Search size={16} className="text-emerald-400" />
-                <span>Selecionar Alimento da Tabela TACO</span>
+                <span>Adicionar Alimento (Tabela TACO)</span>
               </h3>
-              <button onClick={() => setIsFoodModalOpen(false)} className="text-slate-400 hover:text-white">
+              <button
+                onClick={() => {
+                  setIsFoodModalOpen(false);
+                  setFoodModalError(null);
+                }}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+              >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="p-4 border-b border-slate-800">
-              <input
-                type="text"
-                value={searchFoodQuery}
-                onChange={(e) => handleFoodSearchChange(e.target.value)}
-                placeholder="Buscar alimento (arroz, frango, feijão, ovos...)"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
-                autoFocus
-              />
+            <div className="p-4 border-b border-slate-800 bg-slate-900 space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                <input
+                  type="text"
+                  value={searchFoodQuery}
+                  onChange={(e) => handleFoodSearchChange(e.target.value)}
+                  placeholder="Pesquisar alimento (ex: Arroz, Frango, Feijão, Ovo...)"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-white text-xs focus:outline-none focus:border-emerald-500 placeholder:text-slate-500"
+                  autoFocus
+                />
+                {foodSearchLoading && (
+                  <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-400 animate-spin" size={16} />
+                )}
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Selecione um alimento da base oficial para configurar a quantidade e calcular os macronutrientes.
+              </p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {foodResults.map((food) => {
-                const isSelected = selectedFood?.id === food.id;
-                return (
-                  <div
-                    key={food.id}
-                    onClick={() => setSelectedFood(food)}
-                    className={`p-3 rounded-xl border cursor-pointer transition flex items-center justify-between text-xs ${
-                      isSelected
-                        ? 'bg-emerald-500/10 border-emerald-500/50 text-white'
-                        : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <div>
-                      <div className="font-bold text-white">{food.name}</div>
-                      <div className="text-[10px] text-slate-400">{food.category}</div>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-extrabold text-emerald-400">{food.caloriesPer100g} kcal</span>
-                      <div className="text-[10px] text-slate-400">
-                        {food.proteinPer100g}g P • {food.carbsPer100g}g C • {food.fatPer100g}g G
+            {/* Lista de Alimentos Encontrados */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 min-h-[220px]">
+              {foodResults.length === 0 && !foodSearchLoading ? (
+                <div className="text-center py-12 text-slate-500 text-xs space-y-2">
+                  <UtensilsCrossed size={32} className="mx-auto text-slate-600" />
+                  <p>Nenhum alimento encontrado para "{searchFoodQuery}".</p>
+                  <p className="text-[11px] text-slate-600">Tente buscar por termos simples como "arroz", "frango" ou "leite".</p>
+                </div>
+              ) : (
+                foodResults.map((food) => {
+                  const isSelected = selectedFood?.id === food.id;
+                  return (
+                    <div
+                      key={food.id}
+                      onClick={() => {
+                        setSelectedFood(food);
+                        setFoodModalError(null);
+                      }}
+                      className={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center justify-between text-xs gap-3 ${
+                        isSelected
+                          ? 'bg-emerald-500/15 border-emerald-500 text-white shadow-md'
+                          : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800/80'
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-white text-sm truncate">{food.name}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5 truncate">{food.category}</div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="font-extrabold text-emerald-400 text-sm block">
+                          {food.caloriesPer100g} kcal
+                        </span>
+                        <div className="text-[10px] text-slate-400 mt-0.5">
+                          {food.proteinPer100g}g P • {food.carbsPer100g}g C • {food.fatPer100g}g G
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 pl-1">
+                        <button
+                          type="button"
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
+                            isSelected
+                              ? 'bg-emerald-500 text-slate-950'
+                              : 'bg-slate-700 hover:bg-emerald-600 hover:text-slate-950 text-slate-200'
+                          }`}
+                        >
+                          {isSelected ? 'Selecionado' : 'Selecionar'}
+                        </button>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
 
+            {/* Painel de Quantidade e Confirmação */}
             {selectedFood && (
-              <div className="p-4 border-t border-slate-800 bg-slate-950/60 rounded-b-3xl space-y-3">
-                <div className="flex items-center justify-between text-xs">
+              <div className="p-4 border-t border-slate-800 bg-slate-950/80 rounded-b-3xl space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                   <div>
-                    <span className="text-slate-400">Alimento:</span>
+                    <span className="text-slate-400 text-[11px] block">Alimento Selecionado:</span>
                     <div className="font-bold text-emerald-400 text-sm">{selectedFood.name}</div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <label className="text-slate-300">Porção:</label>
+                    <label className="text-slate-300 font-semibold text-xs">Quantidade:</label>
                     <input
                       type="number"
                       min={1}
                       max={2000}
-                      value={portionGrams}
-                      onChange={(e) => setPortionGrams(Number(e.target.value))}
-                      className="w-20 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-white text-center text-xs"
+                      value={portionGrams || ''}
+                      onChange={(e) => {
+                        setPortionGrams(Number(e.target.value));
+                        setFoodModalError(null);
+                      }}
+                      className="w-24 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-white font-bold text-center text-xs focus:outline-none focus:border-emerald-500"
                     />
-                    <span className="text-slate-400">gramas</span>
+                    <span className="text-slate-400 font-semibold">gramas</span>
                   </div>
                 </div>
 
+                {/* Prévia Nutricional Proporcional */}
+                {portionGrams > 0 && (
+                  <div className="grid grid-cols-4 gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-center text-[11px]">
+                    <div>
+                      <span className="text-slate-400 block">Calorias</span>
+                      <strong className="text-emerald-400">
+                        {Math.round((selectedFood.caloriesPer100g * portionGrams) / 100)} kcal
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block">Proteína</span>
+                      <strong className="text-sky-400">
+                        {((selectedFood.proteinPer100g * portionGrams) / 100).toFixed(1)}g
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block">Carboidratos</span>
+                      <strong className="text-amber-400">
+                        {((selectedFood.carbsPer100g * portionGrams) / 100).toFixed(1)}g
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block">Gorduras</span>
+                      <strong className="text-rose-400">
+                        {((selectedFood.fatPer100g * portionGrams) / 100).toFixed(1)}g
+                      </strong>
+                    </div>
+                  </div>
+                )}
+
+                {/* Alerta de Erro com Retry */}
+                {foodModalError && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle size={15} className="shrink-0 text-rose-400" />
+                      <span>{foodModalError}</span>
+                    </div>
+                    <button
+                      onClick={handleAddFoodToMeal}
+                      className="px-2.5 py-1 rounded bg-rose-600/30 hover:bg-rose-600 text-white font-bold text-[11px] shrink-0 transition"
+                    >
+                      Tentar Novamente
+                    </button>
+                  </div>
+                )}
+
                 <button
                   onClick={handleAddFoodToMeal}
-                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs transition"
+                  disabled={isAddingFood || !portionGrams || portionGrams <= 0}
+                  className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-extrabold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
                 >
-                  Adicionar à Refeição
+                  {isAddingFood ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Adicionando Alimento...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={16} />
+                      <span>ADICIONAR À REFEIÇÃO ({portionGrams || 0}g)</span>
+                    </>
+                  )}
                 </button>
               </div>
             )}

@@ -16,7 +16,16 @@ import {
   ArrowLeft,
   History,
   Check,
+  ChevronUp,
+  ChevronDown,
+  Edit2,
+  Loader2,
+  MessageSquare,
+  UserCheck,
+  Users,
+  PhoneCall,
 } from 'lucide-react';
+import { ProfessionalContactModal } from '../components/ProfessionalContactModal';
 
 interface ExerciseItem {
   id: string;
@@ -86,6 +95,31 @@ export const WorkoutPlanner: React.FC = () => {
   const [exWeightKg, setExWeightKg] = useState(20);
   const [exRestSec, setExRestSec] = useState(60);
   const [exNotes, setExNotes] = useState('');
+  const [isAddingExercise, setIsAddingExercise] = useState(false);
+  const [exerciseModalError, setExerciseModalError] = useState<string | null>(null);
+  const [exerciseSearchLoading, setExerciseSearchLoading] = useState(false);
+
+  // Edição de Exercício na Rotina
+  const [editingExercise, setEditingExercise] = useState<{
+    id: string;
+    exerciseName: string;
+    sets: number;
+    reps: number;
+    weightKg: number;
+    restSeconds: number;
+    notes: string;
+  } | null>(null);
+  const [isUpdatingExercise, setIsUpdatingExercise] = useState(false);
+
+  // Vínculo com Personal Trainer / Contato Profissional
+  const [associatedTrainer, setAssociatedTrainer] = useState<{
+    id: string;
+    name: string;
+    profession?: string;
+    specialty?: string;
+  } | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [trainerContactId, setTrainerContactId] = useState<string | null>(null);
 
   // -------------------------------------------------------------
   // ESTADOS DO WIZARD DE MONTAGEM (8 ETAPAS)
@@ -157,6 +191,7 @@ export const WorkoutPlanner: React.FC = () => {
 
   useEffect(() => {
     loadWorkouts();
+    checkTrainerAssociation();
   }, []);
 
   const handleTabChange = (tab: 'current' | 'wizard' | 'logger' | 'history' | 'exercises') => {
@@ -206,6 +241,30 @@ export const WorkoutPlanner: React.FC = () => {
     }
   };
 
+  const checkTrainerAssociation = async () => {
+    try {
+      const convRes = await api.get('/messages/conversations').catch(() => ({ data: [] }));
+      const convs = convRes.data || [];
+      const trainerConv = convs.find(
+        (c: any) =>
+          (c.profession && /educador|personal|treinador|fitness/i.test(c.profession)) ||
+          c.role === 'PROFESSIONAL'
+      );
+      if (trainerConv) {
+        setAssociatedTrainer({
+          id: trainerConv.contactId,
+          name: trainerConv.name,
+          profession: trainerConv.profession || 'Personal Trainer',
+          specialty: trainerConv.specialty || 'Musculação e Treinamento Físico',
+        });
+        return;
+      }
+      setAssociatedTrainer(null);
+    } catch {
+      setAssociatedTrainer(null);
+    }
+  };
+
   const openAddExerciseModal = async () => {
     setSelectedEx(null);
     setSearchExQuery('');
@@ -214,45 +273,134 @@ export const WorkoutPlanner: React.FC = () => {
     setExReps(10);
     setExWeightKg(20);
     setExRestSec(60);
+    setExNotes('');
+    setExerciseModalError(null);
     setIsAddExerciseModalOpen(true);
+    setExerciseSearchLoading(true);
     try {
-      const res = await api.get('/exercises', { params: { limit: 40 } });
-      setCatalogExercises(res.data);
+      const res = await api.get('/exercises', { params: { limit: 50 } });
+      const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+      setCatalogExercises(items);
     } catch {
-      // ignore
+      setCatalogExercises([]);
+    } finally {
+      setExerciseSearchLoading(false);
     }
   };
 
   const handleSearchExerciseInModal = async (query: string, muscle: string) => {
     setSearchExQuery(query);
     setSelectedMuscleFilter(muscle);
+    setExerciseModalError(null);
+    setExerciseSearchLoading(true);
     try {
       const res = await api.get('/exercises', {
-        params: { query: query || undefined, muscleGroup: muscle || undefined, limit: 40 },
+        params: { query: query || undefined, muscleGroup: muscle || undefined, limit: 50 },
       });
-      setCatalogExercises(res.data);
+      const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+      setCatalogExercises(items);
     } catch {
-      // ignore
+      setCatalogExercises([]);
+    } finally {
+      setExerciseSearchLoading(false);
     }
   };
 
   const handleAddExerciseToWorkout = async () => {
-    if (!selectedEx || !activeWorkout) return;
+    if (!selectedEx || !activeWorkout) {
+      setExerciseModalError('Selecione um exercício antes de adicionar.');
+      return;
+    }
+    const sets = Number(exSets);
+    const reps = Number(exReps);
+    const weight = Number(exWeightKg);
+    const rest = Number(exRestSec);
+
+    if (isNaN(sets) || sets < 1 || sets > 20) {
+      setExerciseModalError('O número de séries deve estar entre 1 e 20.');
+      return;
+    }
+    if (isNaN(reps) || reps < 1 || reps > 100) {
+      setExerciseModalError('O número de repetições deve estar entre 1 e 100.');
+      return;
+    }
+
+    setIsAddingExercise(true);
+    setExerciseModalError(null);
     try {
       const res = await api.post(`/workouts/${activeWorkout.id}/exercises`, {
         exerciseId: selectedEx.id,
-        sets: Number(exSets),
-        reps: Number(exReps),
-        weightKg: Number(exWeightKg),
-        restSeconds: Number(exRestSec),
-        notes: exNotes || undefined,
+        sets,
+        reps,
+        weightKg: isNaN(weight) ? 0 : Math.max(0, weight),
+        restSeconds: isNaN(rest) ? 60 : Math.max(10, rest),
+        notes: exNotes.trim() || undefined,
       });
       setActiveWorkout(res.data);
       setIsAddExerciseModalOpen(false);
       setSelectedEx(null);
-      setFeedback({ type: 'success', message: `Exercício "${selectedEx.name}" adicionado à rotina!` });
+      setFeedback({ type: 'success', message: `Exercício "${selectedEx.name}" adicionado à rotina com sucesso!` });
+    } catch (err: any) {
+      setExerciseModalError(
+        err.response?.data?.message || 'Falha ao adicionar exercício. Verifique os dados e tente novamente.'
+      );
+    } finally {
+      setIsAddingExercise(false);
+    }
+  };
+
+  const handleUpdateExercise = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingExercise || !activeWorkout) return;
+    const sets = Number(editingExercise.sets);
+    const reps = Number(editingExercise.reps);
+    const weight = Number(editingExercise.weightKg);
+    const rest = Number(editingExercise.restSeconds);
+
+    if (isNaN(sets) || sets < 1 || sets > 20) {
+      setFeedback({ type: 'error', message: 'Configuração inválida: Séries devem estar entre 1 e 20.' });
+      return;
+    }
+    if (isNaN(reps) || reps < 1 || reps > 100) {
+      setFeedback({ type: 'error', message: 'Configuração inválida: Repetições devem estar entre 1 e 100.' });
+      return;
+    }
+
+    setIsUpdatingExercise(true);
+    try {
+      const res = await api.put(`/workouts/${activeWorkout.id}/exercises/${editingExercise.id}`, {
+        sets,
+        reps,
+        weightKg: isNaN(weight) ? 0 : Math.max(0, weight),
+        restSeconds: isNaN(rest) ? 60 : Math.max(10, rest),
+        notes: editingExercise.notes?.trim() || undefined,
+      });
+      setActiveWorkout(res.data);
+      setEditingExercise(null);
+      setFeedback({ type: 'success', message: 'Exercício atualizado e salvo na rotina com sucesso!' });
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.response?.data?.message || 'Falha ao atualizar exercício.' });
+    } finally {
+      setIsUpdatingExercise(false);
+    }
+  };
+
+  const handleMoveExercise = async (index: number, direction: 'up' | 'down') => {
+    if (!activeWorkout || !activeWorkout.exercises) return;
+    const items = [...activeWorkout.exercises];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+
+    const temp = items[index];
+    items[index] = items[targetIndex];
+    items[targetIndex] = temp;
+
+    const exerciseIds = items.map((i) => i.id);
+    try {
+      const res = await api.put(`/workouts/${activeWorkout.id}/exercises/reorder`, { exerciseIds });
+      setActiveWorkout(res.data);
     } catch {
-      setFeedback({ type: 'error', message: 'Falha ao adicionar exercício.' });
+      setFeedback({ type: 'error', message: 'Falha ao reordenar exercícios.' });
     }
   };
 
@@ -386,9 +534,10 @@ export const WorkoutPlanner: React.FC = () => {
               limit: 60,
             },
           });
-          setAllCatalogExercises(res.data);
-          if (!selectedCatalogDetail && res.data.length > 0) {
-            setSelectedCatalogDetail(res.data[0]);
+          const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+          setAllCatalogExercises(items);
+          if (!selectedCatalogDetail && items.length > 0) {
+            setSelectedCatalogDetail(items[0]);
           }
         } catch {
           // ignore
@@ -459,6 +608,72 @@ export const WorkoutPlanner: React.FC = () => {
           <span>{feedback.message}</span>
         </div>
       )}
+
+      {/* Seção Dedicada: Contato e Acompanhamento com Personal Trainer (Requisito 9) */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-teal-950/20 to-slate-900 border border-teal-500/20 shadow-xl space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 shrink-0">
+              <UserCheck size={24} />
+            </div>
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-teal-400 block">
+                Acompanhamento Profissional
+              </span>
+              <h3 className="font-extrabold text-white text-base sm:text-lg">
+                PRECISA DE AJUDA COM SEU TREINO?
+              </h3>
+              {associatedTrainer ? (
+                <p className="text-xs text-teal-300 mt-0.5">
+                  Seu Personal Trainer responsável: <strong className="text-white">{associatedTrainer.name}</strong> ({associatedTrainer.profession})
+                </p>
+              ) : (
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Você ainda não possui um profissional de treinamento associado. Tire dúvidas sobre execução e periodização.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+            {associatedTrainer ? (
+              <button
+                onClick={() => {
+                  setTrainerContactId(associatedTrainer.id);
+                  setIsContactModalOpen(true);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center gap-2"
+              >
+                <MessageSquare size={16} />
+                <span>FALAR COM PERSONAL</span>
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setTrainerContactId(null);
+                    setIsContactModalOpen(true);
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-500/30 font-semibold text-xs transition flex items-center gap-1.5"
+                >
+                  <Users size={15} />
+                  <span>ENCONTRAR PROFISSIONAL</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setTrainerContactId(null);
+                    setIsContactModalOpen(true);
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-teal-500/20 transition flex items-center gap-1.5"
+                >
+                  <PhoneCall size={15} />
+                  <span>SOLICITAR CONTATO</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* 2. Navegação por Abas Condensadas */}
       <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
@@ -651,37 +866,95 @@ export const WorkoutPlanner: React.FC = () => {
                     {activeWorkout.exercises.map((item, idx) => (
                       <div
                         key={item.id}
-                        className="p-4 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                        className="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs hover:border-slate-700 transition shadow-sm"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="w-7 h-7 rounded-lg bg-slate-800 text-emerald-400 font-extrabold flex items-center justify-center text-xs shrink-0">
-                            {idx + 1}
-                          </span>
-                          <div>
-                            <div className="font-bold text-sm text-white">{item.exercise.name}</div>
-                            <div className="text-slate-400 text-[11px] mt-0.5">
-                              {item.exercise.muscleGroup} • {item.exercise.equipment}
+                        {/* Identificador, Reordenação e Nome */}
+                        <div className="flex items-start sm:items-center gap-3">
+                          {/* Controles de Reordenação (Requisito 7) */}
+                          <div className="flex flex-col items-center gap-0.5 shrink-0 bg-slate-800/80 p-1 rounded-xl border border-slate-700/60">
+                            <button
+                              onClick={() => handleMoveExercise(idx, 'up')}
+                              disabled={idx === 0}
+                              className="p-1 rounded text-slate-400 hover:text-emerald-400 disabled:opacity-25 disabled:cursor-not-allowed transition"
+                              title="Subir posição do exercício"
+                            >
+                              <ChevronUp size={15} />
+                            </button>
+                            <span className="text-[11px] font-black text-white px-1">{idx + 1}</span>
+                            <button
+                              onClick={() => handleMoveExercise(idx, 'down')}
+                              disabled={idx === activeWorkout.exercises.length - 1}
+                              className="p-1 rounded text-slate-400 hover:text-emerald-400 disabled:opacity-25 disabled:cursor-not-allowed transition"
+                              title="Descer posição do exercício"
+                            >
+                              <ChevronDown size={15} />
+                            </button>
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="font-bold text-sm text-white flex flex-wrap items-center gap-2">
+                              <span>{item.exercise.name}</span>
+                              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                                {item.exercise.muscleGroup}
+                              </span>
+                            </div>
+                            <div className="text-slate-400 text-[11px] mt-1 flex flex-wrap items-center gap-2">
+                              <span>Equipamento: <strong className="text-slate-300">{item.exercise.equipment}</strong></span>
+                              {item.notes && (
+                                <span className="text-slate-400 italic bg-slate-800/60 px-2 py-0.5 rounded-md">
+                                  "{item.notes}"
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4 self-end sm:self-center">
-                          <div className="text-right">
-                            <span className="font-bold text-white">
-                              {item.sets} séries × {item.reps} reps
-                            </span>
-                            <div className="text-[11px] text-slate-400">
-                              {item.weightKg > 0 ? `${item.weightKg} kg` : 'Peso Corporal'} • Descanso: {item.restSeconds}s
+                        {/* Parâmetros Prescritos e Botões de Ação */}
+                        <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-800">
+                          <div className="flex items-center gap-2">
+                            <div className="p-2 rounded-xl bg-slate-800/70 border border-slate-700/50 text-center min-w-[90px]">
+                              <span className="font-extrabold text-white text-xs block">
+                                {item.sets} × {item.reps}
+                              </span>
+                              <span className="text-[10px] text-slate-400">séries × reps</span>
+                            </div>
+
+                            <div className="p-2 rounded-xl bg-slate-800/70 border border-slate-700/50 text-center min-w-[95px]">
+                              <span className="font-extrabold text-teal-400 text-xs block">
+                                {item.weightKg > 0 ? `${item.weightKg} kg` : 'Corporal'}
+                              </span>
+                              <span className="text-[10px] text-slate-400">{item.restSeconds}s desc.</span>
                             </div>
                           </div>
 
-                          <button
-                            onClick={() => handleRemoveExercise(item.id)}
-                            className="p-1.5 text-slate-500 hover:text-rose-400 transition"
-                            title="Remover exercício"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              onClick={() =>
+                                setEditingExercise({
+                                  id: item.id,
+                                  exerciseName: item.exercise.name,
+                                  sets: item.sets,
+                                  reps: item.reps,
+                                  weightKg: item.weightKg,
+                                  restSeconds: item.restSeconds,
+                                  notes: item.notes || '',
+                                })
+                              }
+                              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5"
+                              title="Editar séries, repetições e carga"
+                            >
+                              <Edit2 size={13} />
+                              <span>Editar</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleRemoveExercise(item.id)}
+                              className="p-2 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                              title="Remover exercício da rotina"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1372,126 +1645,374 @@ export const WorkoutPlanner: React.FC = () => {
       {/* MODAL ADICIONAR EXERCÍCIO À ROTINA ATIVA */}
       {isAddExerciseModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl max-h-[85vh] flex flex-col shadow-2xl">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <Dumbbell size={16} className="text-emerald-400" />
-                <span>Selecionar Exercício do Catálogo</span>
+                <Dumbbell size={16} className="text-teal-400" />
+                <span>Adicionar Exercício ao Treino</span>
               </h3>
-              <button onClick={() => setIsAddExerciseModalOpen(false)} className="text-slate-400 hover:text-white">
+              <button
+                onClick={() => {
+                  setIsAddExerciseModalOpen(false);
+                  setExerciseModalError(null);
+                }}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+              >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="p-4 border-b border-slate-800 flex gap-2">
-              <input
-                type="text"
-                value={searchExQuery}
-                onChange={(e) => handleSearchExerciseInModal(e.target.value, selectedMuscleFilter)}
-                placeholder="Buscar por nome..."
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
-              />
-            </div>
+            <div className="p-4 border-b border-slate-800 bg-slate-900 space-y-2.5">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                <input
+                  type="text"
+                  value={searchExQuery}
+                  onChange={(e) => handleSearchExerciseInModal(e.target.value, selectedMuscleFilter)}
+                  placeholder="Pesquisar exercício (ex: Supino, Agachamento, Puxada...)"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-white text-xs focus:outline-none focus:border-teal-500 placeholder:text-slate-500"
+                  autoFocus
+                />
+                {exerciseSearchLoading && (
+                  <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-teal-400 animate-spin" size={16} />
+                )}
+              </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {catalogExercises.map((ex) => {
-                const isSelected = selectedEx?.id === ex.id;
-                return (
-                  <div
-                    key={ex.id}
-                    onClick={() => setSelectedEx(ex)}
-                    className={`p-3 rounded-xl border cursor-pointer transition flex items-center justify-between text-xs ${
-                      isSelected
-                        ? 'bg-emerald-500/10 border-emerald-500/50 text-white'
-                        : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800'
+              {/* Filtros Rápidos de Grupo Muscular */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px]">
+                {[
+                  { id: '', label: 'Todos' },
+                  { id: 'CHEST', label: 'Peito' },
+                  { id: 'BACK', label: 'Costas' },
+                  { id: 'QUADRICEPS', label: 'Quadríceps' },
+                  { id: 'HAMSTRINGS', label: 'Posterior' },
+                  { id: 'SHOULDERS', label: 'Ombros' },
+                  { id: 'BICEPS', label: 'Bíceps' },
+                  { id: 'TRICEPS', label: 'Tríceps' },
+                  { id: 'GLUTES', label: 'Glúteos' },
+                  { id: 'ABS', label: 'Abdômen' },
+                ].map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => handleSearchExerciseInModal(searchExQuery, m.id)}
+                    className={`px-2.5 py-1 rounded-lg font-semibold shrink-0 transition ${
+                      selectedMuscleFilter === m.id
+                        ? 'bg-teal-500 text-slate-950 font-bold'
+                        : 'bg-slate-800 text-slate-400 hover:text-white'
                     }`}
                   >
-                    <div>
-                      <div className="font-bold text-white">{ex.name}</div>
-                      <div className="text-[10px] text-slate-400">
-                        {ex.muscleGroup} • {ex.equipment}
-                      </div>
-                    </div>
-                    {isSelected && <Check size={16} className="text-emerald-400" />}
-                  </div>
-                );
-              })}
+                    {m.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
+            {/* Lista de Exercícios Encontrados */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 min-h-[220px]">
+              {catalogExercises.length === 0 && !exerciseSearchLoading ? (
+                <div className="text-center py-12 text-slate-500 text-xs space-y-2">
+                  <Dumbbell size={32} className="mx-auto text-slate-600" />
+                  <p>Nenhum exercício encontrado para "{searchExQuery}".</p>
+                  <p className="text-[11px] text-slate-600">Tente buscar por termos como "supino", "remada" ou "agachamento".</p>
+                </div>
+              ) : (
+                catalogExercises.map((ex) => {
+                  const isSelected = selectedEx?.id === ex.id;
+                  return (
+                    <div
+                      key={ex.id}
+                      onClick={() => {
+                        setSelectedEx(ex);
+                        setExerciseModalError(null);
+                      }}
+                      className={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center justify-between text-xs gap-3 ${
+                        isSelected
+                          ? 'bg-teal-500/15 border-teal-500 text-white shadow-md'
+                          : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800/80'
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-white text-sm truncate">{ex.name}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5 truncate">
+                          {ex.muscleGroup} • Equipamento: {ex.equipment}
+                        </div>
+                      </div>
+
+                      <div className="shrink-0">
+                        <button
+                          type="button"
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
+                            isSelected
+                              ? 'bg-teal-500 text-slate-950'
+                              : 'bg-slate-700 hover:bg-teal-500 hover:text-slate-950 text-slate-200'
+                          }`}
+                        >
+                          {isSelected ? 'Selecionado' : 'Selecionar'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Painel Progressivo de Configuração de Cargas e Séries */}
             {selectedEx && (
-              <div className="p-4 border-t border-slate-800 bg-slate-950/60 rounded-b-3xl space-y-3">
-                <div className="grid grid-cols-4 gap-2 text-xs">
+              <div className="p-4 border-t border-slate-800 bg-slate-950/80 rounded-b-3xl space-y-3">
+                <div className="flex items-center justify-between text-xs">
                   <div>
-                    <label className="text-slate-400 block">Séries:</label>
+                    <span className="text-slate-400 text-[11px] block">Exercício Selecionado:</span>
+                    <strong className="text-teal-400 text-sm">{selectedEx.name}</strong>
+                  </div>
+                  <span className="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">
+                    {selectedEx.muscleGroup}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <div>
+                    <label className="text-slate-400 block font-medium mb-1">Séries:</label>
                     <input
                       type="number"
                       min={1}
                       max={20}
-                      value={exSets}
-                      onChange={(e) => setExSets(Number(e.target.value))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white text-center"
+                      value={exSets || ''}
+                      onChange={(e) => {
+                        setExSets(Number(e.target.value));
+                        setExerciseModalError(null);
+                      }}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-1.5 text-white font-bold text-center focus:outline-none focus:border-teal-500"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block">Reps:</label>
+                    <label className="text-slate-400 block font-medium mb-1">Repetições:</label>
                     <input
                       type="number"
                       min={1}
                       max={100}
-                      value={exReps}
-                      onChange={(e) => setExReps(Number(e.target.value))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white text-center"
+                      value={exReps || ''}
+                      onChange={(e) => {
+                        setExReps(Number(e.target.value));
+                        setExerciseModalError(null);
+                      }}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-1.5 text-white font-bold text-center focus:outline-none focus:border-teal-500"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block">Carga (kg):</label>
+                    <label className="text-slate-400 block font-medium mb-1">Carga (kg):</label>
                     <input
                       type="number"
                       min={0}
                       max={500}
-                      value={exWeightKg}
-                      onChange={(e) => setExWeightKg(Number(e.target.value))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white text-center"
+                      value={exWeightKg === 0 ? '0' : exWeightKg || ''}
+                      onChange={(e) => {
+                        setExWeightKg(Number(e.target.value));
+                        setExerciseModalError(null);
+                      }}
+                      placeholder="0 = corporal"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-1.5 text-white font-bold text-center focus:outline-none focus:border-teal-500"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-400 block">Descanso (s):</label>
+                    <label className="text-slate-400 block font-medium mb-1">Descanso (s):</label>
                     <input
                       type="number"
                       min={10}
                       max={300}
-                      value={exRestSec}
-                      onChange={(e) => setExRestSec(Number(e.target.value))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white text-center"
+                      value={exRestSec || ''}
+                      onChange={(e) => {
+                        setExRestSec(Number(e.target.value));
+                        setExerciseModalError(null);
+                      }}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-1.5 text-white font-bold text-center focus:outline-none focus:border-teal-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-slate-400 block text-xs mb-1">Observações técnicas (opcional):</label>
+                  <label className="text-slate-400 block text-[11px] mb-1">Observações técnicas (opcional):</label>
                   <input
                     type="text"
                     value={exNotes}
                     onChange={(e) => setExNotes(e.target.value)}
-                    placeholder="Ex: Pegada pronada, drop-set na última série"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-white text-xs"
+                    placeholder="Ex: Pegada supinada, cadência 3-0-1, drop-set na última"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-white text-xs focus:outline-none focus:border-teal-500 placeholder:text-slate-500"
                   />
                 </div>
 
+                {/* Alerta de Erro com Retry */}
+                {exerciseModalError && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle size={15} className="shrink-0 text-rose-400" />
+                      <span>{exerciseModalError}</span>
+                    </div>
+                    <button
+                      onClick={handleAddExerciseToWorkout}
+                      className="px-2.5 py-1 rounded bg-rose-600/30 hover:bg-rose-600 text-white font-bold text-[11px] shrink-0 transition"
+                    >
+                      Tentar Novamente
+                    </button>
+                  </div>
+                )}
+
                 <button
                   onClick={handleAddExerciseToWorkout}
-                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs transition"
+                  disabled={isAddingExercise || !exSets || exSets <= 0 || !exReps || exReps <= 0}
+                  className="w-full py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-extrabold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20"
                 >
-                  Adicionar à Rotina
+                  {isAddingExercise ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Adicionando Exercício...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={16} />
+                      <span>ADICIONAR AO TREINO ({exSets}×{exReps})</span>
+                    </>
+                  )}
                 </button>
               </div>
             )}
           </div>
         </div>
       )}
+
+      {/* MODAL EDITAR EXERCÍCIO EXISTENTE NA ROTINA */}
+      {editingExercise && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-white text-base flex items-center gap-2">
+                <Edit2 size={16} className="text-teal-400" />
+                <span>Editar Exercício da Rotina</span>
+              </h3>
+              <button
+                onClick={() => setEditingExercise(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div>
+              <span className="text-xs text-slate-400 block">Exercício:</span>
+              <strong className="text-white text-sm">{editingExercise.exerciseName}</strong>
+            </div>
+
+            <form onSubmit={handleUpdateExercise} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">Séries (1–20):</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={editingExercise.sets || ''}
+                    onChange={(e) =>
+                      setEditingExercise({ ...editingExercise, sets: Number(e.target.value) })
+                    }
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold text-center focus:outline-none focus:border-teal-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">Repetições (1–100):</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={editingExercise.reps || ''}
+                    onChange={(e) =>
+                      setEditingExercise({ ...editingExercise, reps: Number(e.target.value) })
+                    }
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold text-center focus:outline-none focus:border-teal-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">Carga (kg):</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={500}
+                    value={editingExercise.weightKg === 0 ? '0' : editingExercise.weightKg || ''}
+                    onChange={(e) =>
+                      setEditingExercise({ ...editingExercise, weightKg: Number(e.target.value) })
+                    }
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold text-center focus:outline-none focus:border-teal-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">Descanso (s):</label>
+                  <input
+                    type="number"
+                    min={10}
+                    max={300}
+                    value={editingExercise.restSeconds || ''}
+                    onChange={(e) =>
+                      setEditingExercise({ ...editingExercise, restSeconds: Number(e.target.value) })
+                    }
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold text-center focus:outline-none focus:border-teal-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-300 font-semibold text-xs block mb-1">Observações Técnicas:</label>
+                <input
+                  type="text"
+                  value={editingExercise.notes}
+                  onChange={(e) =>
+                    setEditingExercise({ ...editingExercise, notes: e.target.value })
+                  }
+                  placeholder="Ex: Foco no pico de contração"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingExercise(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingExercise}
+                  className="px-5 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 disabled:opacity-50 text-slate-950 font-bold text-xs transition flex items-center gap-1.5"
+                >
+                  {isUpdatingExercise ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      <span>Salvando...</span>
+                    </>
+                  ) : (
+                    <span>Salvar Alterações</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONTATO COM PROFISSIONAL / PERSONAL TRAINER */}
+      <ProfessionalContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        initialContactId={trainerContactId}
+      />
     </div>
   );
 };

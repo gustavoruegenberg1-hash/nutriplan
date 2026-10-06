@@ -22,6 +22,23 @@ export class FoodsController {
     });
   }
 
+  @Get('search')
+  async searchFoods(
+    @Query('query') query?: string,
+    @Query('category') category?: string,
+    @Query('tag') tag?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.foodsService.searchFoods({
+      query,
+      category,
+      tag,
+      limit: limit ? parseInt(limit, 10) : 40,
+      offset: offset ? parseInt(offset, 10) : 0,
+    });
+  }
+
   @Get('categories')
   async getCategories(): Promise<string[]> {
     return this.foodsService.getCategories();

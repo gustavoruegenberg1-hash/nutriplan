@@ -99,6 +99,16 @@ export class WorkoutsController {
     return this.workoutsService.addExerciseToWorkout(user.userId, workoutId, dto);
   }
 
+  @Put('workouts/:id/exercises/reorder')
+  @UseGuards(JwtAuthGuard)
+  async reorderExercises(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') workoutId: string,
+    @Body() dto: { exerciseIds: string[] },
+  ) {
+    return this.workoutsService.reorderWorkoutExercises(user.userId, workoutId, dto.exerciseIds);
+  }
+
   @Put('workouts/:id/exercises/:weId')
   @UseGuards(JwtAuthGuard)
   async updateExercise(

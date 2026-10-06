@@ -84,13 +84,18 @@ class FoodService {
       const res = await api.get('/foods/search', {
         params: { query: cleanQuery, limit },
       });
-      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+      const items: FoodItem[] = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.items)
+        ? res.data.items
+        : [];
+      if (items.length > 0) {
         const currentIds = new Set(this.memoryCache.map((f) => f.id));
-        const newItems = res.data.filter((f: FoodItem) => !currentIds.has(f.id));
+        const newItems = items.filter((f: FoodItem) => !currentIds.has(f.id));
         if (newItems.length > 0) {
           this.persistCache([...newItems, ...this.memoryCache]);
         }
-        return res.data;
+        return items;
       }
     } catch {
       // Fallback para busca local

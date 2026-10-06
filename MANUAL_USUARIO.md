@@ -66,19 +66,21 @@ O Dashboard centraliza todas as informações essenciais em uma única visão:
 
 ### 4.3. Adicionando Alimentos da Base Científica TACO
 1. Na refeição desejada, clique em **"+ Adicionar Alimento"**.
-2. Uma janela com o catálogo da **Tabela TACO (744 alimentos oficiais)** será aberta.
-3. Digite o nome do alimento na barra de busca (ex: *Frango*, *Arroz*, *Ovo*, *Banana*).
-4. Clique no alimento desejado para selecioná-lo e visualize os nutrientes de referência por 100g.
-5. Digite a quantidade em **gramas** que você consumirá (ex: 150g).
-6. Clique em **"Adicionar Alimento"**.
-7. O sistema recalculará na hora as calorias, proteínas, carboidratos e gorduras proporcionais dessa porção e atualizará os totais da refeição e do dia.
+2. A interface de seleção da **Tabela TACO (744 alimentos oficiais)** será aberta.
+3. Digite o nome do alimento na barra de busca (ex: *Arroz*, *Frango*, *Feijão*, *Ovo*, *Banana*).
+4. O catálogo exibirá apenas as informações essenciais por 100g: **Nome**, **Categoria**, **Calorias**, **Proteínas**, **Carboidratos** e **Gorduras**.
+5. Clique no alimento desejado para selecioná-lo.
+6. Informe a porção em **gramas** (ex: 100g). O sistema valida a entrada, impedindo valores zerados, negativos ou em branco.
+7. Veja a prévia instantânea dos macronutrientes proporcionais à quantidade informada.
+8. Clique em **"ADICIONAR À REFEIÇÃO"**. Em caso de falha de conexão, uma mensagem clara com botão de tentar novamente será apresentada.
+9. O sistema atualizará os totais da refeição e da dieta automaticamente.
 
-### 4.4. Ajustando Gramas ou Removendo Alimentos
-* Para ajustar a quantidade de um alimento, clique no botão de edição ao lado dos gramas, altere o valor e confirme. Todos os macronutrientes serão recalculados instantaneamente.
-* Para excluir um alimento, basta clicar no ícone de lixeira.
+### 4.4. Editando e Removendo Alimentos da Dieta
+* **Editar quantidade:** No card do alimento dentro da refeição, clique no botão **"Editar"** ou sobre o valor em gramas, digite o novo peso e clique em **"Salvar"**. Os macronutrientes da refeição e os totais diários serão recalculados imediatamente.
+* **Remover alimento:** Clique no ícone de lixeira (**"Remover"**) para excluir o item. Os totais calóricos e nutricionais são subtraídos na mesma hora.
 
 ### 4.5. Gerador de Dieta Assistido (Montagem Automática)
-* Se preferir uma sugestão automática inicial baseada nas metas do seu perfil, clique no botão **"Gerador Assistido"** no topo da tela de dietas.
+* Se preferir uma sugestão automática inicial baseada nas metas do seu perfil, clique no botão **"Montar Nova Dieta (8 Etapas)"** no topo da tela de dietas.
 * O sistema distribuirá alimentos balanceados da base TACO entre as refeições do seu dia para atingir suas metas de calorias e proteínas. Você poderá editar, trocar ou remover qualquer alimento da sugestão a qualquer momento.
 
 ---
@@ -98,22 +100,36 @@ O Dashboard centraliza todas as informações essenciais em uma única visão:
 ## 6. Planejando e Acompanhando seus Treinos
 
 ### 6.1. Criando uma Ficha de Treino
-1. Acesse o menu **"Treinos"**.
+1. Acesse o menu **"Treino"** (ou a aba Treino).
 2. Clique no botão **"Nova Ficha"**.
 3. Defina o nome da ficha (ex: *Treino A - Peitoral e Tríceps*), a divisão muscular (*Treino A*, *Treino B*, *Superior*, *Inferior*, etc.) e a duração estimada em minutos.
 
-### 6.2. Adicionando Exercícios à Ficha
-1. Na ficha selecionada, clique em **"Adicionar Exercício"**.
-2. Busque pelo nome do exercício ou filtre pelo grupamento muscular (Peito, Costas, Quadríceps, Ombros, etc.) dentre os 128 exercícios disponíveis.
-3. Configure:
-   * Quantidade de **Séries** (ex: 4);
-   * Quantidade de **Repetições** (ex: 10 a 12);
-   * **Carga Sugerida** em kg (ex: 30 kg);
-   * Tempo de **Descanso** em segundos (ex: 60s ou 90s);
-   * Observações técnicas de execução (opcional).
-4. Clique em **"Adicionar Exercício"**.
+### 6.2. Adicionando Exercícios à Ficha (Fluxo Passo a Passo)
+1. Na ficha de treino ativa, localize a seção de exercícios e clique no botão **"+ Adicionar Exercício"**.
+2. Uma janela dedicada e otimizada para mobile e desktop será aberta:
+   * **Busca Rápida**: Digite o nome do exercício (ex: *Supino*, *Agachamento*, *Puxada*).
+   * **Filtros por Grupamento Muscular**: Toque nos chips rápidos (Todos, Peito, Costas, Pernas, Ombros, Bíceps, Tríceps, Abdômen).
+   * **Seleção do Exercício**: Toque no exercício desejado dentre os 128 exercícios do catálogo. O sistema exibe o nome, músculo principal e equipamento.
+3. Configure os parâmetros da prescrição:
+   * **Séries**: Quantidade de séries (mínimo 1, padrão 3 ou 4);
+   * **Repetições**: Faixa de repetições planejada (mínimo 1, padrão 8 a 12);
+   * **Carga Sugerida (kg)**: Carga inicial em quilogramas (opcional, padrão 0);
+   * **Tempo de Descanso (segundos)**: Intervalo de recuperação entre séries (mínimo 1, padrão 60s);
+   * **Observações Técnicas**: Orientações de cadência ou pegada (opcional).
+4. Clique em **"Adicionar à Ficha"**. O botão exibe estado de carregamento e trata eventuais falhas com opção de repetição imediata.
 
-### 6.3. Registrando a Execução Real do Treino (Log de Treino)
+### 6.3. Editando e Reordenando Exercícios
+Cada exercício é exibido como um card vertical responsivo, ideal para dispositivos móveis:
+* **Reordenação (Subir / Descer)**: Utilize as setas **▲** e **▼** em cada exercício para alterar a sequência cronológica do treino. A nova ordem é salva atomicamente no servidor.
+* **Editar Exercício**: Clique no botão **"Editar"** para abrir o modal de ajustes de séries, repetições, carga planejada e descanso. Ao salvar, as alterações são gravadas imediatamente.
+* **Remover Exercício**: Clique no botão **"Remover"** (ícone de lixeira) para retirar o exercício da rotina com confirmação.
+
+### 6.4. Seção Integrada: Precisa de Ajuda com seu Treino? [ Falar com Personal ]
+Em todas as resoluções (Desktop, Tablet e Celular), a tela de treinos inclui uma área permanente de suporte técnico:
+* **Aluno com Personal Vinculado**: O sistema reconhece o educador físico credenciado e o botão **"Falar com Personal"** abre diretamente a conversa em tempo real com seu treinador.
+* **Aluno sem Personal**: É exibido o aviso amigável *"Você ainda não possui um profissional de treinamento associado"*, com botão rápido para abrir a lista de treinadores físicos homologados no sistema, permitindo solicitar acompanhamento profissional imediatamente.
+
+### 6.5. Registrando a Execução Real do Treino (Log de Treino)
 1. Ao concluir uma sessão de treinamento na academia ou em casa, abra sua ficha e clique no botão **"Registrar Execução"**.
 2. O sistema abrirá a ficha preenchida com os exercícios daquele treino.
 3. Ajuste caso você tenha feito repetições diferentes ou cargas diferentes (ex: aumentou de 30kg para 32.5kg na última série).

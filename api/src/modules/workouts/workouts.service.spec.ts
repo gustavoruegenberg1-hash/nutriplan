@@ -137,6 +137,37 @@ describe('WorkoutsService (Módulo de Treinos, Exercícios e Logs Históricos)',
     expect(w3.totalSets).toBe(0);
   });
 
+  it('TEST-WORK-005: deve reordenar exercícios na rotina de treino e persistir a ordem', async () => {
+    const workout = await workoutsService.createWorkout(userAId, { name: 'Treino A' });
+    const allEx = await workoutsService.searchExercises({ limit: 5 });
+    const ex1 = allEx.items[0];
+    const ex2 = allEx.items[1];
+
+    await workoutsService.addExerciseToWorkout(userAId, workout.id, {
+      exerciseId: ex1.id,
+      sets: 3,
+      reps: 10,
+    });
+    const wAdded = await workoutsService.addExerciseToWorkout(userAId, workout.id, {
+      exerciseId: ex2.id,
+      sets: 4,
+      reps: 12,
+    });
+
+    expect(wAdded.exercises[0].exerciseId).toBe(ex1.id);
+    expect(wAdded.exercises[1].exerciseId).toBe(ex2.id);
+
+    // Inverte a ordem
+    const weId1 = wAdded.exercises[0].id;
+    const weId2 = wAdded.exercises[1].id;
+    const wReordered = await workoutsService.reorderWorkoutExercises(userAId, workout.id, [weId2, weId1]);
+
+    expect(wReordered.exercises[0].id).toBe(weId2);
+    expect(wReordered.exercises[0].exerciseId).toBe(ex2.id);
+    expect(wReordered.exercises[1].id).toBe(weId1);
+    expect(wReordered.exercises[1].exerciseId).toBe(ex1.id);
+  });
+
   it('TEST-LOG-001: deve registrar sessão realizada de treino com exercícios e cargas (RN24)', async () => {
     const workout = await workoutsService.createWorkout(userAId, { name: 'Treino Pernas' });
     await workoutsService.addExerciseToWorkout(userAId, workout.id, {

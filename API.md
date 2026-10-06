@@ -204,7 +204,7 @@ Grava uma nova aferição de peso na tabela `weight_history` e atualiza o peso a
 ### 4.1. Pesquisar Alimentos no Catálogo Oficial
 Permite filtrar 744 alimentos por texto, categoria ou tags nutricionais.
 * **Método:** `GET`
-* **Rota:** `/foods`
+* **Rotas:** `/foods` e `/foods/search`
 * **Autenticação:** Pública ou Autenticada
 * **Query Parameters:**
   * `query`: Termo de busca (ex: `Frango`, `Arroz`, `Aveia`)
@@ -451,7 +451,53 @@ Algoritmo que distribui alimentos da base TACO em refeições para atingir a met
 
 ---
 
-### 6.5. Registrar Execução de Treino (RN22, RN24 - Histórico Imutável)
+### 6.5. Atualizar Exercício da Ficha de Treino (RN16, RN22)
+Permite alterar o número de séries, repetições, carga em kg, tempo de descanso e anotações técnicas.
+* **Método:** `PUT`
+* **Rota:** `/workouts/:id/exercises/:weId`
+* **Autenticação:** Requer Bearer Token
+
+#### Corpo da Requisição (JSON)
+```json
+{
+  "sets": 4,
+  "reps": 12,
+  "weightKg": 35.0,
+  "restSeconds": 60,
+  "notes": "Aumentada a carga em relação à semana anterior"
+}
+```
+
+---
+
+### 6.6. Reordenar Exercícios da Ficha de Treino
+Persiste atomicamente a nova ordem dos exercícios da rotina no banco relacional SQLite.
+* **Método:** `PUT`
+* **Rota:** `/workouts/:id/exercises/reorder`
+* **Autenticação:** Requer Bearer Token
+
+#### Corpo da Requisição (JSON)
+```json
+{
+  "exerciseIds": [
+    "we-uuid-item-2",
+    "we-uuid-item-1",
+    "we-uuid-item-3"
+  ]
+}
+```
+
+---
+
+### 6.7. Remover Exercício da Ficha de Treino
+Remove o exercício da ficha e recalcula o total de séries da rotina.
+* **Método:** `DELETE`
+* **Rota:** `/workouts/:id/exercises/:weId`
+* **Autenticação:** Requer Bearer Token
+
+---
+
+### 6.8. Registrar Execução de Treino (RN22, RN24 - Histórico Imutável)
 Grava uma sessão de treino concluída na tabela de histórico `workout_logs` e `workout_log_exercises`.
 * **Método:** `POST`
 * **Rota:** `/workouts/:id/log`

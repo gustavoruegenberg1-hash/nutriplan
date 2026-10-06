@@ -357,6 +357,24 @@ export class WorkoutsService {
     return this.getWorkoutById(userId, workoutId);
   }
 
+  async reorderWorkoutExercises(userId: string, workoutId: string, exerciseIds: string[]): Promise<DetailedWorkout> {
+    await this.getWorkoutById(userId, workoutId);
+
+    if (Array.isArray(exerciseIds) && exerciseIds.length > 0) {
+      this.db.transaction(() => {
+        exerciseIds.forEach((id, idx) => {
+          this.db.run(
+            'UPDATE workout_exercises SET order_index = ? WHERE id = ? AND workout_id = ?',
+            [idx, id, workoutId]
+          );
+        });
+      });
+      this.db.run('UPDATE workouts SET updated_at = ? WHERE id = ?', [new Date().toISOString(), workoutId]);
+    }
+
+    return this.getWorkoutById(userId, workoutId);
+  }
+
   // 3. Registro e Histórico de Treino Executado (RN24)
   async logWorkout(userId: string, workoutId: string, dto: CreateWorkoutLogDto): Promise<WorkoutLogEntity> {
     const workout = await this.getWorkoutById(userId, workoutId);
