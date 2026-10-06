@@ -79,6 +79,10 @@ O sistema atende a requisitos acadêmicos rigorosos de Engenharia de Software:
 ### 3.7. Módulo Dashboard e Notificações
 - **RF33 — Painel de Controle Integrado (Dashboard):** Visão unificada com peso atual, status da meta calórica, resumo da dieta ativa, próximos treinos e últimos treinos registrados.
 - **RF34 — Alertas e Inconsistências:** Avisos sobre refeições com baixa densidade proteica, desvio acentuado da meta calórica ou treinos vazios sem exercícios.
+- **RF35 — Múltiplas Opções de Sugestões de Treino Assistido:** O assistente de montagem de treino deve permitir selecionar grupamentos musculares específicos em português e gerar múltiplas alternativas estruturadas (Treino A, B, C) com catálogo oficial traduzido para escolha do usuário.
+- **RF36 — Cronômetro Interativo em Tempo Real:** Interface de execução e descanso com cronômetro integrado (play, pause, reset e intervalos rápidos) para condução dos treinos.
+- **RF37 — Portal e Credenciamento de Profissionais de Saúde:** Cadastro especializado com número de registro (CRN/CREF), perfil profissional público e canal de solicitação de acompanhamento direto.
+- **RF38 — Painel de Controle e Auditoria Administrativa:** Módulo de gestão exclusivo para perfil de Administrador (`ADMIN`), com métricas consolidadas da plataforma e moderação de contas.
 
 ---
 

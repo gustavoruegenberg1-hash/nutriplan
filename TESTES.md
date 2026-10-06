@@ -17,7 +17,7 @@ Para assegurar a confiabilidade, robustez e conformidade acadêmica com a Engenh
 ### 1.1. Princípios de Hermeticidade e Isolamento
 1. **Banco em Memória Dedicado (`:memory:`)**: Cada suíte de teste instancia sua própria conexão SQLite em memória, garantindo isolamento total de estado entre execuções.
 2. **Determinismo**: Nenhuma dependência externa não-controlada (redes remotas, datas não fixadas ou sementes dinâmicas sem controle) interfere nos resultados.
-3. **Execução Rápida**: Graças ao motor nativo `node:sqlite` do Node 24 e ao executor ultra-rápido **Vitest**, a suíte completa de 47 testes executa em menos de 4 segundos.
+3. **Execução Rápida**: Graças ao motor nativo `node:sqlite` do Node 24 e ao executor ultra-rápido **Vitest**, a suíte completa de 61 testes executa em cerca de 12 segundos.
 
 ---
 

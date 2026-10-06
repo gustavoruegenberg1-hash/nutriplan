@@ -3,7 +3,13 @@ dist/
 .env
 *.pem
 serviceAccountKey.json
-local-cache/
+# Cache local (preserva sementes oficiais TACO e exercicios)
+api/local-cache/*
+!api/local-cache/foods.json
+!api/local-cache/exercises.json
+local-cache/*
+!local-cache/foods.json
+!local-cache/exercises.json
 coverage/
 *.log
 *.tsbuildinfo

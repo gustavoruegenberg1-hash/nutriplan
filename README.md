@@ -63,14 +63,14 @@ Execute o arquivo `iniciar.bat` com 2 cliques na raiz.
 
 O NutriPlan v2 possui documentação completa e formal de Engenharia de Software:
 
-1. **[REQUISITOS.md](./REQUISITOS.md)**: Especificação formal dos 34 Requisitos Funcionais (RF01 a RF34) e 10 Requisitos Não-Funcionais (RNF01 a RNF10).
-2. **[REGRAS_DE_NEGOCIO.md](./REGRAS_DE_NEGOCIO.md)**: Modelagem detalhada das 27 Regras de Negócio (RN01 a RN27), do cálculo metabólico à integridade histórica.
+1. **[REQUISITOS.md](./REQUISITOS.md)**: Especificação formal dos 38 Requisitos Funcionais (RF01 a RF38) e 10 Requisitos Não-Funcionais (RNF01 a RNF10).
+2. **[REGRAS_DE_NEGOCIO.md](./REGRAS_DE_NEGOCIO.md)**: Modelagem detalhada das 29 Regras de Negócio (RN01 a RN29), do cálculo metabólico à integridade histórica e governança administrativa.
 3. **[ARQUITETURA.md](./ARQUITETURA.md)**: Padrão arquitetural em camadas, diagramas de fluxo de dados, padrão GoF e decisões tecnológicas justificadas academicamente.
 4. **[BANCO_DE_DADOS.md](./BANCO_DE_DADOS.md)**: Modelo Entidade-Relacionamento completo (17 tabelas em 3FN), tipos de dados, chaves estrangeiras, índices e integridade referencial.
 5. **[MATRIZ_RASTREABILIDADE.md](./MATRIZ_RASTREABILIDADE.md)**: Matriz bidirecional completa conectando Requisitos ↔ Regras ↔ Código-Fonte ↔ Testes Automatizados.
 6. **[DOCUMENTACAO.md](./DOCUMENTACAO.md)**: Visão geral da engenharia do sistema, metodologia de desenvolvimento, governança de dados científicos e segurança.
 7. **[API.md](./API.md)**: Especificação RESTful OpenAPI com todas as rotas, cabeçalhos, parâmetros, códigos de status e payloads JSON de requisição e resposta.
-8. **[TESTES.md](./TESTES.md)**: Plano e relatório da suíte de 47 testes automatizados de unidade e integração, pirâmide de testes e métricas de cobertura (>90%).
+8. **[TESTES.md](./TESTES.md)**: Plano e relatório da suíte de 61 testes automatizados de unidade e integração, pirâmide de testes e métricas de cobertura (>90%).
 9. **[MANUAL_USUARIO.md](./MANUAL_USUARIO.md)**: Guia passo a passo ilustrado com instruções de operação de todas as telas e fluxos para o usuário final.
 10. **[MANUAL_TECNICO.md](./MANUAL_TECNICO.md)**: Manual de implantação, infraestrutura, ciclo de vida do SQLite, variáveis de ambiente e procedimentos de build.
 

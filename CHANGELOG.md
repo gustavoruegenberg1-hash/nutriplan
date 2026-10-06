@@ -2,6 +2,29 @@
 
 Todas as alterações notáveis, correções de bugs, melhorias arquiteturais e refatorações realizadas no projeto NutriPlan v2 são documentadas neste arquivo.
 
+## [2026-10-06] - Auditoria Final do Sistema, Varredura de Segurança, Proteção de Sementes e Preparação para Publicação
+
+### Tipo
+Auditoria de Segurança / Qualidade de Código / Conformidade de Requisitos / DevOps
+
+### Alterações Principais
+1. **Varredura Completa de Segurança e Credenciais**:
+   - Varredura em 100% da árvore de código-fonte: 0 chaves de API, 0 tokens JWT, 0 senhas ou certificados expostos.
+   - Auditoria relacional de banco de dados SQLite: 100% de consultas parametrizadas com Prepared Statements (`?`), eliminando qualquer risco de SQL Injection.
+   - Controle de Acesso Baseado em Perfis (RBAC): Validação de `@Roles('ADMIN')` e `@Roles('PROFESSIONAL')` com guards `JwtAuthGuard` e `RolesGuard`, além de isolamento estrito por `userId` em todas as rotas contra vulnerabilidades IDOR.
+2. **Proteção e Rastreamento das Sementes Oficiais do Banco de Dados**:
+   - Ajuste crítico no `.gitignore` para permitir o rastreamento das sementes essenciais `api/local-cache/foods.json` (744 alimentos da base TACO) e `api/local-cache/exercises.json` (128 exercícios com biomecânica), garantindo que clones limpos executem a inicialização e o seed com sucesso absoluto.
+   - Remoção de arquivos de cache obsoletos ou de depuração local não utilizados (`heroes.json`, `pets.json`, `professionals.json`, `users.json`).
+3. **Auditoria e Eliminação de Vulnerabilidades em Dependências**:
+   - Remoção da dependência desnecessária `@nestjs/mau` do backend, zerando vulnerabilidades apontadas pelo `npm audit` (0 vulnerabilidades no backend e 0 vulnerabilidades no frontend).
+4. **Padronização de Variáveis de Ambiente**:
+   - Criação dos templates documentados `.env.example`, `api/.env.example` e `web/.env.example` com instruções claras para configuração de produção e desenvolvimento.
+5. **Rastreabilidade e Alinhamento da Documentação Formal**:
+   - Atualização de `MATRIZ_RASTREABILIDADE.md`, `REQUISITOS.md`, `REGRAS_DE_NEGOCIO.md`, `TESTES.md` e `README.md` abrangendo todos os 38 Requisitos Funcionais, 10 Requisitos Não-Funcionais, 29 Regras de Negócio e os 61 testes automatizados (100% aprovados).
+6. **Validação de Build e Testes**:
+   - Backend: Suíte de 61 testes automatizados executada e aprovada em 12 arquivos (`npm test`); compilação limpa (`nest build`).
+   - Frontend: Compilação TypeScript e Vite validada sem erros (`tsc -b && vite build`).
+
 ## [2026-10-06] - Correção dos Nomes de Exercícios e Tradução Completa para Português nas Sugestões de Treino
 
 ### Tipo

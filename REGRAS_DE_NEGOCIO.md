@@ -91,3 +91,5 @@
 
 - **RN26 — Registro de Auditoria:** Operações críticas de criação, atualização e exclusão de contas e planos devem registrar log com `userId`, `action`, `resource` e `timestamp`.
 - **RN27 — Isenção Médica Obrigatória:** Em todas as telas e relatórios com metas ou planos, deve ser exibido o aviso de que o aplicativo é uma ferramenta de apoio educacional e de organização pessoal, não substituindo prescrição profissional por nutricionista ou educador físico.
+- **RN28 — Credenciamento e Moderação de Profissionais:** O cadastro de nutricionistas e treinadores exige número de registro de conselho de classe (CRN/CREF), e perfis ativos passam por moderação antes de receber solicitações de acompanhamento.
+- **RN29 — Controle de Acesso Administrativo:** Rotas do painel executivo e relatórios de métricas do sistema são restritas exclusivamente a usuários com atribuição `ADMIN`.

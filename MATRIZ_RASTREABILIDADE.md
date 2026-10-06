@@ -28,12 +28,21 @@
 | **RF21** (Recálculo Instantâneo) | **RN15** (Sem edição manual), **RN16** (Recálculo cascata) | `DietsService.recalculateTotals` | `TEST-DIET-004`<br>`TEST-DIET-005` | Recalcula totais da refeição e do dia após alteração de quantidade ou remoção de item. |
 | **RF22** (Comparativo com Metas) | **RN18** (Alerta de desvio > 15%) | `DietsService.compareWithTarget` | `TEST-DIET-006` | Verifica cálculo do delta e emissão de alertas para planos fora da meta calórica. |
 | **RF23** (Alertas de Restrições) | **RN17** (Verificação de alergias) | `RestrictionValidator.checkCompatibility` | `TEST-DIET-007` | Alerta quando alimento com lactose é adicionado por usuário intolerante. |
+| **RF24** (Dieta Assistida Otimizada) | **RN19** (Metas estritas $\le 5\%$ calorias/proteínas, $\le 8\%$ carbos/gorduras) | `DietsService.generateAssistedDiet`, `diets.service.ts` | `TEST-DIET-009`<br>`TEST-DIET-010` | Otimização estrita por solver numérico, validação pós-persistência e suporte a número dinâmico de refeições. |
+| **RF25** (Aviso Legal de Saúde) | **RN27** (Disclaimer legal mandatório) | `DashboardService.getSummary`, `Dashboard.tsx`, `DietPlanner.tsx` | `TEST-DASH-001` | Garante que respostas e interfaces contêm o aviso de estimativa que não substitui nutricionista/médico. |
 | **RF26** (Catálogo Exercícios) | **RN21** (Existência prévia) | `ExercisesService`, `ExercisesRepository` | `TEST-EXER-001` | Consulta banco de exercícios por grupamento muscular e equipamento. |
+| **RF27** (Busca Filtrada de Exercícios) | **RN21** (Busca multilíngue e grupamentos em PT-BR) | `ExercisesService.findAll`, `WorkoutsController` | `TEST-EXER-001`<br>`TEST-EXER-002` | Valida busca de exercícios por nome, equipamento e múltiplos grupamentos musculares em português. |
 | **RF28** (Rotina de Treino) | **RN20** (Associação ao usuário) | `WorkoutsService.createWorkout` | `TEST-WORK-001` | Persiste rotina de treino relacional do usuário. |
 | **RF29** (Séries e Cargas) | **RN22** (Limites válidos de séries/reps) | `WorkoutsService.addExerciseToWorkout` | `TEST-WORK-002` | Valida inserção de exercícios com séries e repetições válidas e rejeita valores absurdos. |
+| **RF30** (Reordenação de Exercícios) | **RN23** (Persistência atômica da ordem) | `WorkoutsService.reorderExercises`, `workouts.service.ts` | `TEST-WORK-005` | Reordena atômica e sequencialmente os exercícios da rotina mantendo persistência no banco. |
 | **RF31** (Registro de Treino) | **RN24** (Imutabilidade do log histórico) | `WorkoutLogsService.createLog` | `TEST-LOG-001` | Registra execução de treino com data, carga realizada e notas. |
 | **RF32** (Integridade Histórico) | **RN24** (Preservação pós-exclusão do plano) | `WorkoutLogsRepository` | `TEST-LOG-002` | Exclui plano de treino e confirma que logs históricos permanecem intactos no banco. |
 | **RF33** (Dashboard Integrado) | **RN05**, **RN18** | `DashboardService.getSummary` | `TEST-DASH-001` | Valida agregação de dados de perfil, dieta ativa, treino do dia e histórico recente. |
+| **RF34** (Alertas e Inconsistências) | **RN26** (Detecção de desvios e treinos vazios) | `DashboardService.getSummary`, `Dashboard.tsx` | `TEST-DASH-001` | Alerta refeições com baixa densidade proteica ou desvio superior a 15% das metas. |
+| **RF35** (Múltiplas Sugestões de Treino) | **RN25** (Geração de Treino A, B, C traduzidos) | `WorkoutsService.generateAssistedWorkout`, `workouts.service.ts` | `TEST-WORK-006`<br>`TEST-WORK-007` | Gera múltiplas opções completas de treino a partir de grupamentos selecionados pelo usuário. |
+| **RF36** (Cronômetro Interativo) | **RN22** (Controle de tempo de descanso em tempo real) | `WorkoutPlanner.tsx`, `workoutService.ts` | `TEST-WORK-002` | Cronômetro com play, pause, reset e intervalos rápidos acoplado à sessão de treino. |
+| **RF37** (Portal de Profissionais) | **RN28** (Credenciamento CRN/CREF e contato) | `ProfessionalsService`, `MessagesService` | `TEST-PROF-003` | Permite cadastro de profissionais, listagem de certificados e envio de mensagens de contato. |
+| **RF38** (Auditoria Administrativa) | **RN29** (Controle de acesso e moderação ADMIN) | `AdminService`, `AdminController`, `RolesGuard` | `TEST-ADMIN-001` | Protege rotas administrativas (`@Roles('ADMIN')`) e consolida métricas de usuários e auditoria. |
 
 ---
 
