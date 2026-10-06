@@ -9,6 +9,7 @@ export class FoodsController {
   async getFoods(
     @Query('query') query?: string,
     @Query('category') category?: string,
+    @Query('subCategory') subCategory?: string,
     @Query('tag') tag?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
@@ -16,6 +17,7 @@ export class FoodsController {
     return this.foodsService.searchFoods({
       query,
       category,
+      subCategory,
       tag,
       limit: limit ? parseInt(limit, 10) : 40,
       offset: offset ? parseInt(offset, 10) : 0,
@@ -26,6 +28,7 @@ export class FoodsController {
   async searchFoods(
     @Query('query') query?: string,
     @Query('category') category?: string,
+    @Query('subCategory') subCategory?: string,
     @Query('tag') tag?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
@@ -33,10 +36,16 @@ export class FoodsController {
     return this.foodsService.searchFoods({
       query,
       category,
+      subCategory,
       tag,
       limit: limit ? parseInt(limit, 10) : 40,
       offset: offset ? parseInt(offset, 10) : 0,
     });
+  }
+
+  @Get('taxonomy')
+  async getTaxonomy() {
+    return this.foodsService.getTaxonomy();
   }
 
   @Get('categories')

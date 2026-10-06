@@ -49,6 +49,22 @@ describe('WorkoutsService (Módulo de Treinos, Exercícios e Logs Históricos)',
     expect(res.items.every((e) => e.muscleGroup === 'CHEST')).toBe(true);
   });
 
+  it('TEST-EXER-002: deve filtrar exercícios por múltiplos grupamentos musculares em português', async () => {
+    const multi = await workoutsService.searchExercises({
+      muscleGroups: ['Peito', 'Tríceps'],
+      limit: 50,
+    });
+    expect(multi.items.length).toBeGreaterThan(0);
+    expect(multi.items.every((e) => ['CHEST', 'TRICEPS'].includes(e.muscleGroup))).toBe(true);
+
+    const comma = await workoutsService.searchExercises({
+      muscleGroup: 'Quadríceps,Posterior de coxa',
+      limit: 50,
+    });
+    expect(comma.items.length).toBeGreaterThan(0);
+    expect(comma.items.every((e) => ['QUADRICEPS', 'HAMSTRINGS'].includes(e.muscleGroup))).toBe(true);
+  });
+
   it('TEST-WORK-001: deve criar rotina de treino vinculada ao usuário (RN14, RN20)', async () => {
     const workout = await workoutsService.createWorkout(userAId, {
       name: 'Treino A — Peito e Tríceps',

@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   UtensilsCrossed,
   Dumbbell,
-  User,
   ShieldCheck,
   Award,
   Users,
@@ -26,27 +25,31 @@ export const BottomNav: React.FC = () => {
         { to: '/admin', label: 'Painel', icon: ShieldCheck, exact: true },
         { to: '/admin/professionals', label: 'Especialistas', icon: Award },
         { to: '/admin/users', label: 'Usuários', icon: Users },
-        { to: '/profile', label: 'Perfil', icon: User },
       ];
     }
     if (role === 'PROFESSIONAL') {
       return [
         { to: '/professional', label: 'Painel', icon: LayoutDashboard, exact: true },
         { to: '/professional/clients', label: 'Clientes', icon: Users },
-        { to: '/profile', label: 'Perfil', icon: User },
       ];
     }
-    // USER comum: 4 abas + botão rápido de contato opcional
+    // USER comum: 3 abas principais (Painel, Dieta, Treino)
     return [
       { to: '/dashboard', label: 'Painel', icon: LayoutDashboard },
       { to: '/diet', label: 'Dieta', icon: UtensilsCrossed },
       { to: '/workouts', label: 'Treino', icon: Dumbbell },
-      { to: '/profile', label: 'Perfil', icon: User },
     ];
   };
 
   const navItems = getNavItems();
-  const colsClass = navItems.length === 3 ? 'grid-cols-3' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-5';
+  const colsClass =
+    navItems.length === 2
+      ? 'grid-cols-2'
+      : navItems.length === 3
+      ? 'grid-cols-3'
+      : navItems.length === 4
+      ? 'grid-cols-4'
+      : 'grid-cols-5';
 
   return (
     <>

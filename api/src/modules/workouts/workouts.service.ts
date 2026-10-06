@@ -80,6 +80,7 @@ export class WorkoutsService {
   async searchExercises(params: {
     query?: string;
     muscleGroup?: string;
+    muscleGroups?: string[];
     equipment?: string;
     limit?: number;
     offset?: number;
@@ -96,9 +97,48 @@ export class WorkoutsService {
       sqlParams.push(q, q);
     }
 
-    if (params.muscleGroup && params.muscleGroup !== 'ALL') {
-      conditions.push('muscle_group = ?');
-      sqlParams.push(params.muscleGroup.toUpperCase());
+    const normalizeMuscle = (m: string): string => {
+      const norm = m.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const map: Record<string, string> = {
+        PEITO: 'CHEST',
+        COSTAS: 'BACK',
+        OMBROS: 'SHOULDERS',
+        OMBRO: 'SHOULDERS',
+        BICEPS: 'BICEPS',
+        TRICEPS: 'TRICEPS',
+        ABDOMEN: 'ABS',
+        ABDOMINAL: 'ABS',
+        QUADRICEPS: 'QUADRICEPS',
+        POSTERIOR: 'HAMSTRINGS',
+        'POSTERIOR DE COXA': 'HAMSTRINGS',
+        GLUTEOS: 'GLUTES',
+        GLUTEO: 'GLUTES',
+        PANTURRILHAS: 'CALVES',
+        PANTURRILHA: 'CALVES',
+        ANTEBRACOS: 'FOREARMS',
+        ANTEBRACO: 'FOREARMS',
+        'CORPO INTEIRO': 'FULL_BODY',
+      };
+      return map[norm] || norm;
+    };
+
+    const rawGroups: string[] = [];
+    if (params.muscleGroups && Array.isArray(params.muscleGroups)) {
+      rawGroups.push(...params.muscleGroups);
+    } else if (params.muscleGroup) {
+      rawGroups.push(...params.muscleGroup.split(','));
+    }
+
+    const cleanGroups = rawGroups
+      .map((g) => normalizeMuscle(g))
+      .filter((g) => g && g !== 'ALL');
+
+    if (cleanGroups.length > 0) {
+      if (!cleanGroups.includes('FULL_BODY')) {
+        const placeholders = cleanGroups.map(() => '?').join(', ');
+        conditions.push(`muscle_group IN (${placeholders})`);
+        sqlParams.push(...cleanGroups);
+      }
     }
 
     if (params.equipment && params.equipment !== 'ALL') {

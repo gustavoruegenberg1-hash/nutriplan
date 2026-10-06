@@ -24,6 +24,7 @@ export interface FoodEntity {
 export interface FoodSearchFilters {
   query?: string;
   category?: string;
+  subCategory?: string;
   tag?: string;
   limit?: number;
   offset?: number;
@@ -54,7 +55,12 @@ export class FoodsService {
       params.push(filters.category.trim());
     }
 
-    if (filters.tag && filters.tag.trim()) {
+    if (filters.subCategory && filters.subCategory.trim() && filters.subCategory !== 'ALL') {
+      conditions.push('sub_category = ?');
+      params.push(filters.subCategory.trim());
+    }
+
+    if (filters.tag && filters.tag.trim() && filters.tag !== 'ALL') {
       conditions.push('tags_json LIKE ?');
       params.push(`%"${filters.tag.trim()}"%`);
     }
@@ -89,6 +95,28 @@ export class FoodsService {
       'SELECT DISTINCT category FROM foods WHERE is_active = 1 ORDER BY category ASC'
     );
     return rows.map((r) => r.category);
+  }
+
+  async getTaxonomy(): Promise<Array<{ category: string; subCategories: string[] }>> {
+    const rows = this.db.query<{ category: string; sub_category: string | null }>(
+      `SELECT DISTINCT category, sub_category
+       FROM foods
+       WHERE is_active = 1 AND category IS NOT NULL AND category != ''
+       ORDER BY category ASC, sub_category ASC`
+    );
+    const map = new Map<string, Set<string>>();
+    for (const r of rows) {
+      if (!map.has(r.category)) {
+        map.set(r.category, new Set());
+      }
+      if (r.sub_category && r.sub_category.trim()) {
+        map.get(r.category)!.add(r.sub_category.trim());
+      }
+    }
+    return Array.from(map.entries()).map(([category, subs]) => ({
+      category,
+      subCategories: Array.from(subs).sort(),
+    }));
   }
 
   async calculatePortion(id: string, quantityGrams: number): Promise<{

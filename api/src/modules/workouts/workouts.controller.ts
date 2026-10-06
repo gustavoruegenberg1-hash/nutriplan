@@ -19,13 +19,15 @@ export class WorkoutsController {
   async listExercises(
     @Query('query') query?: string,
     @Query('muscleGroup') muscleGroup?: string,
+    @Query('muscleGroups') muscleGroups?: string,
     @Query('equipment') equipment?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ) {
+    const combinedGroup = muscleGroups || muscleGroup;
     return this.workoutsService.searchExercises({
       query,
-      muscleGroup,
+      muscleGroup: combinedGroup,
       equipment,
       limit: limit ? parseInt(limit, 10) : 50,
       offset: offset ? parseInt(offset, 10) : 0,

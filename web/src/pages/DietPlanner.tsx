@@ -46,9 +46,12 @@ export const DietPlanner: React.FC = () => {
   const [isNewMealModalOpen, setIsNewMealModalOpen] = useState(false);
   const [newMealName, setNewMealName] = useState('');
 
-  // Modal de Adição de Alimento na Dieta Ativa
+  // Modal de Adição de Alimento na Dieta Ativa (Navegação em 2 Níveis TACO)
   const [isFoodModalOpen, setIsFoodModalOpen] = useState(false);
   const [targetMealId, setTargetMealId] = useState<string | null>(null);
+  const [taxonomy, setTaxonomy] = useState<Array<{ category: string; subCategories: string[] }>>([]);
+  const [selectedFoodCategory, setSelectedFoodCategory] = useState<string>('');
+  const [selectedFoodSubCategory, setSelectedFoodSubCategory] = useState<string>('');
   const [searchFoodQuery, setSearchFoodQuery] = useState('');
   const [foodResults, setFoodResults] = useState<FoodItem[]>([]);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
@@ -56,6 +59,8 @@ export const DietPlanner: React.FC = () => {
   const [isAddingFood, setIsAddingFood] = useState(false);
   const [foodModalError, setFoodModalError] = useState<string | null>(null);
   const [foodSearchLoading, setFoodSearchLoading] = useState(false);
+  const [foodPage, setFoodPage] = useState<number>(0);
+  const [foodTotal, setFoodTotal] = useState<number>(0);
 
   // Edição inline de gramagem
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -200,40 +205,72 @@ export const DietPlanner: React.FC = () => {
     setSelectedFood(null);
     setPortionGrams(100);
     setSearchFoodQuery('');
+    setSelectedFoodCategory('');
+    setSelectedFoodSubCategory('');
+    setFoodPage(0);
     setFoodModalError(null);
     setIsFoodModalOpen(true);
     setFoodSearchLoading(true);
     try {
-      const popular = await foodService.getPopularFoods(30);
-      setFoodResults(Array.isArray(popular) ? popular : []);
+      const [tax, res] = await Promise.all([
+        foodService.getTaxonomy(),
+        foodService.searchWithFilters({ limit: 30, offset: 0 }),
+      ]);
+      setTaxonomy(tax);
+      setFoodResults(res.items);
+      setFoodTotal(res.total);
     } catch {
-      setFoodResults(foodService.searchLocal('', 30));
+      const popular = await foodService.getPopularFoods(30);
+      setFoodResults(popular);
+      setFoodTotal(popular.length);
     } finally {
       setFoodSearchLoading(false);
     }
   };
 
-  const handleFoodSearchChange = async (query: string) => {
-    setSearchFoodQuery(query);
-    setFoodModalError(null);
-    if (!query.trim()) {
-      try {
-        const popular = await foodService.getPopularFoods(30);
-        setFoodResults(Array.isArray(popular) ? popular : []);
-      } catch {
-        setFoodResults(foodService.searchLocal('', 30));
-      }
-      return;
-    }
+  const fetchFilteredFoods = async (cat: string, subCat: string, query: string, page: number = 0) => {
     setFoodSearchLoading(true);
+    setFoodModalError(null);
     try {
-      const results = await foodService.searchFoods(query, 30);
-      setFoodResults(Array.isArray(results) ? results : []);
+      const res = await foodService.searchWithFilters({
+        category: cat || undefined,
+        subCategory: subCat || undefined,
+        query: query.trim() || undefined,
+        limit: 30,
+        offset: page * 30,
+      });
+      setFoodResults(res.items);
+      setFoodTotal(res.total);
+      setFoodPage(page);
     } catch {
-      setFoodResults(foodService.searchLocal(query, 30));
+      setFoodResults([]);
+      setFoodTotal(0);
     } finally {
       setFoodSearchLoading(false);
     }
+  };
+
+  const handleSelectCategory = (cat: string) => {
+    const nextCat = selectedFoodCategory === cat ? '' : cat;
+    setSelectedFoodCategory(nextCat);
+    setSelectedFoodSubCategory('');
+    fetchFilteredFoods(nextCat, '', searchFoodQuery, 0);
+  };
+
+  const handleSelectSubCategory = (sub: string) => {
+    const nextSub = selectedFoodSubCategory === sub ? '' : sub;
+    setSelectedFoodSubCategory(nextSub);
+    fetchFilteredFoods(selectedFoodCategory, nextSub, searchFoodQuery, 0);
+  };
+
+  const handleFoodSearchChange = (query: string) => {
+    setSearchFoodQuery(query);
+    fetchFilteredFoods(selectedFoodCategory, selectedFoodSubCategory, query, 0);
+  };
+
+  const handleFoodPageChange = (newPage: number) => {
+    if (newPage < 0 || newPage * 30 >= foodTotal) return;
+    fetchFilteredFoods(selectedFoodCategory, selectedFoodSubCategory, searchFoodQuery, newPage);
   };
 
   const handleAddFoodToMeal = async () => {
@@ -1482,14 +1519,15 @@ export const DietPlanner: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-4 border-b border-slate-800 bg-slate-900 space-y-2">
+            <div className="p-4 border-b border-slate-800 bg-slate-900 space-y-3">
+              {/* Busca por texto */}
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                 <input
                   type="text"
                   value={searchFoodQuery}
                   onChange={(e) => handleFoodSearchChange(e.target.value)}
-                  placeholder="Pesquisar alimento (ex: Arroz, Frango, Feijão, Ovo...)"
+                  placeholder="Pesquisar alimento (ex: Arroz, Frango, Feijão, Banana...)"
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-white text-xs focus:outline-none focus:border-emerald-500 placeholder:text-slate-500"
                   autoFocus
                 />
@@ -1497,9 +1535,87 @@ export const DietPlanner: React.FC = () => {
                   <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-400 animate-spin" size={16} />
                 )}
               </div>
-              <p className="text-[11px] text-slate-400">
-                Selecione um alimento da base oficial para configurar a quantidade e calcular os macronutrientes.
-              </p>
+
+              {/* Nível 1: Categorias Principais (TACO) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Categoria Principal (Nível 1):</span>
+                  {selectedFoodCategory && (
+                    <button
+                      type="button"
+                      onClick={() => handleSelectCategory('')}
+                      className="text-emerald-400 hover:underline"
+                    >
+                      Limpar filtro
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px]">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectCategory('')}
+                    className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition ${
+                      !selectedFoodCategory
+                        ? 'bg-emerald-500 text-slate-950'
+                        : 'bg-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Todas
+                  </button>
+                  {taxonomy.map((t) => (
+                    <button
+                      key={t.category}
+                      type="button"
+                      onClick={() => handleSelectCategory(t.category)}
+                      className={`px-3 py-1.5 rounded-xl font-semibold shrink-0 transition ${
+                        selectedFoodCategory === t.category
+                          ? 'bg-emerald-500 text-slate-950 font-bold'
+                          : 'bg-slate-800 text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      {t.category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Nível 2: Subcategorias (quando categoria selecionada) */}
+              {selectedFoodCategory && (
+                <div className="space-y-1.5 pt-1 border-t border-slate-800/60">
+                  <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">
+                    Subcategoria / Grupo:
+                  </span>
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectSubCategory('')}
+                      className={`px-2.5 py-1 rounded-lg font-bold shrink-0 transition ${
+                        !selectedFoodSubCategory
+                          ? 'bg-teal-500 text-slate-950'
+                          : 'bg-slate-800/80 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Todas de {selectedFoodCategory}
+                    </button>
+                    {(taxonomy.find((t) => t.category === selectedFoodCategory)?.subCategories || []).map(
+                      (sub) => (
+                        <button
+                          key={sub}
+                          type="button"
+                          onClick={() => handleSelectSubCategory(sub)}
+                          className={`px-2.5 py-1 rounded-lg font-semibold shrink-0 transition ${
+                            selectedFoodSubCategory === sub
+                              ? 'bg-teal-500 text-slate-950 font-bold'
+                              : 'bg-slate-800/80 text-slate-300 hover:text-white'
+                          }`}
+                        >
+                          {sub}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Lista de Alimentos Encontrados */}
@@ -1528,7 +1644,15 @@ export const DietPlanner: React.FC = () => {
                     >
                       <div className="flex-1 min-w-0">
                         <div className="font-bold text-white text-sm truncate">{food.name}</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5 truncate">{food.category}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5 truncate flex items-center gap-1.5">
+                          <span>{food.category}</span>
+                          {food.subCategory && (
+                            <>
+                              <span>•</span>
+                              <span className="text-teal-400 font-semibold">{food.subCategory}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
 
                       <div className="text-right shrink-0">
@@ -1558,9 +1682,34 @@ export const DietPlanner: React.FC = () => {
               )}
             </div>
 
-            {/* Painel de Quantidade e Confirmação */}
+            {/* Paginação de Alimentos */}
+            {foodTotal > 30 && (
+              <div className="p-3 border-t border-slate-800/80 bg-slate-950/40 flex items-center justify-between text-xs text-slate-400 shrink-0">
+                <button
+                  type="button"
+                  disabled={foodPage === 0 || foodSearchLoading}
+                  onClick={() => handleFoodPageChange(foodPage - 1)}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition"
+                >
+                  ← Anterior
+                </button>
+                <span>
+                  Página <strong>{foodPage + 1}</strong> de <strong>{Math.ceil(foodTotal / 30)}</strong> ({foodTotal} alimentos)
+                </span>
+                <button
+                  type="button"
+                  disabled={(foodPage + 1) * 30 >= foodTotal || foodSearchLoading}
+                  onClick={() => handleFoodPageChange(foodPage + 1)}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition"
+                >
+                  Próxima →
+                </button>
+              </div>
+            )}
+
+            {/* Painel de Quantidade e Confirmação Seguro para Mobile */}
             {selectedFood && (
-              <div className="p-4 border-t border-slate-800 bg-slate-950/80 rounded-b-3xl space-y-3">
+              <div className="sticky bottom-0 z-30 p-4 pb-6 border-t border-slate-800 bg-slate-950/95 backdrop-blur rounded-b-3xl space-y-3 shadow-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                   <div>
                     <span className="text-slate-400 text-[11px] block">Alimento Selecionado:</span>

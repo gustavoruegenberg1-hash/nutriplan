@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { NutritionCalculatorService, ProportionalNutrients, MacroTargets, BiologicalGender, NutritionalGoal } from '../nutrition/nutrition-calculator.service';
 import { CreateDietDto, CreateMealDto, AddMealFoodDto, UpdateMealFoodDto, GenerateDietDto } from './dto/diet.dtos';
@@ -46,6 +46,9 @@ export interface CalculatedDiet {
       carbs: number;
       fat: number;
     };
+    isWithinTolerance?: boolean;
+    tolerances?: any;
+    validationSummary?: string;
     alerts: string[];
   };
   warnings: string[];
@@ -56,6 +59,8 @@ export interface CalculatedDiet {
 
 @Injectable()
 export class DietsService {
+  private readonly logger = new Logger(DietsService.name);
+
   constructor(
     private readonly db: DatabaseService,
     private readonly calc: NutritionCalculatorService,
@@ -302,10 +307,34 @@ export class DietsService {
       if (pctKcal > 115) alerts.push(`Dieta ${dailyTotals.calories - targets.calories} kcal acima da sua meta diária.`);
       if (pctP < 80) alerts.push('Densidade proteica abaixo do recomendado para seu peso corporal.');
 
+      const isWithinTolerance =
+        Math.abs(diffKcal) / (targets.calories || 1) <= 0.05 &&
+        Math.abs(diffP) / (targets.proteinGrams || 1) <= 0.05 &&
+        Math.abs(diffC) / (targets.carbsGrams || 1) <= 0.08 &&
+        Math.abs(diffF) / (targets.fatGrams || 1) <= 0.08;
+
       targetComparison = {
-        targets,
+        targets: {
+          ...targets,
+          labels: {
+            calories: 'Meta Calórica Diária',
+            protein: 'Meta de Proteínas',
+            carbs: 'Meta de Carboidratos',
+            fat: 'Meta de Gorduras',
+            fiber: 'Meta de Fibras',
+          },
+        },
         differences: { calories: diffKcal, protein: diffP, carbs: diffC, fat: diffF },
         percentageMet: { calories: pctKcal, protein: pctP, carbs: pctC, fat: pctF },
+        isWithinTolerance,
+        tolerances: {
+          caloriesPct: 5,
+          proteinPct: 5,
+          carbsPct: 8,
+          fatPct: 8,
+          description: 'Tolerância aceitável: Calorias ±5%, Proteínas ±5%, Carboidratos ±8%, Gorduras ±8%',
+        },
+        validationSummary: `Validação real: ${diffKcal >= 0 ? '+' : ''}${diffKcal} kcal | Proteínas: ${diffP >= 0 ? '+' : ''}${diffP}g | Carboidratos: ${diffC >= 0 ? '+' : ''}${diffC}g | Gorduras: ${diffF >= 0 ? '+' : ''}${diffF}g`,
         alerts,
       };
     }
@@ -427,7 +456,7 @@ export class DietsService {
   }
 
   /**
-   * Seção 13: Gerador Assistido de Proposta de Dieta Editável
+   * Seção 13: Gerador Assistido de Proposta de Dieta Editável com Otimização de Metas
    */
   async generateSuggestion(userId: string, dto: GenerateDietDto): Promise<CalculatedDiet> {
     const profile = this.db.queryOne<{
@@ -440,6 +469,11 @@ export class DietsService {
     }>('SELECT * FROM profiles WHERE user_id = ?', [userId]);
 
     let targetCalories = dto.customCalories || 2000;
+    let targetProtein = 140;
+    let targetCarbs = 230;
+    let targetFat = 55;
+    let targetFiber = 28;
+
     if (profile && profile.tdee && profile.weight && profile.gender) {
       const targets = this.calc.calculateTargets(
         profile.tdee,
@@ -448,29 +482,237 @@ export class DietsService {
         profile.gender as BiologicalGender
       );
       targetCalories = targets.calories;
+      targetProtein = targets.proteinGrams;
+      targetCarbs = targets.carbsGrams;
+      targetFat = targets.fatGrams;
+      targetFiber = targets.fiberGrams;
     }
 
-    // Busca alimentos padrão da TACO para montar a proposta
-    const findFoodByName = (name: string) =>
-      this.db.queryOne<{ id: string }>('SELECT id FROM foods WHERE LOWER(name) LIKE ? LIMIT 1', [`%${name.toLowerCase()}%`]);
+    if (dto.customCalories && dto.customCalories > 0) {
+      const scale = dto.customCalories / (targetCalories || 2000);
+      targetCalories = dto.customCalories;
+      targetProtein = Math.round(targetProtein * scale);
+      targetCarbs = Math.round(targetCarbs * scale);
+      targetFat = Math.round(targetFat * scale);
+      targetFiber = Math.round(targetFiber * scale);
+    }
 
-    const ovo = findFoodByName('ovo') || findFoodByName('clara');
-    const aveia = findFoodByName('aveia');
-    const banana = findFoodByName('banana');
-    const arroz = findFoodByName('arroz');
-    const feijao = findFoodByName('feijão') || findFoodByName('feijao');
-    const frango = findFoodByName('frango') || findFoodByName('patinho');
-    const azeite = findFoodByName('azeite');
-    const maca = findFoodByName('maçã') || findFoodByName('maca');
-    const whey = findFoodByName('whey') || findFoodByName('leite');
+    interface FoodMacroRow {
+      id: string;
+      name: string;
+      calPer100g: number;
+      protPer100g: number;
+      carbPer100g: number;
+      fatPer100g: number;
+      fiberPer100g: number;
+    }
+
+    const findFoodByTerms = (terms: string[]): FoodMacroRow | null => {
+      for (const term of terms) {
+        const row = this.db.queryOne<any>(
+          `SELECT id, name, calories_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g
+           FROM foods
+           WHERE LOWER(name) LIKE ? AND is_active = 1
+           ORDER BY is_verified DESC
+           LIMIT 1`,
+          [`%${term.toLowerCase()}%`]
+        );
+        if (row) {
+          return {
+            id: row.id,
+            name: row.name,
+            calPer100g: Number(row.calories_per_100g) || 0,
+            protPer100g: Number(row.protein_per_100g) || 0,
+            carbPer100g: Number(row.carbs_per_100g) || 0,
+            fatPer100g: Number(row.fat_per_100g) || 0,
+            fiberPer100g: Number(row.fiber_per_100g) || 0,
+          };
+        }
+      }
+      return null;
+    };
+
+    const ovo = findFoodByTerms(['ovo de galinha inteiro cozido', 'ovo de galinha inteiro', 'ovo cozido', 'ovo']);
+    const aveia = findFoodByTerms(['aveia em flocos', 'aveia']);
+    const banana = findFoodByTerms(['banana prata crua', 'banana prata', 'banana']);
+    const arroz = findFoodByTerms(['arroz tipo 1 cozido', 'arroz integral cozido', 'arroz cozido', 'arroz']);
+    const feijao = findFoodByTerms(['feijão carioca cozido', 'feijão preto cozido', 'feijão cozido', 'feijão', 'feijao']);
+    const frango = findFoodByTerms(['frango peito sem pele cozido', 'frango peito sem pele grelhado', 'frango peito', 'filé de peito', 'frango']);
+    const azeite = findFoodByTerms(['azeite de oliva extra virgem', 'azeite de oliva', 'azeite']);
+    const maca = findFoodByTerms(['maçã fuji com casca', 'maçã gala com casca', 'maçã']);
+    const whey = findFoodByTerms(['queijo minas frescal', 'leite desnatado', 'whey', 'leite']);
+
+    interface MealItemPlan {
+      mealName: string;
+      mealOrder: number;
+      food: FoodMacroRow;
+      role: 'CHICKEN_PROTEIN' | 'RICE_CARB' | 'OIL_FAT' | 'STAPLE';
+      grams: number;
+      minGrams: number;
+      maxGrams: number;
+    }
+
+    const mealsCount = dto.mealsCount && [3, 4, 5, 6].includes(Number(dto.mealsCount)) ? Number(dto.mealsCount) : 4;
+    const planItems: MealItemPlan[] = [];
+
+    if (mealsCount === 3) {
+      if (ovo) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: ovo, role: 'STAPLE', grams: 100, minGrams: 50, maxGrams: 150 });
+      if (aveia) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: aveia, role: 'RICE_CARB', grams: 40, minGrams: 20, maxGrams: 100 });
+      if (banana) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: banana, role: 'STAPLE', grams: 90, minGrams: 60, maxGrams: 120 });
+
+      if (arroz) planItems.push({ mealName: 'Almoço', mealOrder: 1, food: arroz, role: 'RICE_CARB', grams: 150, minGrams: 60, maxGrams: 420 });
+      if (feijao) planItems.push({ mealName: 'Almoço', mealOrder: 1, food: feijao, role: 'STAPLE', grams: 100, minGrams: 50, maxGrams: 150 });
+      if (frango) planItems.push({ mealName: 'Almoço', mealOrder: 1, food: frango, role: 'CHICKEN_PROTEIN', grams: 140, minGrams: 60, maxGrams: 280 });
+      if (azeite) planItems.push({ mealName: 'Almoço', mealOrder: 1, food: azeite, role: 'OIL_FAT', grams: 10, minGrams: 3, maxGrams: 25 });
+
+      if (arroz) planItems.push({ mealName: 'Jantar', mealOrder: 2, food: arroz, role: 'RICE_CARB', grams: 140, minGrams: 60, maxGrams: 420 });
+      if (frango) planItems.push({ mealName: 'Jantar', mealOrder: 2, food: frango, role: 'CHICKEN_PROTEIN', grams: 140, minGrams: 60, maxGrams: 280 });
+      if (maca) planItems.push({ mealName: 'Jantar', mealOrder: 2, food: maca, role: 'STAPLE', grams: 110, minGrams: 70, maxGrams: 150 });
+      if (azeite) planItems.push({ mealName: 'Jantar', mealOrder: 2, food: azeite, role: 'OIL_FAT', grams: 10, minGrams: 3, maxGrams: 25 });
+    } else if (mealsCount === 5) {
+      if (ovo) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: ovo, role: 'STAPLE', grams: 100, minGrams: 50, maxGrams: 150 });
+      if (aveia) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: aveia, role: 'RICE_CARB', grams: 40, minGrams: 20, maxGrams: 100 });
+
+      if (banana) planItems.push({ mealName: 'Lanche da Manhã', mealOrder: 1, food: banana, role: 'STAPLE', grams: 90, minGrams: 50, maxGrams: 130 });
+      if (whey) planItems.push({ mealName: 'Lanche da Manhã', mealOrder: 1, food: whey, role: 'STAPLE', grams: 25, minGrams: 20, maxGrams: 40 });
+      if (aveia) planItems.push({ mealName: 'Lanche da Manhã', mealOrder: 1, food: aveia, role: 'RICE_CARB', grams: 30, minGrams: 15, maxGrams: 80 });
+
+      if (arroz) planItems.push({ mealName: 'Almoço', mealOrder: 2, food: arroz, role: 'RICE_CARB', grams: 150, minGrams: 60, maxGrams: 420 });
+      if (feijao) planItems.push({ mealName: 'Almoço', mealOrder: 2, food: feijao, role: 'STAPLE', grams: 90, minGrams: 50, maxGrams: 150 });
+      if (frango) planItems.push({ mealName: 'Almoço', mealOrder: 2, food: frango, role: 'CHICKEN_PROTEIN', grams: 120, minGrams: 50, maxGrams: 260 });
+      if (azeite) planItems.push({ mealName: 'Almoço', mealOrder: 2, food: azeite, role: 'OIL_FAT', grams: 10, minGrams: 3, maxGrams: 25 });
+
+      if (maca) planItems.push({ mealName: 'Lanche da Tarde', mealOrder: 3, food: maca, role: 'STAPLE', grams: 110, minGrams: 70, maxGrams: 140 });
+      if (aveia) planItems.push({ mealName: 'Lanche da Tarde', mealOrder: 3, food: aveia, role: 'RICE_CARB', grams: 30, minGrams: 15, maxGrams: 80 });
+
+      if (arroz) planItems.push({ mealName: 'Jantar', mealOrder: 4, food: arroz, role: 'RICE_CARB', grams: 140, minGrams: 60, maxGrams: 420 });
+      if (frango) planItems.push({ mealName: 'Jantar', mealOrder: 4, food: frango, role: 'CHICKEN_PROTEIN', grams: 120, minGrams: 50, maxGrams: 260 });
+      if (azeite) planItems.push({ mealName: 'Jantar', mealOrder: 4, food: azeite, role: 'OIL_FAT', grams: 8, minGrams: 3, maxGrams: 25 });
+    } else if (mealsCount === 6) {
+      if (ovo) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: ovo, role: 'STAPLE', grams: 100, minGrams: 50, maxGrams: 150 });
+      if (aveia) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: aveia, role: 'RICE_CARB', grams: 35, minGrams: 15, maxGrams: 90 });
+
+      if (banana) planItems.push({ mealName: 'Lanche da Manhã', mealOrder: 1, food: banana, role: 'STAPLE', grams: 80, minGrams: 50, maxGrams: 120 });
+      if (aveia) planItems.push({ mealName: 'Lanche da Manhã', mealOrder: 1, food: aveia, role: 'RICE_CARB', grams: 30, minGrams: 15, maxGrams: 80 });
+
+      if (arroz) planItems.push({ mealName: 'Almoço', mealOrder: 2, food: arroz, role: 'RICE_CARB', grams: 140, minGrams: 60, maxGrams: 420 });
+      if (feijao) planItems.push({ mealName: 'Almoço', mealOrder: 2, food: feijao, role: 'STAPLE', grams: 80, minGrams: 50, maxGrams: 140 });
+      if (frango) planItems.push({ mealName: 'Almoço', mealOrder: 2, food: frango, role: 'CHICKEN_PROTEIN', grams: 110, minGrams: 50, maxGrams: 250 });
+      if (azeite) planItems.push({ mealName: 'Almoço', mealOrder: 2, food: azeite, role: 'OIL_FAT', grams: 8, minGrams: 3, maxGrams: 22 });
+
+      if (maca) planItems.push({ mealName: 'Lanche da Tarde', mealOrder: 3, food: maca, role: 'STAPLE', grams: 110, minGrams: 70, maxGrams: 140 });
+      if (whey) planItems.push({ mealName: 'Lanche da Tarde', mealOrder: 3, food: whey, role: 'STAPLE', grams: 25, minGrams: 15, maxGrams: 40 });
+
+      if (arroz) planItems.push({ mealName: 'Jantar', mealOrder: 4, food: arroz, role: 'RICE_CARB', grams: 130, minGrams: 60, maxGrams: 420 });
+      if (frango) planItems.push({ mealName: 'Jantar', mealOrder: 4, food: frango, role: 'CHICKEN_PROTEIN', grams: 110, minGrams: 50, maxGrams: 250 });
+      if (azeite) planItems.push({ mealName: 'Jantar', mealOrder: 4, food: azeite, role: 'OIL_FAT', grams: 8, minGrams: 3, maxGrams: 22 });
+
+      if (ovo) planItems.push({ mealName: 'Ceia', mealOrder: 5, food: ovo, role: 'STAPLE', grams: 60, minGrams: 50, maxGrams: 100 });
+      if (azeite) planItems.push({ mealName: 'Ceia', mealOrder: 5, food: azeite, role: 'OIL_FAT', grams: 5, minGrams: 2, maxGrams: 15 });
+    } else {
+      // Padrão 4 refeições
+      if (ovo) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: ovo, role: 'STAPLE', grams: 100, minGrams: 50, maxGrams: 150 });
+      if (aveia) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: aveia, role: 'RICE_CARB', grams: 40, minGrams: 20, maxGrams: 100 });
+      if (banana) planItems.push({ mealName: 'Café da Manhã', mealOrder: 0, food: banana, role: 'STAPLE', grams: 80, minGrams: 50, maxGrams: 120 });
+
+      if (arroz) planItems.push({ mealName: 'Almoço', mealOrder: 1, food: arroz, role: 'RICE_CARB', grams: 150, minGrams: 60, maxGrams: 420 });
+      if (feijao) planItems.push({ mealName: 'Almoço', mealOrder: 1, food: feijao, role: 'STAPLE', grams: 90, minGrams: 50, maxGrams: 150 });
+      if (frango) planItems.push({ mealName: 'Almoço', mealOrder: 1, food: frango, role: 'CHICKEN_PROTEIN', grams: 130, minGrams: 50, maxGrams: 260 });
+      if (azeite) planItems.push({ mealName: 'Almoço', mealOrder: 1, food: azeite, role: 'OIL_FAT', grams: 10, minGrams: 3, maxGrams: 25 });
+
+      if (maca) planItems.push({ mealName: 'Lanche da Tarde', mealOrder: 2, food: maca, role: 'STAPLE', grams: 110, minGrams: 70, maxGrams: 140 });
+      if (whey) planItems.push({ mealName: 'Lanche da Tarde', mealOrder: 2, food: whey, role: 'STAPLE', grams: 25, minGrams: 15, maxGrams: 40 });
+      if (aveia) planItems.push({ mealName: 'Lanche da Tarde', mealOrder: 2, food: aveia, role: 'RICE_CARB', grams: 30, minGrams: 15, maxGrams: 80 });
+
+      if (arroz) planItems.push({ mealName: 'Jantar', mealOrder: 3, food: arroz, role: 'RICE_CARB', grams: 140, minGrams: 60, maxGrams: 420 });
+      if (feijao) planItems.push({ mealName: 'Jantar', mealOrder: 3, food: feijao, role: 'STAPLE', grams: 80, minGrams: 40, maxGrams: 140 });
+      if (frango) planItems.push({ mealName: 'Jantar', mealOrder: 3, food: frango, role: 'CHICKEN_PROTEIN', grams: 130, minGrams: 50, maxGrams: 260 });
+      if (azeite) planItems.push({ mealName: 'Jantar', mealOrder: 3, food: azeite, role: 'OIL_FAT', grams: 8, minGrams: 3, maxGrams: 25 });
+    }
+
+    const calcCurrentNutrients = () => {
+      let cals = 0;
+      let p = 0;
+      let c = 0;
+      let f = 0;
+      for (const it of planItems) {
+        const factor = it.grams / 100;
+        cals += it.food.calPer100g * factor;
+        p += it.food.protPer100g * factor;
+        c += it.food.carbPer100g * factor;
+        f += it.food.fatPer100g * factor;
+      }
+      return { cals, p, c, f };
+    };
+
+    // ALGORITMO DE OTIMIZAÇÃO MULTIDIMENSIONAL DE MACRONUTRIENTES
+    // Minimiza simultaneamente as diferenças de Calorias, Proteínas, Carboidratos e Gorduras
+    for (let iter = 0; iter < 25; iter++) {
+      const cur = calcCurrentNutrients();
+      const errP = targetProtein - cur.p;
+      const errC = targetCarbs - cur.c;
+      const errF = targetFat - cur.f;
+      const errCal = targetCalories - cur.cals;
+
+      // Tolerâncias aceitáveis: Calorias <= 5%, Proteínas <= 5%, Carboidratos <= 8%, Gorduras <= 8%
+      if (
+        Math.abs(errCal) / (targetCalories || 1) <= 0.05 &&
+        Math.abs(errP) / (targetProtein || 1) <= 0.05 &&
+        Math.abs(errC) / (targetCarbs || 1) <= 0.08 &&
+        Math.abs(errF) / (targetFat || 1) <= 0.08
+      ) {
+        break;
+      }
+
+      // 1. Ajuste de Proteínas (Frango)
+      const protSlots = planItems.filter((it) => it.role === 'CHICKEN_PROTEIN');
+      if (protSlots.length > 0 && Math.abs(errP) > 1.5) {
+        const avgDensity = protSlots.reduce((acc, it) => acc + it.food.protPer100g / 100, 0) / protSlots.length;
+        const totalAdj = errP / (avgDensity || 0.31);
+        const eachAdj = totalAdj / protSlots.length;
+        for (const slot of protSlots) {
+          slot.grams = Math.max(slot.minGrams, Math.min(slot.maxGrams, slot.grams + eachAdj));
+        }
+      }
+
+      // 2. Ajuste de Gorduras (Azeite)
+      const fatSlots = planItems.filter((it) => it.role === 'OIL_FAT');
+      if (fatSlots.length > 0 && Math.abs(errF) > 1.0) {
+        const avgDensity = fatSlots.reduce((acc, it) => acc + it.food.fatPer100g / 100, 0) / fatSlots.length;
+        const totalAdj = errF / (avgDensity || 0.99);
+        const eachAdj = totalAdj / fatSlots.length;
+        for (const slot of fatSlots) {
+          slot.grams = Math.max(slot.minGrams, Math.min(slot.maxGrams, slot.grams + eachAdj));
+        }
+      }
+
+      // 3. Ajuste de Carboidratos (Arroz e Aveia)
+      const carbSlots = planItems.filter((it) => it.role === 'RICE_CARB');
+      if (carbSlots.length > 0 && Math.abs(errC) > 2.0) {
+        const avgDensity = carbSlots.reduce((acc, it) => acc + it.food.carbPer100g / 100, 0) / carbSlots.length;
+        const totalAdj = errC / (avgDensity || 0.28);
+        const eachAdj = totalAdj / carbSlots.length;
+        for (const slot of carbSlots) {
+          slot.grams = Math.max(slot.minGrams, Math.min(slot.maxGrams, slot.grams + eachAdj));
+        }
+      }
+    }
+
+    // Arredonda as quantidades para gramagens práticas e legíveis para o usuário
+    for (const item of planItems) {
+      if (item.role === 'OIL_FAT') {
+        item.grams = Math.max(item.minGrams, Math.round(item.grams));
+      } else {
+        item.grams = Math.max(item.minGrams, Math.round(item.grams / 5) * 5);
+      }
+    }
 
     const dietName = `Sugestão NutriPlan — ${dto.goal || profile?.goal || 'Equilibrada'}`;
     const dietId = randomUUID();
     const now = new Date().toISOString();
-    const mealsCount = dto.mealsCount && [3, 4, 5, 6].includes(Number(dto.mealsCount)) ? Number(dto.mealsCount) : 4;
 
+    // Persiste a dieta e refeições no SQLite em transação atômica
     this.db.transaction(() => {
-      // Desativa outras dietas do usuário para que a nova sugestão seja o plano ativo imediato
       this.db.run('UPDATE diets SET is_active = 0 WHERE user_id = ?', [userId]);
 
       this.db.run(
@@ -479,125 +721,74 @@ export class DietsService {
         [dietId, userId, dietName, now, now]
       );
 
-      if (mealsCount === 3) {
-        // Café da Manhã
-        const m1 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Café da Manhã', 0, ?)`, [m1, dietId, now]);
-        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m1, ovo.id, now]);
-        if (aveia) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 50, 1, ?)`, [randomUUID(), m1, aveia.id, now]);
-        if (banana) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 2, ?)`, [randomUUID(), m1, banana.id, now]);
+      // Agrupa os itens por refeição
+      const mealNames = Array.from(new Set(planItems.map((it) => it.mealName)));
+      mealNames.forEach((mName, mIdx) => {
+        const mId = randomUUID();
+        this.db.run(
+          `INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, ?, ?, ?)`,
+          [mId, dietId, mName, mIdx, now]
+        );
 
-        // Almoço
-        const m2 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Almoço', 1, ?)`, [m2, dietId, now]);
-        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 160, 0, ?)`, [randomUUID(), m2, arroz.id, now]);
-        if (feijao) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 1, ?)`, [randomUUID(), m2, feijao.id, now]);
-        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 150, 2, ?)`, [randomUUID(), m2, frango.id, now]);
-        if (azeite) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 12, 3, ?)`, [randomUUID(), m2, azeite.id, now]);
-
-        // Jantar
-        const m3 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Jantar', 2, ?)`, [m3, dietId, now]);
-        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 0, ?)`, [randomUUID(), m3, arroz.id, now]);
-        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 140, 1, ?)`, [randomUUID(), m3, frango.id, now]);
-        if (maca) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 2, ?)`, [randomUUID(), m3, maca.id, now]);
-      } else if (mealsCount === 5) {
-        // Café da Manhã
-        const m1 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Café da Manhã', 0, ?)`, [m1, dietId, now]);
-        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 0, ?)`, [randomUUID(), m1, ovo.id, now]);
-        if (aveia) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 40, 1, ?)`, [randomUUID(), m1, aveia.id, now]);
-
-        // Lanche da Manhã
-        const m2 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Manhã', 1, ?)`, [m2, dietId, now]);
-        if (banana) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 80, 0, ?)`, [randomUUID(), m2, banana.id, now]);
-        if (whey) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 25, 1, ?)`, [randomUUID(), m2, whey.id, now]);
-
-        // Almoço
-        const m3 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Almoço', 2, ?)`, [m3, dietId, now]);
-        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 140, 0, ?)`, [randomUUID(), m3, arroz.id, now]);
-        if (feijao) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 90, 1, ?)`, [randomUUID(), m3, feijao.id, now]);
-        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 2, ?)`, [randomUUID(), m3, frango.id, now]);
-        if (azeite) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 10, 3, ?)`, [randomUUID(), m3, azeite.id, now]);
-
-        // Lanche da Tarde
-        const m4 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Tarde', 3, ?)`, [m4, dietId, now]);
-        if (maca) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m4, maca.id, now]);
-
-        // Jantar
-        const m5 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Jantar', 4, ?)`, [m5, dietId, now]);
-        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m5, arroz.id, now]);
-        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 1, ?)`, [randomUUID(), m5, frango.id, now]);
-      } else if (mealsCount === 6) {
-        // Café da Manhã
-        const m1 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Café da Manhã', 0, ?)`, [m1, dietId, now]);
-        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 0, ?)`, [randomUUID(), m1, ovo.id, now]);
-        if (aveia) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 35, 1, ?)`, [randomUUID(), m1, aveia.id, now]);
-
-        // Lanche da Manhã
-        const m2 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Manhã', 1, ?)`, [m2, dietId, now]);
-        if (banana) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 70, 0, ?)`, [randomUUID(), m2, banana.id, now]);
-
-        // Almoço
-        const m3 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Almoço', 2, ?)`, [m3, dietId, now]);
-        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 0, ?)`, [randomUUID(), m3, arroz.id, now]);
-        if (feijao) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 80, 1, ?)`, [randomUUID(), m3, feijao.id, now]);
-        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 110, 2, ?)`, [randomUUID(), m3, frango.id, now]);
-        if (azeite) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 8, 3, ?)`, [randomUUID(), m3, azeite.id, now]);
-
-        // Lanche da Tarde
-        const m4 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Tarde', 3, ?)`, [m4, dietId, now]);
-        if (maca) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 110, 0, ?)`, [randomUUID(), m4, maca.id, now]);
-        if (whey) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 25, 1, ?)`, [randomUUID(), m4, whey.id, now]);
-
-        // Jantar
-        const m5 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Jantar', 4, ?)`, [m5, dietId, now]);
-        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 110, 0, ?)`, [randomUUID(), m5, arroz.id, now]);
-        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 110, 1, ?)`, [randomUUID(), m5, frango.id, now]);
-
-        // Ceia
-        const m6 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Ceia', 5, ?)`, [m6, dietId, now]);
-        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 60, 0, ?)`, [randomUUID(), m6, ovo.id, now]);
-      } else {
-        // Padrão: 4 Refeições
-        // Café da manhã
-        const m1 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Café da Manhã', 0, ?)`, [m1, dietId, now]);
-        if (ovo) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 0, ?)`, [randomUUID(), m1, ovo.id, now]);
-        if (aveia) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 40, 1, ?)`, [randomUUID(), m1, aveia.id, now]);
-        if (banana) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 80, 2, ?)`, [randomUUID(), m1, banana.id, now]);
-
-        // Almoço
-        const m2 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Almoço', 1, ?)`, [m2, dietId, now]);
-        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 150, 0, ?)`, [randomUUID(), m2, arroz.id, now]);
-        if (feijao) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 100, 1, ?)`, [randomUUID(), m2, feijao.id, now]);
-        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 2, ?)`, [randomUUID(), m2, frango.id, now]);
-        if (azeite) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 10, 3, ?)`, [randomUUID(), m2, azeite.id, now]);
-
-        // Lanche
-        const m3 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Lanche da Tarde', 2, ?)`, [m3, dietId, now]);
-        if (maca) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m3, maca.id, now]);
-        if (whey) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 30, 1, ?)`, [randomUUID(), m3, whey.id, now]);
-
-        // Jantar
-        const m4 = randomUUID();
-        this.db.run(`INSERT INTO meals (id, diet_id, name, order_index, created_at) VALUES (?, ?, 'Jantar', 3, ?)`, [m4, dietId, now]);
-        if (arroz) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 120, 0, ?)`, [randomUUID(), m4, arroz.id, now]);
-        if (frango) this.db.run(`INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at) VALUES (?, ?, ?, 130, 1, ?)`, [randomUUID(), m4, frango.id, now]);
-      }
+        const itemsForMeal = planItems.filter((it) => it.mealName === mName);
+        itemsForMeal.forEach((it, itIdx) => {
+          this.db.run(
+            `INSERT INTO meal_foods (id, meal_id, food_id, quantity_grams, order_index, created_at)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [randomUUID(), mId, it.food.id, it.grams, itIdx, now]
+          );
+        });
+      });
     });
+
+    // VALIDAÇÃO OBRIGATÓRIA FINAL:
+    // Recalcula diretamente a partir dos registros e quantidades REALMENTE salvos no banco SQLite
+    const savedRows = this.db.query<{
+      quantity_grams: number;
+      calories_per_100g: number;
+      protein_per_100g: number;
+      carbs_per_100g: number;
+      fat_per_100g: number;
+      fiber_per_100g: number;
+    }>(
+      `SELECT mf.quantity_grams, f.calories_per_100g, f.protein_per_100g, f.carbs_per_100g, f.fat_per_100g, f.fiber_per_100g
+       FROM meal_foods mf
+       JOIN meals m ON mf.meal_id = m.id
+       JOIN foods f ON mf.food_id = f.id
+       WHERE m.diet_id = ?`,
+      [dietId]
+    );
+
+    let verifiedCalories = 0;
+    let verifiedProtein = 0;
+    let verifiedCarbs = 0;
+    let verifiedFat = 0;
+    let verifiedFiber = 0;
+
+    for (const r of savedRows) {
+      const f = r.quantity_grams / 100;
+      verifiedCalories += r.calories_per_100g * f;
+      verifiedProtein += r.protein_per_100g * f;
+      verifiedCarbs += r.carbs_per_100g * f;
+      verifiedFat += r.fat_per_100g * f;
+      verifiedFiber += r.fiber_per_100g * f;
+    }
+
+    const round1 = (v: number) => Math.round(v * 10) / 10;
+    const diffKcal = Math.round(verifiedCalories) - targetCalories;
+    const diffP = round1(verifiedProtein - targetProtein);
+    const diffC = round1(verifiedCarbs - targetCarbs);
+    const diffF = round1(verifiedFat - targetFat);
+
+    const isWithinTol =
+      Math.abs(diffKcal) / (targetCalories || 1) <= 0.05 &&
+      Math.abs(diffP) / (targetProtein || 1) <= 0.05 &&
+      Math.abs(diffC) / (targetCarbs || 1) <= 0.08 &&
+      Math.abs(diffF) / (targetFat || 1) <= 0.08;
+
+    this.logger.log(
+      `[Validação de Dieta Automática] Meta: ${targetCalories} kcal, ${targetProtein}g P, ${targetCarbs}g C, ${targetFat}g F | Salvo: ${Math.round(verifiedCalories)} kcal, ${round1(verifiedProtein)}g P, ${round1(verifiedCarbs)}g C, ${round1(verifiedFat)}g F | Diferenças: ${diffKcal} kcal, ${diffP}g P, ${diffC}g C, ${diffF}g F | Tolerância atendida: ${isWithinTol}`
+    );
 
     return this.getDietById(userId, dietId);
   }

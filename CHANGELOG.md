@@ -2,6 +2,63 @@
 
 Todas as alterações notáveis, correções de bugs, melhorias arquiteturais e refatorações realizadas no projeto NutriPlan v2 são documentadas neste arquivo.
 
+## [2026-10-06] - Refatoração: Otimização Numérica de Macros, Seleção Multimuscular de Treino, Taxonomia TACO em 2 Níveis e Navegação de Perfil
+
+### Tipo
+Melhoria de Usabilidade / Precisão Numérica / Refatoração Arquitetural / Mobile UX
+
+### Alterações Principais
+1. **Convergência Rigorosa de Macronutrientes na Dieta Automática**:
+   - Substituição de porções fixas por solver numérico adaptativo em gradiente (`diets.service.ts`), calibrando gramaturas reais de alimentos básicos da TACO (arroz, feijão, frango, ovos, azeite, aveia).
+   - Validação matemática pós-persistência no SQLite (`meal_foods` + `foods`), garantindo que o plano salvo cumpra tolerâncias estritas ($\le 5\%$ calorias/proteínas, $\le 8\%$ carboidratos/gorduras) em relação às metas do usuário.
+   - Testes automatizados `TEST-DIET-009` e `TEST-DIET-010` verificando a convergência.
+
+2. **Montador de Treino com Seleção Multimuscular e Adição Imediata**:
+   - Modal reformulado em 2 etapas com a pergunta: *"Quais músculos você deseja trabalhar neste treino?"*.
+   - Seleção múltipla interativa via chips (Peito, Costas, Ombros, Bíceps, Tríceps, Abdômen, Quadríceps, Posterior, Glúteos, Panturrilhas, Antebraços, Corpo inteiro).
+   - Suporte a múltiplos grupamentos no backend via query parameter `muscleGroups` com normalização de termos em português (`PEITO` -> `CHEST`, etc.).
+   - Fluxo de adição rápida imediata (`+ Adicionar` -> `✓ Adicionado` desabilitado instantaneamente), mantendo o modal aberto para seleções contínuas sem perder configurações anteriores.
+   - Teste automatizado `TEST-EXER-002` implementado e aprovado.
+
+3. **Seleção de Alimentos por Taxonomia em 2 Níveis e Paginação**:
+   - Endpoint `/foods/taxonomy` no backend extraindo hierarquia real (Categoria -> Subcategoria) dinamicamente dos 744 alimentos da TACO.
+   - Suporte a filtro por subcategoria no endpoint `/foods` e teste automatizado `TEST-FOOD-006`.
+   - Frontend com seleção visual em dois níveis (Nível 1: Categoria, Nível 2: Subcategoria), busca textual combinada e paginação fluida (Página X de Y com anterior/próxima).
+
+4. **Navegação do Perfil e Limpeza da Barra de Navegação**:
+   - Remoção da aba fixa "Perfil" das barras de navegação superior (`Navbar`) e inferior (`BottomNav`) para todos os perfis.
+   - Acesso ao perfil unificado diretamente pelo avatar/botão com a inicial do usuário no topo da tela, simplificando o menu principal para 3 abas essenciais no perfil usuário (Painel, Dieta, Treino).
+
+5. **Responsividade Mobile e Botões com Safe-Area**:
+   - Rodapés dos modais de adição de exercício e de adição de alimentos fixados com `sticky bottom-0 z-30` e espaçamento seguro (`pb-safe`), impedindo corte ou sobreposição pela barra móvel do navegador.
+
+6. **Padronização da Nomenclatura em Português**:
+   - Substituição de siglas e termos em inglês por correspondentes oficiais em português: GET (Gasto Energético Total), TMB (Taxa Metabólica Basal), IMC (Índice de Massa Corporal), Proteínas, Carboidratos e Gorduras.
+
+### Arquivos Modificados
+- `api/src/modules/diets/diets.service.ts`
+- `api/src/modules/diets/diets.service.spec.ts`
+- `api/src/modules/workouts/workouts.controller.ts`
+- `api/src/modules/workouts/workouts.service.ts`
+- `api/src/modules/workouts/workouts.service.spec.ts`
+- `api/src/modules/foods/foods.controller.ts`
+- `api/src/modules/foods/foods.service.ts`
+- `api/src/modules/foods/foods.service.spec.ts`
+- `web/src/pages/DietPlanner.tsx`
+- `web/src/pages/WorkoutPlanner.tsx`
+- `web/src/pages/Dashboard.tsx`
+- `web/src/components/Navbar.tsx`
+- `web/src/components/BottomNav.tsx`
+- `web/src/services/foodService.ts`
+- `TESTES.md`
+- `CHANGELOG.md`
+
+### Testes e Verificação
+- **Backend**: 60 testes aprovados em 12 arquivos (`npm test`), 0 falhas.
+- **Build de Produção**: `api` (NestJS) e `web` (Vite + TypeScript) compilados com código 0.
+
+---
+
 ## [2026-10-06] - Correção Crítica — Assistente de Dieta, Treino, Adição de Exercícios e Catálogo TACO
 
 ### Tipo

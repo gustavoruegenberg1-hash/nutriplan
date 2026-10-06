@@ -62,4 +62,17 @@ describe('FoodsService (Catálogo de Alimentos TACO)', () => {
     expect(portion.nutrients.calories).toBe(Math.round(food.caloriesPer100g * 2));
     expect(portion.nutrients.protein).toBe(Math.round(food.proteinPer100g * 2 * 10) / 10);
   });
+
+  it('TEST-FOOD-006: deve retornar taxonomia em 2 níveis e filtrar por subcategoria', async () => {
+    const taxonomy = await foodsService.getTaxonomy();
+    expect(taxonomy.length).toBeGreaterThan(0);
+    expect(taxonomy.some((t) => t.category === 'Cereais e derivados')).toBe(true);
+
+    const subFiltered = await foodsService.searchFoods({
+      category: 'Cereais e derivados',
+      subCategory: 'Arroz',
+    });
+    expect(subFiltered.items.length).toBeGreaterThan(0);
+    expect(subFiltered.items.every((f) => f.category === 'Cereais e derivados')).toBe(true);
+  });
 });

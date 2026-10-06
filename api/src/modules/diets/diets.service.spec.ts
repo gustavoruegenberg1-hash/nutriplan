@@ -173,7 +173,7 @@ describe('DietsService (Montagem de Dieta, Recálculo e Isolamento Multiusuário
     }
   });
 
-  it('TEST-DIET-009: deve gerar proposta de dieta assistida editável e torná-la ativa (Seção 13)', async () => {
+  it('TEST-DIET-009: deve gerar proposta de dieta assistida editável e torná-la ativa com metas rigorosas (Seção 13)', async () => {
     await profileService.updateProfile(userAId, {
       age: 25,
       gender: 'MALE',
@@ -189,9 +189,28 @@ describe('DietsService (Montagem de Dieta, Recálculo e Isolamento Multiusuário
     expect(suggestion.meals.length).toBe(4);
     expect(suggestion.totals.calories).toBeGreaterThan(1000);
     expect(suggestion.legalDisclaimer).toBeDefined();
+
+    // Verificação de Tolerância Obrigatória: Calorias <= 5%, Proteína <= 5%, Carbos <= 8%, Gordura <= 8%
+    expect(suggestion.targetComparison).toBeDefined();
+    expect(suggestion.targetComparison?.isWithinTolerance).toBe(true);
+    expect(Math.abs(suggestion.targetComparison!.differences.calories)).toBeLessThanOrEqual(
+      suggestion.targetComparison!.targets.calories * 0.05
+    );
+    expect(Math.abs(suggestion.targetComparison!.differences.protein)).toBeLessThanOrEqual(
+      suggestion.targetComparison!.targets.proteinGrams * 0.05
+    );
   });
 
-  it('TEST-DIET-010: deve gerar proposta de dieta com número dinâmico de refeições (ex: 5 refeições)', async () => {
+  it('TEST-DIET-010: deve gerar proposta de dieta com número dinâmico de refeições e validar tolerância (ex: 5 refeições)', async () => {
+    await profileService.updateProfile(userAId, {
+      age: 22,
+      gender: 'FEMALE',
+      weight: 60,
+      height: 165,
+      activityLevel: 'MODERATELY_ACTIVE',
+      goal: 'GAIN_WEIGHT',
+    });
+
     const suggestion5 = await dietsService.generateSuggestion(userAId, {
       goal: 'GAIN_WEIGHT',
       mealsCount: 5,
@@ -199,6 +218,8 @@ describe('DietsService (Montagem de Dieta, Recálculo e Isolamento Multiusuário
     expect(suggestion5).toBeDefined();
     expect(suggestion5.isActive).toBe(true);
     expect(suggestion5.meals.length).toBe(5);
+    expect(suggestion5.targetComparison).toBeDefined();
+    expect(suggestion5.targetComparison?.isWithinTolerance).toBe(true);
     expect(suggestion5.meals.map((m) => m.name)).toEqual([
       'Café da Manhã',
       'Lanche da Manhã',

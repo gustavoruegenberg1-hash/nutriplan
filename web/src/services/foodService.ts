@@ -169,6 +169,58 @@ class FoodService {
       .slice(0, limit);
   }
 
+  async searchWithFilters(params: {
+    query?: string;
+    category?: string;
+    subCategory?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ items: FoodItem[]; total: number }> {
+    try {
+      const res = await api.get('/foods/search', {
+        params: {
+          query: params.query?.trim() || undefined,
+          category: params.category && params.category !== 'ALL' ? params.category : undefined,
+          subCategory: params.subCategory && params.subCategory !== 'ALL' ? params.subCategory : undefined,
+          limit: params.limit || 30,
+          offset: params.offset || 0,
+        },
+      });
+      const items: FoodItem[] = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.items)
+        ? res.data.items
+        : [];
+      const total = typeof res.data?.total === 'number' ? res.data.total : items.length;
+      return { items, total };
+    } catch {
+      const items = this.searchLocal(params.query || '', params.limit || 30);
+      return { items, total: items.length };
+    }
+  }
+
+  async getTaxonomy(): Promise<Array<{ category: string; subCategories: string[] }>> {
+    try {
+      const res = await api.get('/foods/taxonomy');
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        return res.data;
+      }
+    } catch {
+      // Fallback
+    }
+    const map = new Map<string, Set<string>>();
+    for (const food of this.getAllFoods()) {
+      if (food.category) {
+        if (!map.has(food.category)) map.set(food.category, new Set());
+        if (food.subCategory) map.get(food.category)!.add(food.subCategory);
+      }
+    }
+    return Array.from(map.entries()).map(([category, subs]) => ({
+      category,
+      subCategories: Array.from(subs).sort(),
+    }));
+  }
+
   async getFoodById(id: string): Promise<FoodItem | null> {
     try {
       const res = await api.get(`/foods/${id}`);

@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   UtensilsCrossed,
   Dumbbell,
-  User,
   LogOut,
   MessageSquare,
   ShieldCheck,
@@ -28,22 +27,19 @@ export const Navbar: React.FC = () => {
         { to: '/admin', label: 'Visão Geral', icon: ShieldCheck, exact: true },
         { to: '/admin/professionals', label: 'Profissionais', icon: Award },
         { to: '/admin/users', label: 'Usuários', icon: Users },
-        { to: '/profile', label: 'Perfil', icon: User },
       ];
     }
     if (role === 'PROFESSIONAL') {
       return [
         { to: '/professional', label: 'Painel', icon: LayoutDashboard, exact: true },
         { to: '/professional/clients', label: 'Meus Clientes', icon: Users },
-        { to: '/profile', label: 'Perfil', icon: User },
       ];
     }
-    // USER comum (Apenas 4 abas principais, conforme especificação)
+    // USER comum (Apenas as abas principais de rotina: Dashboard, Dieta e Treino)
     return [
       { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { to: '/diet', label: 'Dieta', icon: UtensilsCrossed },
       { to: '/workouts', label: 'Treino', icon: Dumbbell },
-      { to: '/profile', label: 'Perfil', icon: User },
     ];
   };
 
@@ -102,12 +98,28 @@ export const Navbar: React.FC = () => {
               </button>
             )}
 
-            <div className="hidden lg:flex flex-col text-right">
-              <span className="text-sm font-semibold text-slate-200">{user?.name || 'Usuário'}</span>
-              <span className="text-[11px] text-emerald-400 font-medium">
-                {role === 'ADMIN' ? 'Administrador' : role === 'PROFESSIONAL' ? 'Profissional' : 'Aluno / Paciente'}
-              </span>
-            </div>
+            {/* Acesso ao Perfil pelo Avatar / Inicial do Usuário */}
+            <Link
+              to="/profile"
+              title="Acessar meu Perfil"
+              className={`flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl border transition group ${
+                location.pathname === '/profile'
+                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                  : 'bg-slate-800/60 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600 text-slate-200'
+              }`}
+            >
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-black text-sm flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="text-xs font-bold text-white group-hover:text-emerald-300 transition truncate max-w-[120px]">
+                  {user?.name || 'Meu Perfil'}
+                </span>
+                <span className="text-[10px] text-slate-400">
+                  {role === 'ADMIN' ? 'Administrador' : role === 'PROFESSIONAL' ? 'Profissional' : 'Meu Perfil'}
+                </span>
+              </div>
+            </Link>
 
             <button
               onClick={() => logout()}

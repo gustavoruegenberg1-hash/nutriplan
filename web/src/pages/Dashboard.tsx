@@ -152,7 +152,7 @@ export const Dashboard: React.FC = () => {
               {targets ? `${targets.calories} kcal` : '--'}
             </div>
             <span className="text-xs text-slate-400 mt-1">
-              TDEE: {metrics.tdee ? `${metrics.tdee} kcal` : '--'}
+              GET: {metrics.tdee ? `${metrics.tdee} kcal` : '--'} (Gasto Energético)
             </span>
           </div>
 
