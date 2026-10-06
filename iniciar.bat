@@ -11,3 +11,7 @@ echo Aplicativo iniciado!
 echo Backend:  http://localhost:3000
 echo Frontend: http://localhost:5173
 echo.
+echo Abrindo o navegador em http://localhost:5173...
+timeout /t 3 /nobreak > nul
+start http://localhost:5173
+
