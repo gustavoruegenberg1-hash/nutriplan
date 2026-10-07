@@ -256,7 +256,7 @@ async function generateFase1Docx() {
       spacing: { before: 200, after: 80 },
       children: [
         new TextRun({
-          text: 'INSTITUIÇÃO DE ENSINO SUPERIOR — CURSO DE ENGENHARIA DE SOFTWARE',
+          text: 'CENTRO ESTADUAL DE EDUCAÇÃO TECNOLÓGICA PAULA SOUZA\nFATEC CAMPINAS — FACULDADE DE TECNOLOGIA DE CAMPINAS',
           bold: true,
           size: 24,
           color: COLORS.PRIMARY,
@@ -269,7 +269,7 @@ async function generateFase1Docx() {
       spacing: { before: 0, after: 1200 },
       children: [
         new TextRun({
-          text: 'DEPARTAMENTO DE COMPUTAÇÃO / DISCIPLINA DE ENGENHARIA DE SOFTWARE I',
+          text: 'CURSO SUPERIOR DE TECNOLOGIA EM ANÁLISE E DESENVOLVIMENTO DE SISTEMAS\nDISCIPLINA: LABORATÓRIO DE ENGENHARIA DE SOFTWARE',
           size: 20,
           color: COLORS.MUTED,
           font: 'Arial',
@@ -307,7 +307,7 @@ async function generateFase1Docx() {
       spacing: { before: 0, after: 1400 },
       children: [
         new TextRun({
-          text: 'ENTREGÁVEL 1: PROCESSO E PLANEJAMENTO DE SOFTWARE',
+          text: 'ENTREGÁVEL 1: PROCESSO E PLANEJAMENTO DE SOFTWARE (PROJETO EM 5 FASES)',
           size: 22,
           bold: true,
           color: COLORS.TEXT,
@@ -320,7 +320,7 @@ async function generateFase1Docx() {
       spacing: { before: 400, after: 80 },
       children: [
         new TextRun({
-          text: 'Autor: Gustavo Meneses Ruegenberg Rodrigues',
+          text: 'Integrantes do Grupo:\nGustavo Meneses Ruegenberg Rodrigues\nFabiana Tiemi Watanabe',
           bold: true,
           size: 22,
           color: COLORS.TEXT,
@@ -333,7 +333,7 @@ async function generateFase1Docx() {
       spacing: { before: 0, after: 80 },
       children: [
         new TextRun({
-          text: 'Disciplina: Engenharia de Software I',
+          text: 'Disciplina: Laboratório de Engenharia de Software',
           size: 20,
           color: COLORS.MUTED,
           font: 'Arial',
@@ -345,7 +345,7 @@ async function generateFase1Docx() {
       spacing: { before: 0, after: 1200 },
       children: [
         new TextRun({
-          text: 'Grau Acadêmico: Bacharelado em Engenharia de Software',
+          text: 'Curso: Tecnologia em Análise e Desenvolvimento de Sistemas (ADS)',
           size: 20,
           color: COLORS.MUTED,
           font: 'Arial',
@@ -357,7 +357,7 @@ async function generateFase1Docx() {
       spacing: { before: 600, after: 0 },
       children: [
         new TextRun({
-          text: 'SÃO PAULO — SP\nOUTUBRO DE 2026',
+          text: 'CAMPINAS — SP\nOUTUBRO DE 2026',
           bold: true,
           size: 20,
           color: COLORS.MUTED,
@@ -816,7 +816,7 @@ async function generateFase1Docx() {
                 spacing: { after: 120 },
                 children: [
                   new TextRun({
-                    text: 'NUTRIPLAN V2 — FASE 1: PROCESSO E PLANEJAMENTO DE SOFTWARE',
+                    text: 'NUTRIPLAN V2 — FASE 1: PROCESSO E PLANEJAMENTO | FATEC CAMPINAS',
                     size: 16,
                     color: COLORS.MUTED,
                     font: 'Arial',
@@ -833,7 +833,7 @@ async function generateFase1Docx() {
                 alignment: AlignmentType.RIGHT,
                 children: [
                   new TextRun({
-                    text: 'Engenharia de Software I — Página ',
+                    text: 'Laboratório de Engenharia de Software — ADS — Página ',
                     size: 16,
                     color: COLORS.MUTED,
                     font: 'Arial',
@@ -875,14 +875,32 @@ async function generateFase1Docx() {
   if (!fs.existsSync(docsDir)) {
     fs.mkdirSync(docsDir, { recursive: true });
   }
+  try {
+    fs.writeFileSync(rootPath, buffer);
+    console.log(`- Raiz: ${rootPath} (${(buffer.length / 1024).toFixed(1)} KB)`);
+  } catch (err) {
+    if (err.code === 'EBUSY') {
+      const altRoot = path.resolve(__dirname, '..', 'Fase_1_Processo_e_Planejamento_NutriPlan_v2_Atualizado.docx');
+      fs.writeFileSync(altRoot, buffer);
+      console.log(`- Raiz (arquivo original aberto no Word; salvo como alternativo): ${altRoot} (${(buffer.length / 1024).toFixed(1)} KB)`);
+    } else {
+      throw err;
+    }
+  }
+
   const docsPath = path.resolve(docsDir, 'Fase_1_Processo_e_Planejamento_NutriPlan_v2.docx');
-
-  fs.writeFileSync(rootPath, buffer);
-  fs.writeFileSync(docsPath, buffer);
-
-  console.log(`Documento gerado com sucesso!`);
-  console.log(`- Raiz: ${rootPath} (${(buffer.length / 1024).toFixed(1)} KB)`);
-  console.log(`- Docs: ${docsPath} (${(buffer.length / 1024).toFixed(1)} KB)`);
+  try {
+    fs.writeFileSync(docsPath, buffer);
+    console.log(`- Docs: ${docsPath} (${(buffer.length / 1024).toFixed(1)} KB)`);
+  } catch (err) {
+    if (err.code === 'EBUSY') {
+      const altDocs = path.resolve(docsDir, 'Fase_1_Processo_e_Planejamento_NutriPlan_v2_Atualizado.docx');
+      fs.writeFileSync(altDocs, buffer);
+      console.log(`- Docs (arquivo original aberto no Word; salvo como alternativo): ${altDocs} (${(buffer.length / 1024).toFixed(1)} KB)`);
+    } else {
+      throw err;
+    }
+  }
 }
 
 generateFase1Docx().catch((err) => {
